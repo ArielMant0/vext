@@ -1,4 +1,3 @@
-import * as d3 from 'd3';
 import { defineStore } from "pinia"
 import { useHistory } from "@/store/history";
 import { createFabricObject } from '@/use/util';
@@ -20,9 +19,9 @@ const LAYER_MODES = Object.freeze({
 let _CANVAS = null;
 
 function setCanvasPointerEvents(enable) {
-    d3.select(_CANVAS.wrapperEl).style("pointer-events", enable ? null : "none")
-    d3.select(_CANVAS.upperCanvasEl).style("pointer-events", enable ? null : "none")
-    d3.select(_CANVAS.lowerCanvasEl).style("pointer-events", enable ? null : "none")
+    _CANVAS.wrapperEl.style.pointerEvents = enable ? null : "none";
+    _CANVAS.upperCanvasEl.style.pointerEvents = enable ? null : "none";
+    _CANVAS.lowerCanvasEl.style.pointerEvents = enable ? null : "none";
 }
 function canSelect(tool) {
     switch (tool) {
@@ -70,7 +69,19 @@ export const useNote = defineStore("note", {
             activeObjectUUID: null,
             activeObject: {},
 
-            defaultColors: d3.schemeTableau10,
+            // d3.schemeTableau10
+            defaultColors: [
+                "#4e79a7",
+                "#f28e2c",
+                "#e15759",
+                "#76b7b2",
+                "#59a14f",
+                "#edc949",
+                "#af7aa1",
+                "#ff9da7",
+                "#9c755f",
+                "#bab0ab",
+            ],
         };
     },
 

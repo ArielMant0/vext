@@ -5,13 +5,12 @@
 </template>
 
 <script>
-import * as d3 from 'd3';
 import { fabric } from 'fabric';
-import { onMounted, ref, watch, inject } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import { useNote } from '@/store/note';
 
 export default {
-
+    name: "NoteCanvas",
     props: {
         width: {
             type: Number,
@@ -21,6 +20,10 @@ export default {
             type: Number,
             default: 120
         },
+        decimate: {
+            type: Number,
+            default: 5,
+        }
     },
     setup(props) {
         const wrapper = ref(null);
@@ -38,13 +41,13 @@ export default {
             note.setCanvas(canvas);
 
             // hacky but okay
-            d3.select(".canvas-container")
-                .style("position", "absolute")
-                .style("top", 0)
-                .style("left", 0)
+            const el = document.querySelector(".canvas-container")
+            el.style.position = "absolute";
+            el.style.top = 0;
+            el.style.left = 0;
 
             const brush = new fabric.PencilBrush(canvas);
-            brush.decimate = 5;
+            brush.decimate = props.decimate;
             brush.color = note.color0;
             brush.width = note.brushSize;
             canvas.freeDrawingBrush = brush;

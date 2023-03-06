@@ -37,7 +37,7 @@ import { useNote } from '@/store/note'
 import { useState } from '@/store/state';
 
 export default {
-
+    name: "NoteConfiguration",
     components: { EditTool, BrushTool, ShapeTool, LayersTool },
     setup() {
 

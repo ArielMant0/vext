@@ -6,10 +6,12 @@ import vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
 import { defineConfig } from 'vite'
 import { fileURLToPath, URL } from 'node:url'
 
+import { resolve } from 'path'
+
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
-    vue({ 
+    vue({
       template: { transformAssetUrls }
     }),
     // https://github.com/vuetifyjs/vuetify-loader/tree/next/packages/vite-plugin
@@ -37,5 +39,24 @@ export default defineConfig({
   },
   server: {
     port: 3000,
+  },
+  build: {
+    lib: {
+      entry: resolve(__dirname, 'src/index.js'),
+      name: 'vext',
+      fileName: "vext",
+    },
+    rollupOptions: {
+      external: ['vue', 'pinia', 'vuetify'],
+      output: {
+        // Provide global variables to use in the UMD build
+        // Add external deps here
+        globals: {
+          vue: 'vue',
+          pinia: 'pinia',
+          vuetify: 'uetify',
+        },
+      },
+    },
   },
 })

@@ -14,19 +14,15 @@
 
 <script>
 import VASystem from '@/components/VASystem.vue'
-import NoteCanvas from '@/components/NoteCanvas'
-import NoteConfiguration from '@/components/NoteConfiguration'
+import NoteCanvas from '@/components/NoteCanvas.vue'
+import NoteConfiguration from '@/components/NoteConfiguration.vue'
 
 import { ref, reactive, computed } from 'vue'
 import { useElementSize } from '@vueuse/core'
 
 export default {
   name: 'App',
-  components: {
-    NoteCanvas,
-    NoteConfiguration,
-    VASystem
-  },
+  components: { NoteCanvas, NoteConfiguration, VASystem },
   setup() {
 
       const el = ref(null);

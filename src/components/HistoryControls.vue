@@ -9,6 +9,7 @@ import { storeToRefs } from 'pinia';
 import { useHistory } from '@/store/history';
 
 export default {
+    name: "HistoryControls",
     setup() {
 
         const history = useHistory();

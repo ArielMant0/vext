@@ -26,6 +26,7 @@ import { storeToRefs } from 'pinia';
 import { useHistory } from '@/store/history';
 
 export default {
+    name: "HistoryDrawer",
     setup() {
 
         const history = useHistory();

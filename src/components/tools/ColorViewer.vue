@@ -25,6 +25,7 @@ import { useNote } from '@/store/note'
 import { storeToRefs } from 'pinia';
 
 export default {
+    name: "ColorViewer",
     setup() {
 
         const note = useNote();

@@ -44,6 +44,7 @@ import ColorViewer from './ColorViewer.vue';
 import { useAppStore } from '@/store/app';
 
 export default {
+    name: "ShapeTool",
     components: { ColorViewer },
     props: {
         onSelect: {

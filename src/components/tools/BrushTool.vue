@@ -32,10 +32,10 @@ import { useNote } from '@/store/note'
 import ColorViewer from '@/components/tools/ColorViewer';
 
 export default {
+    name: "BrushTool",
     components: { ColorViewer },
     setup() {
         const note = useNote();
-
         const size = ref(1);
 
         function readBrushSize() {

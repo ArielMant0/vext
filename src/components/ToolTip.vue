@@ -23,11 +23,12 @@
 </template>
 
 <script>
-import { useLink } from '@/store/link';
+import { useAppStore } from '@/store/app';
 import { ref, watch } from 'vue';
 
 
 export default {
+    name: "ToolTip",
     props: {
         width: {
             type: Number,
@@ -50,7 +51,7 @@ export default {
         const x = ref(0)
         const y = ref(0)
 
-        const link = useLink();
+        const app = useAppStore();
 
         function findPlacement(mx, my, w, h) {
             const spaceRight = mx < window.innerWidth - w - props.offset*2 - 10;
@@ -133,9 +134,9 @@ export default {
             y.value = 0;
         }
 
-        watch(() => link.ttContent, () => show(link.ttContent, link.ttX, link.ttY, link.ttPlacement), { deep: true });
-        watch(() => link.ttX, () => updatePosition(link.ttX, link.ttY));
-        watch(() => link.ttY, () => updatePosition(link.ttX, link.ttY));
+        watch(() => app.ttContent, () => show(app.ttContent, app.ttX, app.ttY, app.ttPlacement), { deep: true });
+        watch(() => app.ttX, () => updatePosition(app.ttX, app.ttY));
+        watch(() => app.ttY, () => updatePosition(app.ttX, app.ttY));
 
         return {
             wrapper,

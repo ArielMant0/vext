@@ -7,7 +7,12 @@ export const useAppStore = defineStore("app", {
             errors: [],
             alertText: "",
             alertType: "error",
-            alertDuration: 6000 // 6 seconds
+            alertDuration: 6000, // 6 seconds
+
+            ttX: 0,
+            ttY: 0,
+            ttContent: "",
+            ttPlacement: "auto"
         };
     },
 
@@ -42,6 +47,23 @@ export const useAppStore = defineStore("app", {
 
         addError(error) {
             this.errors.push(error);
+        },
+
+        showTooltip(content, x, y, placement) {
+            this.ttX = x;
+            this.ttY = y;
+            this.ttContent = content;
+            this.ttPlacement = placement;
+        },
+
+        hideTooltip() {
+            this.ttContent = "";
+        },
+
+        updateTooltipPos(x, y, placement) {
+            this.ttX = x;
+            this.ttY = y;
+            this.ttPlacement = placement;
         }
     },
 });

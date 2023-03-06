@@ -121,6 +121,7 @@ import { storeToRefs } from 'pinia';
 import { useState } from '@/store/state';
 
 export default {
+    name: "LayersTool",
     setup() {
 
         const addDialog = ref(false);

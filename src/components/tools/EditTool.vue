@@ -19,6 +19,7 @@ import { computed } from 'vue';
 import { storeToRefs } from 'pinia';
 
 export default {
+    name: "EditTool",
     setup() {
         const note = useNote();
         const { activeObject } = storeToRefs(note);
