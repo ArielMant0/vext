@@ -5,7 +5,6 @@
     </div>
     <section ref="el" style="margin:5px; width: 100%;">
       <div style="position: relative;">
-          <VASystem/>
           <NoteCanvas :width="visAreaWidth" :height="visAreaHeight"/>
         </div>
     </section>
@@ -13,7 +12,6 @@
 </template>
 
 <script>
-import VASystem from '@/components/VASystem.vue'
 import NoteCanvas from '@/components/NoteCanvas.vue'
 import NoteConfiguration from '@/components/NoteConfiguration.vue'
 
@@ -22,7 +20,7 @@ import { useElementSize } from '@vueuse/core'
 
 export default {
   name: 'App',
-  components: { NoteCanvas, NoteConfiguration, VASystem },
+  components: { NoteCanvas, NoteConfiguration },
   setup() {
 
       const el = ref(null);

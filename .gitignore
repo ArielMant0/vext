@@ -23,5 +23,5 @@ pnpm-debug.log*
 *.sln
 *.sw?
 
-**/.vuepress/.cache
-**/.vuepress/.temp
+**/.vitepress/cache
+**/.vitepress/dist

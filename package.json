@@ -1,14 +1,11 @@
 {
-  "name": "@nullbuild/vext",
+  "name": "vext",
   "version": "0.0.0",
-  "private": false,
   "publishConfig": {
     "access": "public"
   },
   "type": "module",
-  "files": [
-    "dist"
-  ],
+  "files": [ "dist" ],
   "main": "./dist/vext.umd.js",
   "module": "./dist/vext.cjs",
   "exports": {
@@ -17,13 +14,21 @@
       "require": "./dist/vext.umd.cjs"
     }
   },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ArielMant0/vext.git"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint . --fix --ignore-path .gitignore",
-    "docs:dev": "vuepress dev docs",
-    "docs:build": "vuepress build docs"
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs"
   },
   "dependencies": {
     "@mdi/font": "7.0.96",
@@ -47,12 +52,13 @@
     "sass": "^1.55.0",
     "vite": "^3.1.9",
     "vite-plugin-vuetify": "^1.0.0-alpha.12",
-    "vuepress": "next"
+    "vitepress": "^1.0.0-alpha.49",
+    "vue-docgen-cli": "^4.60.1"
   },
   "peerDependencies": {
     "@vueuse/core": "^9.13.0",
-    "pinia": "^2.0.23",
     "object-hash": "^3.0.0",
+    "pinia": "^2.0.23",
     "uuid": "^9.0.0",
     "vue": "^3.2.13",
     "vue-json-pretty": "^2.2.3",
