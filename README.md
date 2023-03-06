@@ -1,57 +1,45 @@
-# essentials
+# VEXT
 
-## Project setup
+Documentation soon to follow ...
 
-```
-# yarn
-yarn
+## Description
 
-# npm
-npm install
+VEXT is a Vue component library to add externalization capabilities to any Vue application,
+primarily to visual analytics systems implemented with Vue.
 
-# pnpm
-pnpm install
-```
+The **NoteCanvas** component holds a fabric.js canvas that can be used to create annotations, i. e. drawings, shapes or text.
 
-### Compiles and hot-reloads for development
+The **NoteConfiguration** component is basically a sidebar that lets you use and control the NoteCanvas and all related externalization capabilites.
+It lets you select the tool you want to use and handles state changes.
 
-```
-# yarn
-yarn dev
+The **HistoryControls** component can be added to a navigation bar, they let the user undo or redo operations tracked with the history store.
 
-# npm
-npm run dev
+The **HistoryDrawer** component holds a drawer that lets the user see the actions in the history store.
 
-# pnpm
-pnpm dev
-```
+## Installation
 
-### Compiles and minifies for production
+To use this package, simply install it via yarn or npm.
 
-```
-# yarn
-yarn build
-
-# npm
-npm run build
-
-# pnpm
-pnpm build
+using yarn:
+```shell
+yarn add @nullbuild/vext
 ```
 
-### Lints and fixes files
-
-```
-# yarn
-yarn lint
-
-# npm
-npm run lint
-
-# pnpm
-pnpm lint
+using npm:
+```shell
+npm install @nullbuild/vext
 ```
 
-### Customize configuration
+## Stores
 
-See [Configuration Reference](https://vitejs.dev/config/).
+### note
+
+The `note` store implements much of the externalization capabilities.
+
+### state
+
+The `state` store takes care of tracking state changes. You need to pass your application state, e.g. data you visualize, to it so that the state can be tracked and revisited later.
+
+### history
+
+The `history` store implements the action history mechanism used by the `note` store.

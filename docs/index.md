@@ -20,12 +20,12 @@ To use this package, simply install it via yarn or npm.
 
 using yarn:
 ```shell
-yarn add vext
+yarn add @nullbuild/vext
 ```
 
 using npm:
 ```shell
-npm install vext
+npm install @nullbuild/vext
 ```
 
 ## Stores

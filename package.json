@@ -1,6 +1,6 @@
 {
-  "name": "vext",
-  "version": "0.0.0",
+  "name": "@nullbuild/vext",
+  "version": "0.0.1",
   "publishConfig": {
     "access": "public"
   },
