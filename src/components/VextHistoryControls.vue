@@ -8,6 +8,11 @@
 import { storeToRefs } from 'pinia';
 import { useVextHistory } from '@/store/history';
 
+/**
+ * Component that holds two buttons to use un-/do capabilities of the history
+ * store and a button to show/hide the HistoryDrawer.
+ * @displayName VextHistoryControls
+ */
 export default {
     name: "VextHistoryControls",
     setup() {

@@ -120,6 +120,11 @@ import { useVextNote } from '@/store/note';
 import { storeToRefs } from 'pinia';
 import { useVextState } from '@/store/state';
 
+/**
+ * Component that displays layer and state information. Let's the user
+ * switch between layers, select the layer mode, etc.
+ * @displayName VextLayersTool
+ */
 export default {
     name: "VextLayersTool",
     setup() {

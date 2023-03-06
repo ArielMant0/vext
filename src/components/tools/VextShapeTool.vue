@@ -37,23 +37,37 @@
 </template>
 
 <script>
-import { useVextNote } from '@/store/note';
 import { ref } from 'vue';
 import { fabric } from 'fabric';
-import VextColorViewer from './VextColorViewer.vue';
+import { useVextNote } from '@/store/note';
 import { useVextApp } from '@/store/app';
 
+import VextColorViewer from './VextColorViewer.vue';
+
+/**
+ * Component to add simple shapes or text to the NoteCanvas.
+ * @displayName VextShapeTool
+ */
 export default {
     name: "VextShapeTool",
     components: { VextColorViewer },
     props: {
+        /**
+         * Function that is set as the onSelect callback for
+         * created text objects. Used to implement text modification.
+         * When the function is called, the text object is passed.
+         */
         onSelect: {
             type: Function,
-            required: true
+            required: false
         },
+        /**
+         * Function that is set as the onDeselect callback for
+         * created text objects. Used to implement text modification.
+         */
         onDeselect: {
             type: Function,
-            required: true
+            required: false
         },
     },
     setup(props) {
@@ -121,8 +135,12 @@ export default {
                         fontSize: dimx.value,
                         fill: note.color,
                     });
-                    obj.onSelect = () => props.onSelect(obj);
-                    obj.onDeselect = props.onDeselect;
+                    if (props.onSelect) {
+                        obj.onSelect = () => props.onSelect(obj);
+                    }
+                    if (props.onDeselect) {
+                        obj.onDeselect = props.onDeselect;
+                    }
                     break;
             }
 

@@ -1,11 +1,10 @@
 <template>
     <div style="min-width: 280px">
         <v-tabs v-model="tmpTool" density="compact" mandatory @update:modelValue="setTool">
-            <v-tab prepend-icon="mdi-layers" :value="tools.LAYER"></v-tab>
-            <v-tab prepend-icon="mdi-draw" :value="tools.BRUSH"></v-tab>
-            <v-tab prepend-icon="mdi-shape" :value="tools.SHAPE"></v-tab>
-            <v-tab prepend-icon="mdi-cursor-pointer" :value="tools.EDIT"></v-tab>
-            <!-- <v-tab prepend-icon="mdi-lasso" :value="tools.SELECT"></v-tab> -->
+            <v-tab :prepend-icon="props.layerIcon" :value="tools.LAYER"></v-tab>
+            <v-tab :prepend-icon="props.brushIcon" :value="tools.BRUSH"></v-tab>
+            <v-tab :prepend-icon="props.shapeIcon" :value="tools.SHAPE"></v-tab>
+            <v-tab :prepend-icon="props.editIcon" :value="tools.EDIT"></v-tab>
         </v-tabs>
 
         <v-window v-model="tool">
@@ -36,9 +35,44 @@ import { ref, onMounted, watch } from 'vue';
 import { useVextNote } from '@/store/note'
 import { useVextState } from '@/store/state';
 
+/**
+ * Component that includes all tools and handles state transfer from
+ * the state store to the note store.
+ * @displayName VextNoteConfiguration
+ */
 export default {
     name: "VextNoteConfiguration",
     components: { VextEditTool, VextBrushTool, VextShapeTool, VextLayersTool },
+    props: {
+        /**
+         * Vuetify icon for the layers tool
+         */
+        layerIcon: {
+            type: String,
+            default: "mdi-layers"
+        },
+        /**
+         * Vuetify icon for the edit tool
+         */
+        editIcon: {
+            type: String,
+            default: "mdi-cursor-pointer"
+        },
+        /**
+         * Vuetify icon for the shape tool
+         */
+        shapeIcon: {
+            type: String,
+            default: "mdi-shape"
+        },
+        /**
+         * Vuetify icon for the brush tool
+         */
+        brushIcon: {
+            type: String,
+            default: "mdi-draw"
+        },
+    },
     setup() {
 
         const state = useVextState();

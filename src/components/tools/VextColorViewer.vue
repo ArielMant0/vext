@@ -24,14 +24,38 @@ import { ref, watch } from 'vue';
 import { useVextNote } from '@/store/note'
 import { storeToRefs } from 'pinia';
 
+/**
+ * Vuetify color picker that let's the user set a primary and
+ * secondary color, both of which are stored in the note store.
+ * @displayName VextColorViewer
+ */
 export default {
     name: "VextColorViewer",
-    setup() {
+    props: {
+        /**
+         * Initial color of the primary color
+         */
+        colorPrimary: {
+            type: String,
+            default: "#ff0000"
+        },
+        /**
+         * Initial color of the secondary color
+         */
+        colorSecondary: {
+            type: String,
+            default: "#000000"
+        },
+    },
+    setup(props) {
 
         const note = useVextNote();
+        note.setColorPrimary(props.colorPrimary)
+        note.setColorSecondary(props.colorSecondary)
+
         const { activeColor, color0, color1, swatch } = storeToRefs(note);
 
-        const tmpColor = ref("#ff0000")
+        const tmpColor = ref(props.colorPrimary)
         const tmpActive = ref(0);
 
         function changeColor() {

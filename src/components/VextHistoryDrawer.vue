@@ -25,6 +25,11 @@
 import { storeToRefs } from 'pinia';
 import { useVextHistory } from '@/store/history';
 
+/**
+ * Vuetify drawer component that shows the undo and redo actions
+ * of the history store.
+ * @displayName VextHistoryDrawer
+ */
 export default {
     name: "VextHistoryDrawer",
     setup() {

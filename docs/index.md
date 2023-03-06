@@ -5,14 +5,14 @@
 VEXT is a Vue component library to add externalization capabilities to any Vue application,
 primarily to visual analytics systems implemented with Vue.
 
-The [NoteCanvas](/src/components/NoteCanvas) component holds a fabric.js canvas that can be used to create annotations, i. e. drawings, shapes or text.
+The [VextNoteCanvas](/src/components/VextNoteCanvas) component holds a fabric.js canvas that can be used to create annotations, i. e. drawings, shapes or text.
 
-The [NoteConfiguration](/src/components/NoteConfiguration) component is basically a sidebar that lets you use and control the NoteCanvas and all related externalization capabilites.
+The [VextNoteConfiguration](/src/components/VextNoteConfiguration) component is basically a sidebar that lets you use and control the NoteCanvas and all related externalization capabilites.
 It lets you select the tool you want to use and handles state changes.
 
-The [HistoryControls](/src/components/HistoryControls) component can be added to a navigation bar, they let the user undo or redo operations tracked with the history store.
+The [VextHistoryControls](/src/components/VextHistoryControls) component can be added to a navigation bar, they let the user undo or redo operations tracked with the history store.
 
-The [HistoryDrawer](/src/components/HistoryDrawer) component holds a drawer that lets the user see the actions in the history store.
+The [VextHistoryDrawer](/src/components/VextHistoryDrawer) component holds a drawer that lets the user see the actions in the history store.
 
 ## Installation
 
@@ -41,3 +41,7 @@ The [`state` store](/stores/state) takes care of tracking state changes. You nee
 ### history
 
 The [`history` store](/stores/history) implements the action history mechanism used by the `note` store.
+
+### app
+
+The [`app` store](/stores/app) implements the action history mechanism used by the `note` store.

@@ -9,21 +9,42 @@ import { fabric } from 'fabric';
 import { onMounted, ref, watch } from 'vue';
 import { useVextNote } from '@/store/note';
 
+/**
+ * Component that creates the fabric.js canvas.
+ * @displayName VextNoteCanvas
+ */
 export default {
     name: "VextNoteCanvas",
     props: {
+        /**
+         * Width of the canvas
+         */
         width: {
             type: Number,
             default: 300
         },
+        /**
+         * Height of the canvas
+         */
         height: {
             type: Number,
             default: 120
         },
+        /**
+         * Value for the fabric.js decimate option. Larger values result in
+         * more simplified lines when drawing.
+         */
         decimate: {
             type: Number,
             default: 5,
-        }
+        },
+        /**
+         * Background color of the canvas
+         */
+        backgroundColor: {
+            type: String,
+            default: 'rgba(0, 0, 0, 0)',
+        },
     },
     setup(props) {
         const wrapper = ref(null);
@@ -36,7 +57,7 @@ export default {
             const canvas = new fabric.Canvas(canvasNode.value, {
                 isDrawingMode: note.tool === note.tools.BRUSH,
                 renderOnAddRemove: true,
-                backgroundColor: 'rgba(0, 0, 0, 0)'
+                backgroundColor: props.backgroundColor
             });
             note.setCanvas(canvas);
 

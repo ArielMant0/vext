@@ -1,11 +1,13 @@
 {
   "name": "@nullbuild/vext",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "publishConfig": {
     "access": "public"
   },
   "type": "module",
-  "files": [ "dist" ],
+  "files": [
+    "dist"
+  ],
   "main": "./dist/vext.umd.js",
   "module": "./dist/vext.cjs",
   "exports": {
@@ -26,6 +28,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint . --fix --ignore-path .gitignore",
+    "docs:gen": "vue-docgen src/components/**/*.vue docs",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs"

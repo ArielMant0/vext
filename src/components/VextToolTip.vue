@@ -26,18 +26,32 @@
 import { useVextApp } from '@/store/app';
 import { ref, watch } from 'vue';
 
-
+/**
+ * Simple dynamic tooltip that can be used to show data, e.g. when hovering
+ * over an SVG item in a visualization. Intended to be used like a singleton,
+ * so only one instance per app. Content and position are set via the app store.
+ * @displayName VextToolTip
+ */
 export default {
     name: "VextToolTip",
     props: {
+        /**
+         * Minimum width of the tooltip
+         */
         width: {
             type: Number,
             default: 250
         },
+        /**
+         * Minimum height of the tooltip
+         */
         height: {
             type: Number,
             default: 250
         },
+        /**
+         * Offset to add to the tooltip position (for x and y)
+         */
         offset: {
             type: Number,
             default: 5
