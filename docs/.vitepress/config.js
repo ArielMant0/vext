@@ -1,4 +1,5 @@
 export default {
+    base: '/vext/',
     title: 'VEXT Docs',
     description: 'Just playing around.',
     themeConfig: {
