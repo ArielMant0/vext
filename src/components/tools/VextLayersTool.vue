@@ -116,12 +116,12 @@
 
 <script>
 import { ref, watch, computed } from 'vue';
-import { useNote } from '@/store/note';
+import { useVextNote } from '@/store/note';
 import { storeToRefs } from 'pinia';
-import { useState } from '@/store/state';
+import { useVextState } from '@/store/state';
 
 export default {
-    name: "LayersTool",
+    name: "VextLayersTool",
     setup() {
 
         const addDialog = ref(false);
@@ -133,9 +133,9 @@ export default {
         const opacity = ref(1);
         const treeDepth = ref(0);
 
-        const state = useState();
+        const state = useVextState();
 
-        const note = useNote();
+        const note = useVextNote();
         const { layers, activeLayer, layerMode, layerModeValues } = storeToRefs(note);
 
         const dataChange = computed(() => {

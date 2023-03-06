@@ -21,14 +21,14 @@
 
 <script>
 import { ref, watch } from 'vue';
-import { useNote } from '@/store/note'
+import { useVextNote } from '@/store/note'
 import { storeToRefs } from 'pinia';
 
 export default {
-    name: "ColorViewer",
+    name: "VextColorViewer",
     setup() {
 
-        const note = useNote();
+        const note = useVextNote();
         const { activeColor, color0, color1, swatch } = storeToRefs(note);
 
         const tmpColor = ref("#ff0000")

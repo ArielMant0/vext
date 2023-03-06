@@ -1,33 +1,36 @@
 export default {
     base: '/vext/',
     title: 'VEXT Docs',
-    description: 'Just playing around.',
+    description: 'Documentation for the VEXT library for visualization externalization',
+    appearance: 'dark',
+    lastUpdated: true,
     themeConfig: {
         sidebar: [
             {
                 text: 'Components',
                 items: [
-                    { text: 'NoteCanvas', link: 'src/components/NoteCanvas' },
-                    { text: 'NoteConfiguration', link: 'src/components/NoteConfiguration' },
-                    { text: 'HistoryControls', link: 'src/components/HistoryControls' },
-                    { text: 'HistoryDrawer', link: 'src/components/HistoryDrawer' },
-                    { text: 'ToolTip', link: 'src/components/ToolTip' },
+                    { text: 'VextNoteCanvas', link: 'src/components/VextNoteCanvas' },
+                    { text: 'VextNoteConfiguration', link: 'src/components/VextNoteConfiguration' },
+                    { text: 'VextHistoryControls', link: 'src/components/VextHistoryControls' },
+                    { text: 'VextHistoryDrawer', link: 'src/components/VextHistoryDrawer' },
+                    { text: 'VextToolTip', link: 'src/components/VextToolTip' },
                 ]
               },{
                 text: 'Tools',
                 items: [
-                    { text: 'LayersTool', link: 'src/components/tools/LayersTool' },
-                    { text: 'BrushTool', link: 'src/components/tools/BrushTool' },
-                    { text: 'ShapeTool', link: 'src/components/tools/ShapeTool' },
-                    { text: 'EditTool', link: 'src/components/tools/EditTool' },
-                    { text: 'ColorViewer', link: 'src/components/tools/ColorViewer' },
+                    { text: 'VextLayersTool', link: 'src/components/tools/VextLayersTool' },
+                    { text: 'VextBrushTool', link: 'src/components/tools/VextBrushTool' },
+                    { text: 'VextShapeTool', link: 'src/components/tools/VextShapeTool' },
+                    { text: 'VextEditTool', link: 'src/components/tools/VextEditTool' },
+                    { text: 'VextColorViewer', link: 'src/components/tools/VextColorViewer' },
                 ]
               },{
                 text: 'Stores',
                 items: [
-                    { text: 'Note Store', link: 'stores/note' },
-                    { text: 'State Store', link: 'stores/state' },
-                    { text: 'History Store', link: 'stores/history' },
+                    { text: 'VextApp Store', link: 'stores/app' },
+                    { text: 'VextNote Store', link: 'stores/note' },
+                    { text: 'VextState Store', link: 'stores/state' },
+                    { text: 'VextHistory Store', link: 'stores/history' },
                 ]
               }
         ]

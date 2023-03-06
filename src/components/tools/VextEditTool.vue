@@ -14,14 +14,14 @@
 </template>
 
 <script>
-import { useNote } from '@/store/note';
+import { useVextNote } from '@/store/note';
 import { computed } from 'vue';
 import { storeToRefs } from 'pinia';
 
 export default {
-    name: "EditTool",
+    name: "VextEditTool",
     setup() {
-        const note = useNote();
+        const note = useVextNote();
         const { activeObject } = storeToRefs(note);
         const keys = computed(() => {
             if (activeObject.value !== null) {

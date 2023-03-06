@@ -6,13 +6,13 @@
 
 <script>
 import { storeToRefs } from 'pinia';
-import { useHistory } from '@/store/history';
+import { useVextHistory } from '@/store/history';
 
 export default {
-    name: "HistoryControls",
+    name: "VextHistoryControls",
     setup() {
 
-        const history = useHistory();
+        const history = useVextHistory();
         const { menu, hasUndo, hasRedo } = storeToRefs(history);
 
         function backward() { history.undo(); }

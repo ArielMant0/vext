@@ -1,24 +1,24 @@
-import HistoryControls from './HistoryControls'
-import HistoryDrawer from './HistoryDrawer'
-import NoteCanvas from './NoteCanvas'
-import NoteConfiguration from './NoteConfiguration'
-import ToolTip from './ToolTip'
+import VextHistoryControls from './VextHistoryControls'
+import VextHistoryDrawer from './VextHistoryDrawer'
+import VextNoteCanvas from './VextNoteCanvas'
+import VextNoteConfiguration from './VextNoteConfiguration'
+import VextTooltip from './VextTooltip'
 
-import BrushTool from './tools/BrushTool'
-import EditTool from './tools/EditTool'
-import LayersTool from './tools/LayersTool'
-import ShapeTool from './tools/ShapeTool'
-import ColorViewer from './tools/ColorViewer'
+import VextBrushTool from './tools/VextBrushTool'
+import VextEditTool from './tools/VextEditTool'
+import VextLayersTool from './tools/VextLayersTool'
+import VextShapeTool from './tools/VextShapeTool'
+import VextColorViewer from './tools/VextColorViewer'
 
 export {
-    HistoryControls as VextHistoryControls,
-    HistoryDrawer as VextHistoryDrawer,
-    NoteCanvas as VextNoteCanvas,
-    NoteConfiguration as VextNoteConfiguration,
-    ToolTip as VextTooltip,
-    BrushTool as VextBrushTool,
-    EditTool as VextEditTool,
-    LayersTool as VextLayersTool,
-    ShapeTool as VextShapeTool,
-    ColorViewer as VextColorViewer
+    VextHistoryControls,
+    VextHistoryDrawer,
+    VextNoteCanvas,
+    VextNoteConfiguration,
+    VextTooltip,
+    VextBrushTool,
+    VextEditTool,
+    VextLayersTool,
+    VextShapeTool,
+    VextColorViewer
 }

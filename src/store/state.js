@@ -2,7 +2,7 @@ import hash from 'object-hash'
 import { defineStore } from "pinia"
 import { toRaw } from 'vue';
 
-export const useState = defineStore("state", {
+export const useVextState = defineStore("vext-state", {
 
     state: () => {
         return {

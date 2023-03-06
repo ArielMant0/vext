@@ -8,13 +8,13 @@
 
 <script>
 import { storeToRefs } from 'pinia';
-import { useAppStore } from '@/store/app'
+import { useVextApp } from '@/store/app'
 import HistoryDrawer from '@/components/HistoryDrawer';
 
 export default {
   components: { HistoryDrawer },
     setup() {
-        const app = useAppStore();
+        const app = useVextApp();
         const { alertText, alertType } = storeToRefs(app);
 
         return {

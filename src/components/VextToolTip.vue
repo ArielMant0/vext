@@ -23,12 +23,12 @@
 </template>
 
 <script>
-import { useAppStore } from '@/store/app';
+import { useVextApp } from '@/store/app';
 import { ref, watch } from 'vue';
 
 
 export default {
-    name: "ToolTip",
+    name: "VextToolTip",
     props: {
         width: {
             type: Number,
@@ -51,7 +51,7 @@ export default {
         const x = ref(0)
         const y = ref(0)
 
-        const app = useAppStore();
+        const app = useVextApp();
 
         function findPlacement(mx, my, w, h) {
             const spaceRight = mx < window.innerWidth - w - props.offset*2 - 10;

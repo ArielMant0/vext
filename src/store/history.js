@@ -1,7 +1,6 @@
 import { defineStore } from "pinia"
 
-
-export const useHistory = defineStore("history", {
+export const useVextHistory = defineStore("vext-history", {
 
     state: () => {
         return {

@@ -10,39 +10,39 @@
 
         <v-window v-model="tool">
             <v-window-item :value="tools.LAYER">
-                <LayersTool/>
+                <VextLayersTool/>
             </v-window-item>
             <v-window-item :value="tools.EDIT">
-                <EditTool/>
+                <VextEditTool/>
             </v-window-item>
             <v-window-item :value="tools.BRUSH">
-                <BrushTool/>
+                <VextBrushTool/>
             </v-window-item>
             <v-window-item :value="tools.SHAPE">
-                <ShapeTool :onSelect="onTextSelect" :onDeselect="onTextDeselect"/>
+                <VextShapeTool :onSelect="onTextSelect" :onDeselect="onTextDeselect"/>
             </v-window-item>
         </v-window>
     </div>
 </template>
 
 <script>
-import EditTool from '@/components/tools/EditTool.vue';
-import BrushTool from '@/components/tools/BrushTool.vue';
-import ShapeTool from '@/components/tools/ShapeTool.vue';
-import LayersTool from '@/components/tools/LayersTool.vue';
+import VextEditTool from '@/components/tools/VextEditTool.vue';
+import VextBrushTool from '@/components/tools/VextBrushTool.vue';
+import VextShapeTool from '@/components/tools/VextShapeTool.vue';
+import VextLayersTool from '@/components/tools/VextLayersTool.vue';
 
 import { storeToRefs } from 'pinia'
 import { ref, onMounted, watch } from 'vue';
-import { useNote } from '@/store/note'
-import { useState } from '@/store/state';
+import { useVextNote } from '@/store/note'
+import { useVextState } from '@/store/state';
 
 export default {
-    name: "NoteConfiguration",
-    components: { EditTool, BrushTool, ShapeTool, LayersTool },
+    name: "VextNoteConfiguration",
+    components: { VextEditTool, VextBrushTool, VextShapeTool, VextLayersTool },
     setup() {
 
-        const state = useState();
-        const note = useNote();
+        const state = useVextState();
+        const note = useVextNote();
         const { tool, tools } = storeToRefs(note);
         const tmpTool = ref(tool.value);
 

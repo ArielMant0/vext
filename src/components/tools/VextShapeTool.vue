@@ -32,20 +32,20 @@
         <v-select v-if="shape !== 'text'" v-model="stroke" label="stroke" :items="['primary color', 'secondary color', 'none']" density="compact" variant="solo" style="max-width: 275px;"></v-select>
         <v-select v-if="shape !== 'text'" v-model="fill" label="fill" :items="['primary color', 'secondary color', 'none']" density="compact" variant="solo" style="max-width: 275px;"></v-select>
         <v-btn size="small" @click="addObject" color="info">add item</v-btn>
-        <ColorViewer/>
+        <VextColorViewer/>
     </div>
 </template>
 
 <script>
-import { useNote } from '@/store/note';
+import { useVextNote } from '@/store/note';
 import { ref } from 'vue';
 import { fabric } from 'fabric';
-import ColorViewer from './ColorViewer.vue';
-import { useAppStore } from '@/store/app';
+import VextColorViewer from './VextColorViewer.vue';
+import { useVextApp } from '@/store/app';
 
 export default {
-    name: "ShapeTool",
-    components: { ColorViewer },
+    name: "VextShapeTool",
+    components: { VextColorViewer },
     props: {
         onSelect: {
             type: Function,
@@ -58,8 +58,8 @@ export default {
     },
     setup(props) {
 
-        const note = useNote();
-        const app = useAppStore();
+        const note = useVextNote();
+        const app = useVextApp();
         const shape = ref("circle");
 
         const strokeWidth = ref(2)

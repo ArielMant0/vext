@@ -1,6 +1,6 @@
 import { defineStore } from "pinia"
 
-export const useAppStore = defineStore("app", {
+export const useVextApp = defineStore("vext-app", {
 
     state: () => {
         return {

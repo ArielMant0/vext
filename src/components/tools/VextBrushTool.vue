@@ -22,20 +22,20 @@
             <v-btn @click="setBrushSize(10)" size="x-small" rounded="pill" color="info">10</v-btn>
             <v-btn @click="setBrushSize(15)" size="x-small" rounded="pill" color="info">15</v-btn>
         </div>
-        <ColorViewer/>
+        <VextColorViewer/>
     </div>
 </template>
 
 <script>
 import { ref, watch, onMounted } from 'vue';
-import { useNote } from '@/store/note'
-import ColorViewer from '@/components/tools/ColorViewer';
+import { useVextNote } from '@/store/note'
+import VextColorViewer from '@/components/tools/VextColorViewer';
 
 export default {
-    name: "BrushTool",
-    components: { ColorViewer },
+    name: "VextBrushTool",
+    components: { VextColorViewer },
     setup() {
-        const note = useNote();
+        const note = useVextNote();
         const size = ref(1);
 
         function readBrushSize() {

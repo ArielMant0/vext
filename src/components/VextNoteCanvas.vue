@@ -7,10 +7,10 @@
 <script>
 import { fabric } from 'fabric';
 import { onMounted, ref, watch } from 'vue';
-import { useNote } from '@/store/note';
+import { useVextNote } from '@/store/note';
 
 export default {
-    name: "NoteCanvas",
+    name: "VextNoteCanvas",
     props: {
         width: {
             type: Number,
@@ -28,7 +28,7 @@ export default {
     setup(props) {
         const wrapper = ref(null);
         const canvasNode = ref(null);
-        const note = useNote();
+        const note = useVextNote();
 
         const activeText = ref(null);
 

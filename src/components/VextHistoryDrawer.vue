@@ -23,13 +23,13 @@
 
 <script>
 import { storeToRefs } from 'pinia';
-import { useHistory } from '@/store/history';
+import { useVextHistory } from '@/store/history';
 
 export default {
-    name: "HistoryDrawer",
+    name: "VextHistoryDrawer",
     setup() {
 
-        const history = useHistory();
+        const history = useVextHistory();
         const { menu, undoStack, redoStack } = storeToRefs(history);
 
         function clearHistory() {

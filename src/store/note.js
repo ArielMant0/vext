@@ -1,5 +1,5 @@
 import { defineStore } from "pinia"
-import { useHistory } from "@/store/history";
+import { useVextHistory } from "@/store/history";
 import { createFabricObject } from '@/use/util';
 import { toRaw } from 'vue';
 import { v4 as uuidv4 } from 'uuid';
@@ -48,7 +48,7 @@ function parseObject(obj, layer) {
     }
 }
 
-export const useNote = defineStore("note", {
+export const useVextNote = defineStore("vext-note", {
 
     state: () => {
         return {
@@ -137,7 +137,7 @@ export const useNote = defineStore("note", {
             id = id === null ? this.nextID : id;
             color = color === null ? this.nextColor : color;
             if (record) {
-                const history = useHistory();
+                const history = useVextHistory();
                 history.do("add layer " + id,
                     this.addLayer.bind(this, id, color, false),
                     this.removeLayer.bind(this, id, false)
@@ -164,7 +164,7 @@ export const useNote = defineStore("note", {
                 const item = this.layers.splice(idx, 1)[0];
 
                 if (record) {
-                    const history = useHistory();
+                    const history = useVextHistory();
                     history.do("remove layer "+id,
                         this.removeLayer.bind(this, id, false),
                         this.addLayer.bind(this, item.id, item.color, false)
@@ -192,7 +192,7 @@ export const useNote = defineStore("note", {
             const newIndex = this.getLayerIndex(id);
             if (newIndex >= 0) {
                 if (record) {
-                    const history = useHistory();
+                    const history = useVextHistory();
                     history.do("change active layer to "+id,
                         this.setActiveLayer.bind(this, id, false),
                         this.setActiveLayer.bind(this, this.activeLayer, false),
@@ -220,7 +220,7 @@ export const useNote = defineStore("note", {
                 if (render) _CANVAS.requestRenderAll();
 
                 if (record) {
-                    const history = useHistory();
+                    const history = useVextHistory();
                     history.do("set layer opacity to "+value,
                         this.setLayerOpacity.bind(this, value, id, false),
                         this.setLayerOpacity.bind(this, prevValue, id, false),
@@ -242,7 +242,7 @@ export const useNote = defineStore("note", {
                 if (render) _CANVAS.requestRenderAll();
 
                 if (record) {
-                    const history = useHistory();
+                    const history = useVextHistory();
                     history.do("set layer visibility to "+visible,
                         this.setLayerVisibility.bind(this, visible, id, false, true),
                         this.setLayerVisibility.bind(this, !visible, id, false, true)
@@ -255,7 +255,7 @@ export const useNote = defineStore("note", {
 
             if (tool !== this.tool) {
                 if (record) {
-                    const history = useHistory();
+                    const history = useVextHistory();
                     history.do("change tool to "+tool,
                         this.setTool.bind(this, tool, false),
                         this.setTool.bind(this, this.tool, false)
@@ -292,7 +292,7 @@ export const useNote = defineStore("note", {
 
         setBrushSize(size, record=true) {
             if (record) {
-                const history = useHistory();
+                const history = useVextHistory();
                 history.do("set brush size to "+size,
                     this.setBrushSize.bind(this, size, false),
                     this.setBrushSize.bind(this, this.brushSize, false)
@@ -305,7 +305,7 @@ export const useNote = defineStore("note", {
         selectColor(id, record=true) {
             const newColor = id === 0 || id === 1 ? id : this.activeColor;
             if (record) {
-                const history = useHistory();
+                const history = useVextHistory();
                 history.do("select color to "+(newColor === 0 ? 'primary' : 'secondary'),
                     this.selectColor.bind(this, newColor, false),
                     this.selectColor.bind(this, this.activeColor, false)
@@ -319,7 +319,7 @@ export const useNote = defineStore("note", {
 
         setColorPrimary(color, record=true) {
             if (record) {
-                const history = useHistory();
+                const history = useVextHistory();
                 history.do("set primary color to "+color,
                     this.setColorPrimary.bind(this, color, false),
                     this.setColorPrimary.bind(this, this.color0, false),
@@ -333,7 +333,7 @@ export const useNote = defineStore("note", {
 
         setColorSecondary(color, record=true) {
             if (record) {
-                const history = useHistory();
+                const history = useVextHistory();
                 history.do("set secondary color to "+color,
                     this.setColorSecondary.bind(this, color, false),
                     this.setColorSecondary.bind(this, this.color1, false),
@@ -373,7 +373,7 @@ export const useNote = defineStore("note", {
             }
 
             if (record) {
-                const history = useHistory();
+                const history = useVextHistory();
                 history.do("add object of type "+obj.type,
                     this.addObjectFromJSON.bind(this, obj.toJSON(["uuid"]), this.activeLayer, false),
                     this.removeLastObject.bind(this, this.activeLayer, false),
@@ -403,7 +403,7 @@ export const useNote = defineStore("note", {
             });
 
             if (record) {
-                const history = useHistory();
+                const history = useVextHistory();
                 const objJsons = objs.map(d => d.toJSON(["uuid"]));
                 history.do(`add ${objs.length} objects`,
                     this.addObjectsFromJSON.bind(this, objJsons, this.activeLayer, false),
@@ -420,7 +420,7 @@ export const useNote = defineStore("note", {
             _CANVAS.add(obj);
 
             if (record) {
-                const history = useHistory();
+                const history = useVextHistory();
                 history.do("add object of type "+obj.type,
                     this.addObjectFromJSON.bind(this, json, layer, false),
                     this.removeLastObject.bind(this, layer, false),
@@ -439,7 +439,7 @@ export const useNote = defineStore("note", {
 
             if (record) {
                 const uuids = json.map(d => d.uuid);
-                const history = useHistory();
+                const history = useVextHistory();
                 history.do(`add ${objs.length} objects`,
                     this.addObjectsFromJSON.bind(this, json, layer, false),
                     this.removeObjects.bind(this, uuids, layer, false),
@@ -457,7 +457,7 @@ export const useNote = defineStore("note", {
                 _CANVAS.remove(toRaw(obj));
 
                 if (record) {
-                    const history = useHistory();
+                    const history = useVextHistory();
                     history.do("remove object of type "+obj.type,
                         this.removeLastObject.bind(this, layer, false),
                         this.addObjectFromJSON.bind(this, objJson, layer, false),
@@ -473,7 +473,7 @@ export const useNote = defineStore("note", {
             objs.forEach(d => _CANVAS.remove(toRaw(d)));
 
             if (record) {
-                const history = useHistory();
+                const history = useVextHistory();
                 history.do(`remove ${uuids.length} objects`,
                     this.removeObjects.bind(this, uuids, layer, false),
                     this.addObjectsFromJSON.bind(this, objsJson, layer, false),
@@ -490,7 +490,7 @@ export const useNote = defineStore("note", {
                 _CANVAS.remove(toRaw(obj));
 
                 if (record) {
-                    const history = useHistory();
+                    const history = useVextHistory();
                     history.do("remove object of type "+obj.type,
                         this.removeLastObject.bind(this, layer, false),
                         this.addObjectFromJSON.bind(this, objJson, layer, false),
