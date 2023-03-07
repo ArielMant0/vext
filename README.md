@@ -1,7 +1,8 @@
 # VEXT
 
-[![Releases](https://github.com/ArielMant0/vext/actions/workflows/release.yml/badge.svg?branch=main)](https://github.com/ArielMant0/vext/actions/workflows/release.yml)
+[![Releases](https://github.com/ArielMant0/vext/actions/workflows/release.yml/badge.svg)](https://github.com/ArielMant0/vext/actions/workflows/release.yml)
 [![Deploy](https://github.com/ArielMant0/vext/actions/workflows/deploy.yml/badge.svg)](https://github.com/ArielMant0/vext/actions/workflows/deploy.yml)
+[![NPM](https://img.shields.io/npm/v/@nullbuild/vext?color=critical&logo=npm)](https://www.npmjs.com/package/@nullbuild/vext)
 
 VEXT is a Vue component library to add externalization capabilities to any Vue application,
 primarily intended to be used visual analytics systems implemented with Vue.
