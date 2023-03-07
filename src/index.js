@@ -1,17 +1,17 @@
 import * as components from './components'
 
-import { useVextNote } from '@/store/note'
-import { useVextState } from '@/store/state'
-import { useVextHistory } from '@/store/history'
-import { useVextApp } from '@/store/app'
+import { useVextNote } from './store/note'
+import { useVextState } from './store/state'
+import { useVextHistory } from './store/history'
+import { useVextApp } from './store/app'
 
-export function createVextPlugin() {
+function createVextPlugin() {
     const plugin = {
         install: function(app) {
-            app.provide("useVextNote", useVextNote);
-            app.provide("useVextState", useVextState);
-            app.provide("useVextHistory", useVextHistory);
-            app.provide("useVextApp", useVextApp);
+            // app.provide("useVextNote", useVextNote);
+            // app.provide("useVextState", useVextState);
+            // app.provide("useVextHistory", useVextHistory);
+            // app.provide("useVextApp", useVextApp);
             // auto import all components
             for (const componentKey in components) {
                 app.component(componentKey, components[componentKey])
@@ -21,4 +21,10 @@ export function createVextPlugin() {
     return plugin;
 }
 
-
+export {
+    createVextPlugin,
+    useVextNote,
+    useVextState,
+    useVextHistory,
+    useVextApp
+}
