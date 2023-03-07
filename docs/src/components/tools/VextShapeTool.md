@@ -1,7 +1,5 @@
 # VextShapeTool
 
-> Component to add simple shapes or text to the NoteCanvas.
-
 ## Props
 
 | Prop name  | Description                                                                                                                                                                  | Type | Values | Default |

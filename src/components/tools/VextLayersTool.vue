@@ -114,109 +114,77 @@
     </div>
 </template>
 
-<script>
-import { ref, watch, computed } from 'vue';
-import { useVextNote } from '@/store/note';
-import { storeToRefs } from 'pinia';
-import { useVextState } from '@/store/state';
+<script setup>
+    /**
+     * Component that displays layer and state information. Let's the user
+     * switch between layers, select the layer mode, etc.
+     */
+    import { ref, watch, computed } from 'vue';
+    import { useVextNote } from '@/store/note';
+    import { storeToRefs } from 'pinia';
+    import { useVextState } from '@/store/state';
 
-/**
- * Component that displays layer and state information. Let's the user
- * switch between layers, select the layer mode, etc.
- * @displayName VextLayersTool
- */
-export default {
-    name: "VextLayersTool",
-    setup() {
+    const addDialog = ref(false);
+    const delDialog = ref(false);
 
-        const addDialog = ref(false);
-        const delDialog = ref(false);
+    const filterLayers = ref(false);
+    const layerColor = ref("#ddd")
+    const layerID = ref("new layer");
+    const opacity = ref(1);
+    const treeDepth = ref(0);
 
-        const filterLayers = ref(false);
-        const layerColor = ref("#ddd")
-        const layerID = ref("new layer");
-        const opacity = ref(1);
-        const treeDepth = ref(0);
+    const state = useVextState();
 
-        const state = useVextState();
+    const note = useVextNote();
+    const { layers, activeLayer, layerMode, layerModeValues } = storeToRefs(note);
 
-        const note = useVextNote();
-        const { layers, activeLayer, layerMode, layerModeValues } = storeToRefs(note);
+    const dataChange = computed(() => {
+        return note.currentLayer !== null && state.hash !== null &&
+            note.currentLayer.state.hash !== state.hash;
+    })
 
-        const dataChange = computed(() => {
-            return note.currentLayer !== null && state.hash !== null &&
-                note.currentLayer.state.hash !== state.hash;
-        })
+    function changeOpacity() {
+        note.setLayerOpacity(opacity.value)
+    }
+    function changeVisibility(id, visible) {
+        note.setLayerVisibility(visible, id)
+    }
+    function addLayer() {
+        addDialog.value = false;
+        const s = state.exportState();
+        note.addLayer(s, false, layerID.value, layerColor.value);
+    }
+    function removeLayer() {
+        delDialog.value = false;
+        setTimeout(note.removeLayer, 100);
+    }
 
-        function changeOpacity() {
-            note.setLayerOpacity(opacity.value)
-        }
-        function changeVisibility(id, visible) {
-            note.setLayerVisibility(visible, id)
-        }
-        function addLayer() {
-            addDialog.value = false;
-            const s = state.exportState();
-            note.addLayer(s, false, layerID.value, layerColor.value);
-        }
-        function removeLayer() {
-            delDialog.value = false;
-            setTimeout(note.removeLayer, 100);
-        }
+    function activeLayerChange() {
+        const layer = note.currentLayer;
+        opacity.value = layer !== null ? layer.opacity : 1;
+    }
 
-        function activeLayerChange() {
-            const layer = note.currentLayer;
-            opacity.value = layer !== null ? layer.opacity : 1;
-        }
+    function openAddDialog() {
+        layerColor.value = note.nextColor;
+        layerID.value = note.nextID;
+        addDialog.value = true;
+    }
+    function openDelDialog() { delDialog.value = true; }
 
-        function openAddDialog() {
-            layerColor.value = note.nextColor;
-            layerID.value = note.nextID;
-            addDialog.value = true;
-        }
-        function openDelDialog() { delDialog.value = true; }
+    function selectLayer(id) { note.setActiveLayer(id) }
+    function removeEmptyLayers() { note.removeEmptyLayers(); }
+    function saveState() { note.overwriteState(state.exportState()); }
 
-        function selectLayer(id) { note.setActiveLayer(id) }
-        function removeEmptyLayers() { note.removeEmptyLayers(); }
-        function saveState() { note.overwriteState(state.exportState()); }
+    function updateTreeDepth(node) {
+        const collaped = node.type.endsWith("Collapsed")
+        treeDepth.value = collaped ?
+            Math.min(node.level, treeDepth.value) :
+            Math.max(node.level+1, treeDepth.value)
+    }
 
-        function updateTreeDepth(node) {
-            const collaped = node.type.endsWith("Collapsed")
-            treeDepth.value = collaped ?
-                Math.min(node.level, treeDepth.value) :
-                Math.max(node.level+1, treeDepth.value)
-        }
+    watch(() => note.activeLayer, activeLayerChange);
+    watch(() => opacity.value, changeOpacity);
 
-        watch(() => note.activeLayer, activeLayerChange);
-        watch(() => opacity.value, changeOpacity);
-
-        return {
-            layers,
-            activeLayer,
-            layerMode,
-            layerModeValues,
-            filterLayers,
-            addDialog,
-            delDialog,
-            layerColor,
-            layerID,
-            opacity,
-            treeDepth,
-            dataChange,
-            openAddDialog,
-            openDelDialog,
-            changeVisibility,
-            changeOpacity,
-            addLayer,
-            removeLayer,
-            selectLayer,
-            removeEmptyLayers,
-            saveState,
-            updateTreeDepth
-        };
-
-    },
-}
 </script>
 
 <style scoped>

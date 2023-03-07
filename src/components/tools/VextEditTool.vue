@@ -10,33 +10,25 @@
     </div>
 </template>
 
-<script>
-import { useVextNote } from '@/store/note';
-import { computed } from 'vue';
-import { storeToRefs } from 'pinia';
+<script setup>
+    /**
+     * Component that displays information about the selected object(s)
+     * in the NoteCanvas.
+     */
+    import { useVextNote } from '@/store/note';
+    import { computed } from 'vue';
+    import { storeToRefs } from 'pinia';
 
-/**
- * Component that displays information about the selected object(s)
- * in the NoteCanvas.
- * @displayName VextEditTool
- */
-export default {
-    name: "VextEditTool",
-    setup() {
-        const note = useVextNote();
-        const { activeObject } = storeToRefs(note);
-        const keys = computed(() => {
-            if (activeObject.value !== null) {
-                return Object.keys(activeObject.value)
-            }
-            return []
-        })
+    const note = useVextNote();
+    const { activeObject } = storeToRefs(note);
 
-        return {
-            activeObject,
-            keys
+    /**
+     * Contains all available keys in the active selection object
+     */
+    const keys = computed(() => {
+        if (activeObject.value !== null) {
+            return Object.keys(activeObject.value)
         }
-
-    },
-}
+        return []
+    });
 </script>

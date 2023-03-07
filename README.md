@@ -70,12 +70,12 @@ import 'vuetify/styles'
 
 import { createVuetify } from 'vuetify'
 
-import * as components from 'vuetify/components' // necessary so that all components are included
-import * as directives from 'vuetify/directives' // necessary so that all directives are included
+import * as components from 'vuetify/components'
+import * as directives from 'vuetify/directives'
 
 export default createVuetify({
-  components: components,
-  directives: directives,
+  components: components, // necessary so that all components are included
+  directives: directives,  // necessary so that all directives are included
 })
 
 ```

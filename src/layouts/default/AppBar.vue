@@ -4,14 +4,10 @@
             <v-icon icon="mdi-pen-circle" />
             VEXT
         </v-app-bar-title>
-        <HistoryControls/>
+        <VextHistoryControls/>
     </v-app-bar>
 </template>
 
-<script>
-import HistoryControls from '@/components/HistoryControls';
-export default {
-    components: { HistoryControls },
-    setup() {}
-}
+<script setup>
+import VextHistoryControls from '@/components/VextHistoryControls';
 </script>

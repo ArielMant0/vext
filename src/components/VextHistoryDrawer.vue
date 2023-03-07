@@ -21,32 +21,18 @@
     </v-navigation-drawer>
 </template>
 
-<script>
-import { storeToRefs } from 'pinia';
-import { useVextHistory } from '@/store/history';
+<script setup>
+    /**
+     * Vuetify drawer component that shows the undo and redo actions
+     * of the history store.
+     */
+    import { storeToRefs } from 'pinia';
+    import { useVextHistory } from '@/store/history';
 
-/**
- * Vuetify drawer component that shows the undo and redo actions
- * of the history store.
- * @displayName VextHistoryDrawer
- */
-export default {
-    name: "VextHistoryDrawer",
-    setup() {
+    const history = useVextHistory();
+    const { menu, undoStack, redoStack } = storeToRefs(history);
 
-        const history = useVextHistory();
-        const { menu, undoStack, redoStack } = storeToRefs(history);
-
-        function clearHistory() {
-            history.clear();
-        }
-
-        return {
-            menu,
-            undoStack,
-            redoStack,
-            clearHistory
-        }
-    },
-}
+    function clearHistory() {
+        history.clear();
+    }
 </script>

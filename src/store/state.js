@@ -25,6 +25,7 @@ export const useVextState = defineStore("vext-state", {
                 this.hash = newHash;
                 this.dataChange = true;
             }
+            return this.dataChange;
         },
 
         setData(data, check=true) {
@@ -59,6 +60,7 @@ export const useVextState = defineStore("vext-state", {
 
         clear() {
             this.data = null;
+            this.hash = null;
         },
 
     },

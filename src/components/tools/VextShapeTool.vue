@@ -36,22 +36,17 @@
     </div>
 </template>
 
-<script>
-import { ref } from 'vue';
-import { fabric } from 'fabric';
-import { useVextNote } from '@/store/note';
-import { useVextApp } from '@/store/app';
+<script setup>
+    /**
+     * Component to add simple shapes or text to the NoteCanvas.
+     */
+    import { ref } from 'vue';
+    import { fabric } from 'fabric';
+    import { useVextNote } from '@/store/note';
+    import { useVextApp } from '@/store/app';
 
-import VextColorViewer from './VextColorViewer.vue';
-
-/**
- * Component to add simple shapes or text to the NoteCanvas.
- * @displayName VextShapeTool
- */
-export default {
-    name: "VextShapeTool",
-    components: { VextColorViewer },
-    props: {
+    import VextColorViewer from './VextColorViewer.vue';
+    const props = defineProps({
         /**
          * Function that is set as the onSelect callback for
          * created text objects. Used to implement text modification.
@@ -69,105 +64,89 @@ export default {
             type: Function,
             required: false
         },
-    },
-    setup(props) {
+    });
+    const note = useVextNote();
+    const app = useVextApp();
+    const shape = ref("circle");
 
-        const note = useVextNote();
-        const app = useVextApp();
-        const shape = ref("circle");
+    const strokeWidth = ref(2)
+    const dimx = ref(30)
+    const dimy = ref(30)
 
-        const strokeWidth = ref(2)
-        const dimx = ref(30)
-        const dimy = ref(30)
+    const stroke = ref("primary color")
+    const fill = ref("primary color")
 
-        const stroke = ref("primary color")
-        const fill = ref("primary color")
+    function addObject() {
+        let obj;
 
-        function addObject() {
-            let obj;
-
-            if (fill.value === "none" && stroke.value === "none") {
-                // show alert
-                app.error("at least one of 'fill' or 'stroke' must have a color");
-                return;
-            }
-
-            switch(shape.value) {
-                case "rectangle":
-                    obj = new fabric.Rect({
-                        width: dimx.value, height: dimy.value,
-                        top: 10, left: 10,
-                        stroke: stroke.value === "none" ? null :
-                            (stroke.value === "primary color" ? note.color0 : note.color1),
-                        strokeWidth: strokeWidth.value,
-                        strokeUniform: true,
-                        fill: fill.value === "none" ? null :
-                            (fill.value === "primary color" ? note.color0 : note.color1)
-                    });
-                    break;
-                case "circle":
-                    obj = new fabric.Circle({
-                        radius: dimx.value,
-                        top: 10, left: 10,
-                        stroke: stroke.value === "none" ? null :
-                            (stroke.value === "primary color" ? note.color0 : note.color1),
-                        strokeWidth: strokeWidth.value,
-                        strokeUniform: true,
-                        fill: fill.value === "none" ? null :
-                            (fill.value === "primary color" ? note.color0 : note.color1)
-                    });
-                    break;
-                case "triangle":
-                    obj = new fabric.Triangle({
-                        width: dimx.value, height: dimy.value,
-                        top: 10, left: 10,
-                        stroke: stroke.value === "none" ? null :
-                            (stroke.value === "primary color" ? note.color0 : note.color1),
-                        strokeWidth: strokeWidth.value,
-                        strokeUniform: true,
-                        fill: fill.value === "none" ? null :
-                            (fill.value === "primary color" ? note.color0 : note.color1)
-                    });
-                    break;
-                case "text":
-                    obj = new fabric.Text("new text", {
-                        fontFamily: "Avenir", top: 10, left: 10,
-                        fontSize: dimx.value,
-                        fill: note.color,
-                    });
-                    if (props.onSelect) {
-                        obj.onSelect = () => props.onSelect(obj);
-                    }
-                    if (props.onDeselect) {
-                        obj.onDeselect = props.onDeselect;
-                    }
-                    break;
-            }
-
-            note.addObject(obj)
+        if (fill.value === "none" && stroke.value === "none") {
+            // show alert
+            app.error("at least one of 'fill' or 'stroke' must have a color");
+            return;
         }
 
-        function optionToColor(opt) {
-            switch(opt) {
-                case "none": return null;
-                case "primary color": return note.color0;
-                case "secondary color": return note.color1;
-            }
+        switch(shape.value) {
+            case "rectangle":
+                obj = new fabric.Rect({
+                    width: dimx.value, height: dimy.value,
+                    top: 10, left: 10,
+                    stroke: stroke.value === "none" ? null :
+                        (stroke.value === "primary color" ? note.color0 : note.color1),
+                    strokeWidth: strokeWidth.value,
+                    strokeUniform: true,
+                    fill: fill.value === "none" ? null :
+                        (fill.value === "primary color" ? note.color0 : note.color1)
+                });
+                break;
+            case "circle":
+                obj = new fabric.Circle({
+                    radius: dimx.value,
+                    top: 10, left: 10,
+                    stroke: stroke.value === "none" ? null :
+                        (stroke.value === "primary color" ? note.color0 : note.color1),
+                    strokeWidth: strokeWidth.value,
+                    strokeUniform: true,
+                    fill: fill.value === "none" ? null :
+                        (fill.value === "primary color" ? note.color0 : note.color1)
+                });
+                break;
+            case "triangle":
+                obj = new fabric.Triangle({
+                    width: dimx.value, height: dimy.value,
+                    top: 10, left: 10,
+                    stroke: stroke.value === "none" ? null :
+                        (stroke.value === "primary color" ? note.color0 : note.color1),
+                    strokeWidth: strokeWidth.value,
+                    strokeUniform: true,
+                    fill: fill.value === "none" ? null :
+                        (fill.value === "primary color" ? note.color0 : note.color1)
+                });
+                break;
+            case "text":
+                obj = new fabric.Text("new text", {
+                    fontFamily: "Avenir", top: 10, left: 10,
+                    fontSize: dimx.value,
+                    fill: note.color,
+                });
+                if (props.onSelect) {
+                    obj.onSelect = () => props.onSelect(obj);
+                }
+                if (props.onDeselect) {
+                    obj.onDeselect = props.onDeselect;
+                }
+                break;
         }
 
-        return {
-            shape,
-            stroke,
-            strokeWidth,
-            dimx,
-            dimy,
-            fill,
-            addObject,
-            optionToColor
-        };
+        note.addObject(obj)
+    }
 
-    },
-}
+    function optionToColor(opt) {
+        switch(opt) {
+            case "none": return null;
+            case "primary color": return note.color0;
+            case "secondary color": return note.color1;
+        }
+    }
 </script>
 
 <style scoped>

@@ -22,23 +22,21 @@
     </div>
 </template>
 
-<script>
-import { useVextApp } from '@/store/app';
-import { ref, watch } from 'vue';
+<script setup>
+    /**
+     * Simple dynamic tooltip that can be used to show data, e.g. when hovering
+     * over an SVG item in a visualization. Intended to be used like a singleton,
+     * so only one instance per app. Content and position are set via the app store.
+     */
 
-/**
- * Simple dynamic tooltip that can be used to show data, e.g. when hovering
- * over an SVG item in a visualization. Intended to be used like a singleton,
- * so only one instance per app. Content and position are set via the app store.
- * @displayName VextToolTip
- */
-export default {
-    name: "VextToolTip",
-    props: {
+    import { useVextApp } from '@/store/app';
+    import { ref, watch } from 'vue';
+
+    const props = defineProps({
         /**
          * Minimum width of the tooltip
          */
-        width: {
+            width: {
             type: Number,
             default: 250
         },
@@ -56,113 +54,133 @@ export default {
             type: Number,
             default: 5
         }
-    },
-    setup(props) {
+    })
 
-        const wrapper = ref(null);
-        const content = ref("")
-        const placementCache = ref("auto");
-        const x = ref(0)
-        const y = ref(0)
+    const wrapper = ref(null);
+    const content = ref("")
+    const placementCache = ref("auto");
+    const x = ref(0)
+    const y = ref(0)
 
-        const app = useVextApp();
+    const app = useVextApp();
 
-        function findPlacement(mx, my, w, h) {
-            const spaceRight = mx < window.innerWidth - w - props.offset*2 - 10;
-            const spaceBottom = my < window.innerHeight - h - props.offset*2 - 10;
-            if (spaceRight && spaceBottom) {
-                return "right-bottom"
-            } else if (!spaceRight && spaceBottom) {
-                return "left-bottom"
-            } else if (spaceRight && !spaceBottom) {
-                return "right-top"
-            } else {
-                return "left-top";
-            }
+    function findPlacement(mx, my, w, h) {
+        const spaceRight = mx < window.innerWidth - w - props.offset*2 - 10;
+        const spaceBottom = my < window.innerHeight - h - props.offset*2 - 10;
+        if (spaceRight && spaceBottom) {
+            return "right-bottom"
+        } else if (!spaceRight && spaceBottom) {
+            return "left-bottom"
+        } else if (spaceRight && !spaceBottom) {
+            return "right-top"
+        } else {
+            return "left-top";
+        }
+    }
+
+    function updatePosition(mx, my, placement=placementCache.value) {
+
+        let w = props.width;
+        let h = props.height;
+        if (wrapper.value) {
+            const rect = wrapper.value.getBoundingClientRect()
+            w = rect.width;
+            h = rect.height;
         }
 
-        function updatePosition(mx, my, placement=placementCache.value) {
+        mx = mx - window.scrollX;
+        my = my - window.scrollY;
 
-            let w = props.width;
-            let h = props.height;
-            if (wrapper.value) {
-                const rect = wrapper.value.getBoundingClientRect()
-                w = rect.width;
-                h = rect.height;
-            }
-
-            mx = mx - window.scrollX;
-            my = my - window.scrollY;
-
-            if (placement === "auto") {
-                placement = findPlacement(mx, my, w, h);
-            }
-
-            switch (placement) {
-                case "left":
-                    x.value = mx - w - props.offset;
-                    y.value = my - (h * 0.5);
-                    break;
-                case "left-top":
-                    x.value = mx - w - props.offset;
-                    y.value = my - h - props.offset;
-                    break;
-                case "left-bottom":
-                    x.value = mx - w - props.offset;
-                    y.value = my + props.offset;
-                    break;
-                case "top":
-                    x.value = mx - (w * 0.5);
-                    y.value = my - h - props.offset;
-                    break;
-                case "bottom":
-                    x.value = mx + (w * 0.5) + props.offset;
-                    y.value = my + props.offset;
-                    break;
-                case "right-top":
-                    x.value = mx + props.offset;
-                    y.value = my - h - props.offset;
-                    break;
-                case "right":
-                    x.value = mx + props.offset;
-                    y.value = my - (h * 0.5);
-                    break;
-                // case "right-bottom":
-                default:
-                    x.value = mx + props.offset;
-                    y.value = my + props.offset;
-                    break;
-            }
+        if (placement === "auto") {
+            placement = findPlacement(mx, my, w, h);
         }
 
-        function show(object, mx, my, placement="auto") {
-            content.value = object;
-            placementCache.value = placement;
-            updatePosition(mx, my, placement);
+        switch (placement) {
+            case "left":
+                x.value = mx - w - props.offset;
+                y.value = my - (h * 0.5);
+                break;
+            case "left-top":
+                x.value = mx - w - props.offset;
+                y.value = my - h - props.offset;
+                break;
+            case "left-bottom":
+                x.value = mx - w - props.offset;
+                y.value = my + props.offset;
+                break;
+            case "top":
+                x.value = mx - (w * 0.5);
+                y.value = my - h - props.offset;
+                break;
+            case "bottom":
+                x.value = mx + (w * 0.5) + props.offset;
+                y.value = my + props.offset;
+                break;
+            case "right-top":
+                x.value = mx + props.offset;
+                y.value = my - h - props.offset;
+                break;
+            case "right":
+                x.value = mx + props.offset;
+                y.value = my - (h * 0.5);
+                break;
+            // case "right-bottom":
+            default:
+                x.value = mx + props.offset;
+                y.value = my + props.offset;
+                break;
         }
+    }
 
-        function hide() {
-            content.value = "";
-            placementCache.value = "auto";
-            x.value = 0;
-            y.value = 0;
-        }
+    function show(content, mx, my, placement="auto") {
+        content.value = content;
+        placementCache.value = placement;
+        updatePosition(mx, my, placement);
+    }
 
-        watch(() => app.ttContent, () => show(app.ttContent, app.ttX, app.ttY, app.ttPlacement), { deep: true });
-        watch(() => app.ttX, () => updatePosition(app.ttX, app.ttY));
-        watch(() => app.ttY, () => updatePosition(app.ttX, app.ttY));
+    function hide() {
+        content.value = "";
+        placementCache.value = "auto";
+        x.value = 0;
+        y.value = 0;
+    }
 
-        return {
-            wrapper,
-            content,
-            x,
-            y,
-            show,
-            hide,
-            updatePosition,
-        }
-    },
-}
+    watch(() => app.ttContent, () => show(app.ttContent, app.ttX, app.ttY, app.ttPlacement), { deep: true });
+    watch(() => app.ttX, () => updatePosition(app.ttX, app.ttY));
+    watch(() => app.ttY, () => updatePosition(app.ttX, app.ttY));
+
+    defineExpose({
+        /**
+         * Show the tooltip with 'content' at position [mx, my] and 'placement'.
+         * Content can be either a sting, object or array of objects.
+         *
+         * @param {*} content tooltip content
+         * @param {Number} mx x position in the document
+         * @param {Number} my y position in the document
+         * @param {String} placement tooltip placement
+         *
+         * @public
+         */
+        show,
+        /**
+         * Hide the tooltip
+         * @public
+         */
+        hide,
+        /**
+         * Update the position of the tooltip wit coordinates [mx, my] and placement
+         * 'placement'. This may be useful if you want the tooltip to stay at the same
+         * position relative to the mouse. If no placement is given, the last set
+         * placement is used.
+         *
+         * @param {Number} mx x position in the document
+         * @param {Number} my y position in the document
+         * @param {String} placement tooltip placement
+         *
+         * @public
+         */
+        updatePosition
+    });
 </script>
 
 <style scoped>

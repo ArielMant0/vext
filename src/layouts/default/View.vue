@@ -1,28 +1,19 @@
 <template>
     <v-main>
-        <HistoryDrawer/>
+        <VextHistoryDrawer/>
         <router-view />
         <v-alert v-if="alertText.length > 0" :text="alertText" :type="alertType" closable position="absolute" class="main-alert"></v-alert>
     </v-main>
 </template>
 
-<script>
-import { storeToRefs } from 'pinia';
-import { useVextApp } from '@/store/app'
-import HistoryDrawer from '@/components/HistoryDrawer';
+<script setup>
+    import { storeToRefs } from 'pinia';
+    import { useVextApp } from '@/store/app'
+    import VextHistoryDrawer from '@/components/VextHistoryDrawer';
 
-export default {
-  components: { HistoryDrawer },
-    setup() {
-        const app = useVextApp();
-        const { alertText, alertType } = storeToRefs(app);
+    const app = useVextApp();
+    const { alertText, alertType } = storeToRefs(app);
 
-        return {
-            alertText,
-            alertType,
-        }
-    }
-}
 </script>
 
 <style>

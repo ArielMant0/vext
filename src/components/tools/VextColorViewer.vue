@@ -19,19 +19,17 @@
     </div>
 </template>
 
-<script>
-import { ref, watch } from 'vue';
-import { useVextNote } from '@/store/note'
-import { storeToRefs } from 'pinia';
+<script setup>
+    /**
+     * Vuetify color picker that let's the user set a primary and
+     * secondary color, both of which are stored in the note store.
+     */
 
-/**
- * Vuetify color picker that let's the user set a primary and
- * secondary color, both of which are stored in the note store.
- * @displayName VextColorViewer
- */
-export default {
-    name: "VextColorViewer",
-    props: {
+    import { ref, watch } from 'vue';
+    import { useVextNote } from '@/store/note'
+    import { storeToRefs } from 'pinia';
+
+    const props = defineProps({
         /**
          * Initial color of the primary color
          */
@@ -46,45 +44,33 @@ export default {
             type: String,
             default: "#000000"
         },
-    },
-    setup(props) {
+    });
 
-        const note = useVextNote();
-        note.setColorPrimary(props.colorPrimary)
-        note.setColorSecondary(props.colorSecondary)
+    const note = useVextNote();
+    note.setColorPrimary(props.colorPrimary)
+    note.setColorSecondary(props.colorSecondary)
 
-        const { activeColor, color0, color1, swatch } = storeToRefs(note);
+    const { activeColor, color0, color1, swatch } = storeToRefs(note);
 
-        const tmpColor = ref(props.colorPrimary)
-        const tmpActive = ref(0);
+    const tmpColor = ref(props.colorPrimary)
+    const tmpActive = ref(0);
 
-        function changeColor() {
-            if (activeColor.value === 0) {
-                note.setColorPrimary(tmpColor.value)
-            } else {
-                note.setColorSecondary(tmpColor.value)
-            }
+    function changeColor() {
+        if (activeColor.value === 0) {
+            note.setColorPrimary(tmpColor.value)
+        } else {
+            note.setColorSecondary(tmpColor.value)
         }
-        function chooseColor() {
-            note.selectColor(tmpActive.value);
-        }
-        function readColor() {
-            tmpColor.value = note.color;
-            tmpActive.value = activeColor.value;
-        }
+    }
+    function chooseColor() {
+        note.selectColor(tmpActive.value);
+    }
+    function readColor() {
+        tmpColor.value = note.color;
+        tmpActive.value = activeColor.value;
+    }
 
-        watch(() => activeColor.value, readColor);
-        watch(() => note.color, readColor);
+    watch(() => activeColor.value, readColor);
+    watch(() => note.color, readColor);
 
-        return {
-            color0,
-            color1,
-            swatch,
-            tmpColor,
-            tmpActive,
-            changeColor,
-            chooseColor
-        }
-    },
-}
 </script>

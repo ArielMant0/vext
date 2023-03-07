@@ -1,8 +1,5 @@
 # VextNoteConfiguration
 
-> Component that includes all tools and handles state transfer from
-> the state store to the note store.
-
 ## Props
 
 | Prop name | Description                      | Type   | Values | Default              |

@@ -29,8 +29,8 @@
     "preview": "vite preview",
     "lint": "eslint . --fix --ignore-path .gitignore",
     "docs:gen": "vue-docgen src/components/**/*.vue docs",
-    "docs:dev": "vitepress dev docs",
-    "docs:build": "vitepress build docs",
+    "docs:dev": "concurrently \"vue-docgen src/components/**/*.vue docs -w\" \"vitepress dev docs\"",
+    "docs:build": "vue-docgen src/components/**/*.vue docs && vitepress build docs",
     "docs:preview": "vitepress preview docs"
   },
   "dependencies": {
@@ -60,6 +60,7 @@
   },
   "peerDependencies": {
     "@vueuse/core": "^9.13.0",
+    "fabric": "^5.3.0",
     "object-hash": "^3.0.0",
     "pinia": "^2.0.23",
     "uuid": "^9.0.0",

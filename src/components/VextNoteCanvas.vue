@@ -4,18 +4,15 @@
     </div>
 </template>
 
-<script>
-import { fabric } from 'fabric';
-import { onMounted, ref, watch } from 'vue';
-import { useVextNote } from '@/store/note';
+<script setup>
+    /**
+     * Component that creates the fabric.js canvas.
+     */
+    import { fabric } from 'fabric';
+    import { onMounted, ref, watch } from 'vue';
+    import { useVextNote } from '@/store/note';
 
-/**
- * Component that creates the fabric.js canvas.
- * @displayName VextNoteCanvas
- */
-export default {
-    name: "VextNoteCanvas",
-    props: {
+    const props = defineProps({
         /**
          * Width of the canvas
          */
@@ -45,47 +42,38 @@ export default {
             type: String,
             default: 'rgba(0, 0, 0, 0)',
         },
-    },
-    setup(props) {
-        const wrapper = ref(null);
-        const canvasNode = ref(null);
-        const note = useVextNote();
+    });
 
-        const activeText = ref(null);
+    const wrapper = ref(null);
+    const canvasNode = ref(null);
+    const note = useVextNote();
 
-        const init = () => {
-            const canvas = new fabric.Canvas(canvasNode.value, {
-                isDrawingMode: note.tool === note.tools.BRUSH,
-                renderOnAddRemove: true,
-                backgroundColor: props.backgroundColor
-            });
-            note.setCanvas(canvas);
+    function init() {
+        const canvas = new fabric.Canvas(canvasNode.value, {
+            isDrawingMode: note.tool === note.tools.BRUSH,
+            renderOnAddRemove: true,
+            backgroundColor: props.backgroundColor
+        });
+        note.setCanvas(canvas);
 
-            // hacky but okay
-            const el = document.querySelector(".canvas-container")
-            el.style.position = "absolute";
-            el.style.top = 0;
-            el.style.left = 0;
+        // hacky but okay
+        const el = document.querySelector(".canvas-container")
+        el.style.position = "absolute";
+        el.style.top = 0;
+        el.style.left = 0;
 
-            const brush = new fabric.PencilBrush(canvas);
-            brush.decimate = props.decimate;
-            brush.color = note.color0;
-            brush.width = note.brushSize;
-            canvas.freeDrawingBrush = brush;
-        }
+        const brush = new fabric.PencilBrush(canvas);
+        brush.decimate = props.decimate;
+        brush.color = note.color0;
+        brush.width = note.brushSize;
+        canvas.freeDrawingBrush = brush;
+    }
 
-        onMounted(init);
+    onMounted(init);
 
-        watch(() => props.width, () => note.resizeCanvas(props.width, props.height))
-        watch(() => props.height, () => note.resizeCanvas(props.width, props.height))
+    watch(() => props.width, () => note.resizeCanvas(props.width, props.height))
+    watch(() => props.height, () => note.resizeCanvas(props.width, props.height))
 
-        return {
-            canvasNode,
-            wrapper,
-            activeText
-        }
-    },
-}
 </script>
 
 <style>

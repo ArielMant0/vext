@@ -26,21 +26,16 @@
     </div>
 </template>
 
-<script>
-import { ref, watch, onMounted } from 'vue';
-import { useVextNote } from '@/store/note'
-import VextColorViewer from '@/components/tools/VextColorViewer';
+<script setup>
+    /**
+     * A tool that enables drawing on the NoteCanvas when active and handles
+     * the brush configuration for drawing.
+     */
+    import { ref, watch, onMounted } from 'vue';
+    import { useVextNote } from '@/store/note'
+    import VextColorViewer from '@/components/tools/VextColorViewer';
 
-/**
- * A tool that enables drawing on the NoteCanvas when active and handles
- * the brush configuration for drawing.
- *
- * @displayName VextBrushTool
- */
-export default {
-    name: "VextBrushTool",
-    components: { VextColorViewer },
-    props: {
+    const props = defineProps({
         /**
          * The initial size of the brush
          */
@@ -48,43 +43,42 @@ export default {
             type: Number,
             default: 1,
         }
-    },
-    setup(props) {
-        const note = useVextNote();
-        const size = ref(props.initialSize);
+    });
 
-        function readBrushSize() {
-            if (note.brushSize !== size.value) {
-                size.value = note.brushSize;
-            }
+    const note = useVextNote();
+    const size = ref(props.initialSize);
+
+    function readBrushSize() {
+        if (note.brushSize !== size.value) {
+            size.value = note.brushSize;
         }
+    }
+
+    function transferBrushSize() { note.setBrushSize(size.value); }
+
+    function setBrushSize(brushSize) {
+        if (brushSize !== size.value) {
+            size.value = brushSize;
+            transferBrushSize();
+        }
+    }
+
+    onMounted(transferBrushSize);
+
+    watch(() => note.brushSize, readBrushSize)
+
+    defineExpose({
+        /**
+         * Sets the brush size to brushSize
+         * @param {Number} brushSize size of the brush in pixels
+         */
+        setBrushSize,
         /**
          * Transfer the brush size to the note store
          */
-        function transferBrushSize() { note.setBrushSize(size.value); }
+        transferBrushSize
+    })
 
-        /**
-         * Sets the brush size to brushSize
-         * @param {Number} brushSize
-         */
-        function setBrushSize(brushSize) {
-            if (brushSize !== size.value) {
-                size.value = brushSize;
-                transferBrushSize();
-            }
-        }
-
-        onMounted(transferBrushSize);
-
-        watch(() => note.brushSize, readBrushSize)
-
-        return {
-            size,
-            setBrushSize,
-            transferBrushSize
-        }
-    },
-}
 </script>
 
 <style>

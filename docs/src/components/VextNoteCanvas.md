@@ -1,7 +1,5 @@
 # VextNoteCanvas
 
-> Component that creates the fabric.js canvas.
-
 ## Props
 
 | Prop name       | Description                                                                                              | Type   | Values | Default            |

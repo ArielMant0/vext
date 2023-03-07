@@ -1,41 +1,29 @@
 <template>
   <div style="display: flex;">
     <div style="height: 96vh; position: sticky; top: 0; left: 0; margin: 5px;">
-        <NoteConfiguration/>
+        <VextNoteConfiguration/>
     </div>
     <section ref="el" style="margin:5px; width: 100%;">
       <div style="position: relative;">
-          <NoteCanvas :width="visAreaWidth" :height="visAreaHeight"/>
+          <VextNoteCanvas :width="visAreaWidth" :height="visAreaHeight"/>
         </div>
     </section>
   </div>
 </template>
 
-<script>
-import NoteCanvas from '@/components/NoteCanvas.vue'
-import NoteConfiguration from '@/components/NoteConfiguration.vue'
+<script setup>
 
-import { ref, reactive, computed } from 'vue'
-import { useElementSize } from '@vueuse/core'
+  import VextNoteCanvas from '@/components/VextNoteCanvas.vue'
+  import VextNoteConfiguration from '@/components/VextNoteConfiguration.vue'
 
-export default {
-  name: 'App',
-  components: { NoteCanvas, NoteConfiguration },
-  setup() {
+  import { ref, reactive, computed } from 'vue'
+  import { useElementSize } from '@vueuse/core'
 
-      const el = ref(null);
-      const visAreaWidth = computed(() => size.width);
-      const visAreaHeight = computed(() => size.height);
-      const size = reactive(useElementSize(el));
+  const el = ref(null);
+  const visAreaWidth = computed(() => size.width);
+  const visAreaHeight = computed(() => size.height);
+  const size = reactive(useElementSize(el));
 
-      return {
-          el,
-          size,
-          visAreaWidth,
-          visAreaHeight,
-      }
-  }
-}
 </script>
 
 <style>

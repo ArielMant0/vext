@@ -27,10 +27,10 @@ export default {
               },{
                 text: 'Stores',
                 items: [
-                    { text: 'VextApp Store', link: 'stores/app' },
                     { text: 'VextNote Store', link: 'stores/note' },
                     { text: 'VextState Store', link: 'stores/state' },
                     { text: 'VextHistory Store', link: 'stores/history' },
+                    { text: 'VextApp Store', link: 'stores/app' },
                 ]
               }
         ]

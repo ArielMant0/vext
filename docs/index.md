@@ -14,6 +14,16 @@ The [VextHistoryControls](/src/components/VextHistoryControls) component can be 
 
 The [VextHistoryDrawer](/src/components/VextHistoryDrawer) component holds a drawer that lets the user see the actions in the history store.
 
+### Stores
+
+The [`note` store](/stores/note) implements much of the externalization capabilities.
+
+The [`state` store](/stores/state) takes care of tracking state changes. You need to pass your application state, e.g. data you visualize, to it so that the state can be tracked and revisited later.
+
+The [`history` store](/stores/history) implements the action history mechanism used by the `note` store.
+
+The [`app` store](/stores/app) implements the action history mechanism used by the `note` store.
+
 ## Installation
 
 To use this package, simply install it via yarn or npm.
@@ -28,20 +38,71 @@ using npm:
 npm install @nullbuild/vext
 ```
 
-## Stores
+## Usage
 
-### note
+To use the components provided by VEXT, you need to register the plugin and make
+sure that all Vuetify components used by the plugin ([see here](#vuetify-components-and-directives))
+are actually provided. For more information see [treeshaking](https://vuetifyjs.com/en/features/treeshaking/).
 
-The [`note` store](/stores/note) implements much of the externalization capabilities.
+Here is a simple example, starting off from an essentials vuetify application:
 
-### state
+```javascript
+// src/plugins/index.js
 
-The [`state` store](/stores/state) takes care of tracking state changes. You need to pass your application state, e.g. data you visualize, to it so that the state can be tracked and revisited later.
+import { loadFonts } from './webfontloader'
+import vuetify from './vuetify'
+import pinia from '../store'
+import router from '../router'
+import { createVextPlugin } from '@nullbuild/vext'
 
-### history
+import VueJsonPretty from 'vue-json-pretty'
+import 'vue-json-pretty/lib/styles.css';
 
-The [`history` store](/stores/history) implements the action history mechanism used by the `note` store.
+export function registerPlugins (app) {
+  loadFonts()
+  app
+    .use(vuetify)
+    .use(router)
+    .use(pinia)
+    .component("vue-json-pretty", VueJsonPretty) // add the VueJsonPretty component
+    .use(createVextPlugin())                     // add VEXT components
+}
 
-### app
+```
 
-The [`app` store](/stores/app) implements the action history mechanism used by the `note` store.
+```javascript
+// src/plugins/vuetify.js
+
+import '@mdi/font/css/materialdesignicons.css'
+import 'vuetify/styles'
+
+import { createVuetify } from 'vuetify'
+
+import * as components from 'vuetify/components'
+import * as directives from 'vuetify/directives'
+
+export default createVuetify({
+  components: components, // necessary so that all components are included
+  directives: directives,  // necessary so that all directives are included
+})
+
+```
+
+### Vuetify Components and Directives
+
+Components:
+- VBtn
+- VSlider
+- VTextField
+- VIcon
+- VDialog (+ related components)
+- VCard (+ related components)
+- VItemGroup (+ related components)
+- VList (+ related components)
+- VHover
+- VContainer
+- VRow
+- VCol
+
+Directives:
+- Ripple
