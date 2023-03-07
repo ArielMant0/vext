@@ -22,6 +22,12 @@ jobs:
         name: Bundle Files
         with:
           args: zip -qq -r vext.zip dist
+      - uses: actions/upload-artifact@v2
+        with:
+          name: vext.zip
+    - uses: actions/download-artifact@v2
+        with:
+          name: vext.zip
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
