@@ -2,7 +2,7 @@ import VextHistoryControls from './VextHistoryControls'
 import VextHistoryDrawer from './VextHistoryDrawer'
 import VextNoteCanvas from './VextNoteCanvas'
 import VextNoteConfiguration from './VextNoteConfiguration'
-import VextTooltip from './VextTooltip'
+import VextToolTip from './VextToolTip'
 
 import VextBrushTool from './tools/VextBrushTool'
 import VextEditTool from './tools/VextEditTool'
@@ -15,7 +15,7 @@ export {
     VextHistoryDrawer,
     VextNoteCanvas,
     VextNoteConfiguration,
-    VextTooltip,
+    VextToolTip,
     VextBrushTool,
     VextEditTool,
     VextLayersTool,
