@@ -11,24 +11,27 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - name: Setup Node
+        uses: actions/setup-node@v3
         with:
           node-version: 16
           cache: npm
       - run: npm install --frozen-lockfile
       - name: Build
         run: npm run build
-      - uses: montudor/action-zip@v1
-        name: Bundle Files
+      - name: Bundle Files
+        uses: montudor/action-zip@v1
         with:
           args: zip -qq -r vext.zip dist
-      - uses: actions/upload-artifact@v2
+      - name: Upload ZIP
+        uses: actions/upload-artifact@v2
         with:
           name: vext.zip
-    - uses: actions/download-artifact@v2
-        with:
-          name: vext.zip
-      - name: Release
-        uses: softprops/action-gh-release@v1
-        with:
-          files: vext.zip
+      - name: Download ZIP
+        uses: actions/download-artifact@v2
+          with:
+            name: vext.zip
+        - name: Release
+          uses: softprops/action-gh-release@v1
+          with:
+            files: vext.zip
