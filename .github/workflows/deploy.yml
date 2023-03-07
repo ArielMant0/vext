@@ -21,6 +21,7 @@ jobs:
         with:
           node-version: 16
           cache: npm
+      - run: npm install concurrency
       - run: npm install --frozen-lockfile
       - name: Build
         run: npm run docs:build
