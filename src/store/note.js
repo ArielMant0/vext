@@ -48,7 +48,7 @@ function parseObject(obj, layer) {
     }
 }
 
-export const useVextNote = defineStore("vext-note", {
+const vextNoteStore = {
 
     state: () => {
         return {
@@ -571,4 +571,8 @@ export const useVextNote = defineStore("vext-note", {
         }
 
     },
-});
+};
+
+const useVextNote = defineStore("vext-note", vextNoteStore);
+
+export { useVextNote, vextNoteStore };

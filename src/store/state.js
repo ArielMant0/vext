@@ -2,7 +2,7 @@ import hash from 'object-hash'
 import { defineStore } from "pinia"
 import { toRaw } from 'vue';
 
-export const useVextState = defineStore("vext-state", {
+const vextStateStore = {
 
     state: () => {
         return {
@@ -64,4 +64,8 @@ export const useVextState = defineStore("vext-state", {
         },
 
     },
-});
+};
+
+const useVextState = defineStore("vext-state", vextStateStore);
+
+export { useVextState, vextStateStore };

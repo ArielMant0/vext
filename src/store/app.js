@@ -1,7 +1,6 @@
 import { defineStore } from "pinia"
 
-export const useVextApp = defineStore("vext-app", {
-
+const vextAppStore = {
     state: () => {
         return {
             alertText: "",
@@ -98,4 +97,8 @@ export const useVextApp = defineStore("vext-app", {
             this.ttPlacement = placement;
         }
     },
-});
+}
+
+const useVextApp = defineStore("vext-app", vextAppStore);
+
+export { useVextApp, vextAppStore };

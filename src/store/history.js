@@ -1,6 +1,6 @@
 import { defineStore } from "pinia"
 
-export const useVextHistory = defineStore("vext-history", {
+const vextHistoryStore = {
 
     state: () => {
         return {
@@ -66,4 +66,8 @@ export const useVextHistory = defineStore("vext-history", {
             this.redoStack = [];
         }
     },
-});
+}
+
+const useVextHistory = defineStore("vext-history", vextHistoryStore);
+
+export { useVextHistory, vextHistoryStore }
