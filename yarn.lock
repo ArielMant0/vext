@@ -543,7 +543,6 @@ __metadata:
     "@mdi/font": 7.0.96
     "@vitejs/plugin-vue": ^3.0.3
     "@vueuse/core": ^9.13.0
-    concurrency: ^0.1.4
     core-js: ^3.8.3
     eslint: ^8.22.0
     eslint-plugin-vue: ^9.3.0
@@ -1271,13 +1270,6 @@ __metadata:
   version: 0.0.1
   resolution: "concat-map@npm:0.0.1"
   checksum: 902a9f5d8967a3e2faf138d5cb784b9979bad2e6db5357c5b21c568df4ebe62bcb15108af1b2253744844eb964fc023fbd9afbbbb6ddd0bcc204c6fb5b7bf3af
-  languageName: node
-  linkType: hard
-
-"concurrency@npm:^0.1.4":
-  version: 0.1.4
-  resolution: "concurrency@npm:0.1.4"
-  checksum: b274e75fed82da6b066962f415b28d78831c0cf8b9189b5042edb69955d80b5df29d6c62f77469ce6150dc03279aa858c0880550fc88d501fb2d80059a836428
   languageName: node
   linkType: hard
 

@@ -31,6 +31,7 @@
     "docs:gen": "vue-docgen src/components/**/*.vue docs",
     "docs:dev": "concurrently \"vue-docgen src/components/**/*.vue docs -w\" \"vitepress dev docs\"",
     "docs:build": "vue-docgen src/components/**/*.vue docs && vitepress build docs",
+    "docs:build-vite": "vitepress build docs",
     "docs:preview": "vitepress preview docs"
   },
   "dependencies": {
@@ -50,7 +51,6 @@
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^3.0.3",
-    "concurrency": "^0.1.4",
     "eslint": "^8.22.0",
     "eslint-plugin-vue": "^9.3.0",
     "sass": "^1.55.0",
