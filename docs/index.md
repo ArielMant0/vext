@@ -88,6 +88,24 @@ export default createVuetify({
 
 ```
 
+Here is an example on how to use the stores in a Vue component.
+This code uses the state store and manually sets the state (once).
+
+```javascript
+// src/components/MyComponent.vue
+<script setup>
+import { useVextState } from 'vuetify'
+
+const mystateobject = {
+  key0: ...,
+}
+
+const vextState = useVextState();
+vextState.setData(mystateobject);
+
+</script>
+```
+
 ### Vuetify Components and Directives
 
 Components:
