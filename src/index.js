@@ -5,7 +5,7 @@ import { useVextState } from './store/state.js'
 import { useVextHistory } from './store/history.js'
 import { useVextApp } from './store/app.js'
 
-function createVextPlugin() {
+function createVextPlugin(app) {
     // app.provide("useVextNote", useVextNote);
     // app.provide("useVextState", useVextState);
     // app.provide("useVextHistory", useVextHistory);
@@ -16,6 +16,10 @@ function createVextPlugin() {
     }
 }
 
-export default createVextPlugin
-
-export { useVextNote, useVextState, useVextHistory, useVextApp }
+export {
+    createVextPlugin as default,
+    useVextNote,
+    useVextState,
+    useVextHistory,
+    useVextApp
+}
