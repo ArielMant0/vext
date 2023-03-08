@@ -17,7 +17,7 @@ function createVextPlugin(app) {
 }
 
 export {
-    createVextPlugin as default,
+    createVextPlugin,
     useVextNote,
     useVextState,
     useVextHistory,
