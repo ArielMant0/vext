@@ -4295,8 +4295,8 @@ __metadata:
   linkType: hard
 
 "vitepress@npm:^1.0.0-alpha.49":
-  version: 1.0.0-alpha.49
-  resolution: "vitepress@npm:1.0.0-alpha.49"
+  version: 1.0.0-alpha.50
+  resolution: "vitepress@npm:1.0.0-alpha.50"
   dependencies:
     "@docsearch/css": ^3.3.3
     "@docsearch/js": ^3.3.3
@@ -4309,7 +4309,7 @@ __metadata:
     vue: ^3.2.47
   bin:
     vitepress: bin/vitepress.js
-  checksum: 392706ddb79321aac6160008083487251a526038e0f29966cd4d56b4ff609ed19ec939a54236db08a41156011ba00cfb301db721525c609c8ef498e17ae6da2e
+  checksum: 1e3dc30e8de05a18158fd330ff588229ef41db119f12773a764b4e93df30594adbfbb73c05e05cf40fcbb5aa2cde8d320d169d4a9a724b4ce8a217d8b9d686d9
   languageName: node
   linkType: hard
 
@@ -4370,8 +4370,8 @@ __metadata:
   linkType: hard
 
 "vue-docgen-cli@npm:^4.60.1":
-  version: 4.60.1
-  resolution: "vue-docgen-cli@npm:4.60.1"
+  version: 4.61.0
+  resolution: "vue-docgen-cli@npm:4.61.0"
   dependencies:
     chokidar: ^3.5.1
     globby: ^10.0.2
@@ -4382,7 +4382,7 @@ __metadata:
     vue-docgen-api: ^4.60.0
   bin:
     vue-docgen: lib/bin.js
-  checksum: 12c7187cbe788dc895384990b65ba28630c392de1c59cd76bc919eeb92f862dcee3eef77b7b189429f741aa4d173ca0baf5a6212c1bfa16585f1fd1507c1b5b6
+  checksum: 06c9ce4f40c9016c169b5e05ca572a9fbc6b8fc9fe7244c6b27fae5102a570e627b108df0a6e80c079d619f91e34ae98dbc1ccdde9b239d2bf2168bb94e0cfe9
   languageName: node
   linkType: hard
 
