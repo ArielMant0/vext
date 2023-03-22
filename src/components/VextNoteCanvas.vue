@@ -42,6 +42,13 @@
             type: String,
             default: 'rgba(0, 0, 0, 0)',
         },
+        /**
+         * CSS z-index to set for the canvas
+         */
+        zIndex: {
+            type: String,
+            default: "100"
+        }
     });
 
     const wrapper = ref(null);
@@ -61,6 +68,7 @@
         el.style.position = "absolute";
         el.style.top = 0;
         el.style.left = 0;
+        el.style.zIndex = props.zIndex;
 
         const brush = new fabric.PencilBrush(canvas);
         brush.decimate = props.decimate;
@@ -73,6 +81,8 @@
 
     watch(() => props.width, () => note.resizeCanvas(props.width, props.height))
     watch(() => props.height, () => note.resizeCanvas(props.width, props.height))
+    watch(() => props.decimate, () => note.setBrushDecimation(props.decimate))
+    watch(() => props.zIndex, () => note.setCanvasZIndex(props.zIndex));
 
 </script>
 

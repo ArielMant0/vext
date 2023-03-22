@@ -3,7 +3,7 @@
         <v-card style="height: 100%; opacity: 0.9;" color="grey-darken-3">
             <v-list v-if="Array.isArray(content)" class="content">
                 <v-list v-for="(item, idx) in content" :key="idx">
-                    <v-list-item v-for="(value, key) in item" :key="key" class="_display:flex _justify-content:space-between">
+                    <v-list-item v-for="(value, key) in item" :key="key" class="d-flex _justify-content:space-between">
                         <span><b>{{ key }}: </b></span>
                         <span>{{ ''+value }}</span>
                     </v-list-item>
@@ -36,7 +36,7 @@
         /**
          * Minimum width of the tooltip
          */
-            width: {
+        width: {
             type: Number,
             default: 250
         },
@@ -78,7 +78,11 @@
         }
     }
 
-    function updatePosition(mx, my, placement=placementCache.value) {
+    function updatePosition(mx, my, placement) {
+
+        if (!placement) {
+            placement = placementCache.value;
+        }
 
         let w = props.width;
         let h = props.height;
@@ -183,7 +187,7 @@
     });
 </script>
 
-<style scoped>
+<style>
 .content {
     overflow-y: auto;
     word-wrap: break-word;

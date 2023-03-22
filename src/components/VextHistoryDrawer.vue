@@ -8,12 +8,12 @@
             </template>
         </v-list-item>
         <v-divider/>
-        <v-card title="undo stack" prepend-icon="mdi-undo" variant="flat">
+        <v-card title="undo stack" :prepend-icon="undoIcon" variant="flat">
             <v-list density="compact" nav>
                 <v-list-item v-for="(item, index) in undoStack" :key="index" :title="item.description" :subtitle="item.time.toLocaleTimeString()"></v-list-item>
             </v-list>
         </v-card>
-        <v-card title="redo stack" prepend-icon="mdi-redo" variant="flat">
+        <v-card title="redo stack" :prepend-icon="redoIcon" variant="flat">
             <v-list density="compact" nav>
                 <v-list-item v-for="(item, index) in redoStack" :key="index" :title="item.description" :subtitle="item.time.toLocaleTimeString()"></v-list-item>
             </v-list>
@@ -32,7 +32,17 @@
     const history = useVextHistory();
     const { menu, undoStack, redoStack } = storeToRefs(history);
 
-    function clearHistory() {
-        history.clear();
-    }
+    function clearHistory() { history.clear(); }
+
+    const props = defineProps({
+        undoIcon: {
+            type: String,
+            default: "mdi-undo"
+        },
+        redoIcon: {
+            type: String,
+            default: "mdi-redo"
+        },
+    });
+
 </script>

@@ -56,6 +56,7 @@ const vextNoteStore = {
             color1: "#000000",
             activeColor: 0,
             brushSize: 1,
+            brushDecimation: 5,
 
             tool: TOOLS.LAYER,
 
@@ -133,27 +134,47 @@ const vextNoteStore = {
             }
         },
 
-        addLayer(state, record=true, id=null, color=null) {
+        addLayer(state, record=true, id=null, color=null, items=[]) {
             id = id === null ? this.nextID : id;
             color = color === null ? this.nextColor : color;
+
             if (record) {
                 const history = useVextHistory();
+                const json = items.map(d => d.toJSON("uuid"));
                 history.do("add layer " + id,
-                    this.addLayer.bind(this, id, color, false),
+                    this.addLayer.bind(this, false, id, color, json),
                     this.removeLayer.bind(this, id, false)
                 )
             }
+
             this.layers.splice(0, 0, {
                 id: id,
                 color: color,
                 visible: true,
                 opacity: 1,
-                group: [],
+                group: items,
                 time: new Date(Date.now()),
                 state: state
             });
-            this.activeLayer = id;
+            // add items
+            if (items.length > 0) {
+                items.forEach(item => {
+                    if (typeof item === "string") {
+                        const obj = createFabricObject(item.type, item);
+                        obj.set("opacity", 1);
+                        obj.set("visible", true)
+                        _CANVAS.add(obj)
+                    } else if (typeof item === "object") {
+                        item.set("opacity", 1);
+                        item.set("visible", true)
+                        item.set("uuid", uuidv4())
+                        _CANVAS.add(toRaw(item))
+                    }
+                })
+            }
+
             this.LAYER_ID_IDX++;
+            this.setActiveLayer(id, false);
         },
 
         removeLayer(id, record=false) {
@@ -165,17 +186,18 @@ const vextNoteStore = {
 
                 if (record) {
                     const history = useVextHistory();
+                    const items = item.group.map(d => d.toJSON("uuid"))
                     history.do("remove layer "+id,
                         this.removeLayer.bind(this, id, false),
-                        this.addLayer.bind(this, item.id, item.color, false)
+                        this.addLayer.bind(this, false, item.id, item.color, items)
                     )
                 }
 
-                item.group.forEach(d => _CANVAS.remove(d));
+                item.group.forEach(d => _CANVAS.remove(toRaw(d)));
 
                 const index = this.getLayerIndex(this.activeLayer);
                 if (index < 0) {
-                    this.activeLayer = this.layers.length === 0 ? null : this.layers[0].id;
+                    this.setActiveLayer(this.layers.length === 0 ? null : this.layers[0].id, false);
                 }
             }
         },
@@ -184,7 +206,7 @@ const vextNoteStore = {
             this.layers = this.layers.filter(d => d.group.length > 0);
             const index = this.getLayerIndex(this.activeLayer);
             if (index < 0) {
-                this.activeLayer = this.layers.length === 0 ? null : this.layers[0].id;
+                this.setActiveLayer(this.layers.length === 0 ? null : this.layers[0].id, false);
             }
         },
 
@@ -291,15 +313,29 @@ const vextNoteStore = {
         },
 
         setBrushSize(size, record=true) {
+            const newVal = Math.max(size, 1);
             if (record) {
                 const history = useVextHistory();
-                history.do("set brush size to "+size,
-                    this.setBrushSize.bind(this, size, false),
+                history.do("set brush size to "+newVal,
+                    this.setBrushSize.bind(this, newVal, false),
                     this.setBrushSize.bind(this, this.brushSize, false)
                 );
             }
-            _CANVAS.freeDrawingBrush.width = size;
-            this.brushSize = size;
+            _CANVAS.freeDrawingBrush.width = newVal;
+            this.brushSize = newVal;
+        },
+
+        setBrushDecimation(value, record=false) {
+            const newVal = Math.max(value, 0);
+            if (record) {
+                const history = useVextHistory();
+                history.do("set brush decimation to "+newVal,
+                    this.setBrushDecimation.bind(this, newVal, false),
+                    this.setBrushDecimation.bind(this, this.brushDecimation, false)
+                );
+            }
+            _CANVAS.freeDrawingBrush.decimate = newVal;
+            this.brushDecimation = newVal;
         },
 
         selectColor(id, record=true) {
@@ -523,8 +559,18 @@ const vextNoteStore = {
         },
 
         resizeCanvas(width, height) {
-            _CANVAS.setWidth(width);
-            _CANVAS.setHeight(height);
+            if (_CANVAS) {
+                _CANVAS.setWidth(width);
+                _CANVAS.setHeight(height);
+            }
+        },
+
+        setCanvasZIndex(value) {
+            if (_CANVAS) {
+                _CANVAS.wrapperEl.style.zIndex = value;
+                _CANVAS.upperCanvasEl.style.zIndex = value;
+                _CANVAS.lowerCanvasEl.style.zIndex = value
+            }
         },
 
         setCanvas(canvas) {

@@ -31,7 +31,7 @@
                 </div>
             </template>
         </v-tooltip>
-        <v-checkbox v-model="filterLayers" density="compact" class="no-input-details mb-1"></v-checkbox>
+        <v-checkbox v-model="filterLayers" density="compact" class="mb-1" hide-details></v-checkbox>
 
         <v-tooltip text="remove all layers that contain no annotations (one will always remain)">
             <template v-slot:activator="{ props }">
@@ -68,19 +68,21 @@
             </template>
         </v-tooltip>
 
-        <v-item-group>
-            <v-item v-for="(layer, idx) in layers" :key="idx">
+        <v-item-group mandatory :multiple="false">
+            <v-item v-for="(layer, idx) in layers" :key="idx" :value="layer.id">
                 <v-card v-if="!filterLayers || layer.group.length > 0"
                     :variant="activeLayer === layer.id ? 'elevated' : 'tonal'"
                     class="mb-2 layer-card" style="width: 99%"
                     >
-                    <v-card-title class="layer" v-ripple>
-                        <v-badge :content="layer.group.length" inline :color="layer.color" style="line-height: .9rem;"></v-badge>
-                        <span v-if="layer.id === activeLayer" class="layer-selector" style="text-decoration: underline;">{{ layer.id }}</span>
-                        <span v-else @click="selectLayer(layer.id)" class="layer-selector">{{ layer.id }}</span>
+                    <v-card-title class="layer">
+                        <span>
+                            <v-badge :content="layer.group.length" inline :color="layer.color" style="line-height: .9rem;"></v-badge>
+                            <v-icon :icon="activeLayer === layer.id ? 'mdi-checkbox-marked' : 'mdi-checkbox-blank-outline'" @click="selectLayer(layer.id)"/>
+                        </span>
+                        <span class="layer-selector" @click="toggleLayerOpen(layer.id)">{{ layer.id }}</span>
                         <v-icon :icon="layer.visible ? 'mdi-eye' : 'mdi-eye-off'" @click="changeVisibility(layer.id, !layer.visible)"></v-icon>
                     </v-card-title>
-                    <v-card-text v-if="layer.id === activeLayer">
+                    <v-card-text v-if="layerUI.open[layer.id]">
                         <vue-json-pretty :data="JSON.parse(layer.state.state)" :showDoubleQuotes="false" :deep="treeDepth" @nodeClick="updateTreeDepth"/>
                     </v-card-text>
                 </v-card>
@@ -119,7 +121,7 @@
      * Component that displays layer and state information. Let's the user
      * switch between layers, select the layer mode, etc.
      */
-    import { ref, watch, computed } from 'vue';
+    import { ref, watch, computed, reactive } from 'vue';
     import { useVextNote } from '@/store/note';
     import { storeToRefs } from 'pinia';
     import { useVextState } from '@/store/state';
@@ -132,6 +134,10 @@
     const layerID = ref("new layer");
     const opacity = ref(1);
     const treeDepth = ref(0);
+
+    const layerUI = reactive({
+        open: {},
+    });
 
     const state = useVextState();
 
@@ -162,6 +168,11 @@
     function activeLayerChange() {
         const layer = note.currentLayer;
         opacity.value = layer !== null ? layer.opacity : 1;
+        layerUI.open = {}
+        layerUI.open[layer.id] = true;
+    }
+    function toggleLayerOpen(id) {
+        layerUI.open[id] = !layerUI.open[id];
     }
 
     function openAddDialog() {
@@ -187,21 +198,15 @@
 
 </script>
 
-<style scoped>
+<style>
 .layer {
     display: flex;
     justify-content: space-between;
     font-size: 15px;
 }
-.layer-selector {
-    cursor: pointer;
-}
-.layer-selector:hover {
-    font-weight: bolder;
-}
-.layer-card {
-    max-width: 285px;
-}
+.layer-selector { cursor: pointer; }
+.layer-selector:hover { font-weight: bolder; }
+.layer-card { max-width: 285px; }
 
 .blob {
     cursor: default;
@@ -231,9 +236,7 @@
     transform: rotateZ(0);
   }
 }
-</style>
 
-<style>
 .layer-card .v-badge {
     line-height: inherit;
 }

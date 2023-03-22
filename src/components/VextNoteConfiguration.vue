@@ -18,7 +18,7 @@
                 <VextBrushTool/>
             </v-window-item>
             <v-window-item :value="tools.SHAPE">
-                <VextShapeTool :onSelect="onTextSelect" :onDeselect="onTextDeselect"/>
+                <VextShapeTool @select="onTextSelect" @deselect="onTextDeselect"/>
             </v-window-item>
         </v-window>
     </div>

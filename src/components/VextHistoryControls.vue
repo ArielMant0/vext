@@ -1,7 +1,7 @@
 <template>
-    <v-btn icon="mdi-undo" @click="backward" :disabled="!hasUndo"></v-btn>
-    <v-btn icon="mdi-redo" @click="forward" :disabled="!hasRedo"></v-btn>
-    <v-btn :icon="menu ? 'mdi-forwardburger' : 'mdi-menu'" @click.stop="toggleMenu"></v-btn>
+    <v-btn :icon="undoIcon" @click="backward" :disabled="!hasUndo"></v-btn>
+    <v-btn :icon="redoIcon" @click="forward" :disabled="!hasRedo"></v-btn>
+    <v-btn :icon="menu ? menuOpenIcon : menuClosedIcon" @click.stop="toggleMenu"></v-btn>
 </template>
 
 <script setup>
@@ -14,6 +14,37 @@
 
     const history = useVextHistory();
     const { menu, hasUndo, hasRedo } = storeToRefs(history);
+
+    const props = defineProps({
+        /**
+         * Icon to use for the undo button
+         */
+        undoIcon: {
+            type: String,
+            default: "mdi-undo"
+        },
+        /**
+         * Icon to use for the redo button
+         */
+        redoIcon: {
+            type: String,
+            default: "mdi-redo"
+        },
+        /**
+         * Icon to use for the menu button when the menu is open
+         */
+        menuOpenIcon: {
+            type: String,
+            default: "mdi-forwardburger"
+        },
+        /**
+         * Icon to use for the menu button when the menu is closed
+         */
+        menuClosedIcon: {
+            type: String,
+            default: "mdi-menu"
+        },
+    });
 
     function backward() { history.undo(); }
     function forward() { history.redo(); }

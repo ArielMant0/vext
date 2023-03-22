@@ -8,10 +8,6 @@ import { useVextApp } from './store/app'
 function createVextPlugin() {
     const plugin = {
         install: function(app) {
-            // app.provide("useVextNote", useVextNote);
-            // app.provide("useVextState", useVextState);
-            // app.provide("useVextHistory", useVextHistory);
-            // app.provide("useVextApp", useVextApp);
             // auto import all components
             for (const componentKey in components) {
                 app.component(componentKey, components[componentKey])

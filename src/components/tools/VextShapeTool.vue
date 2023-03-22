@@ -44,32 +44,15 @@
     import { fabric } from 'fabric';
     import { useVextNote } from '@/store/note';
     import { useVextApp } from '@/store/app';
-
     import VextColorViewer from './VextColorViewer.vue';
-    const props = defineProps({
-        /**
-         * Function that is set as the onSelect callback for
-         * created text objects. Used to implement text modification.
-         * When the function is called, the text object is passed.
-         */
-        onSelect: {
-            type: Function,
-            required: false
-        },
-        /**
-         * Function that is set as the onDeselect callback for
-         * created text objects. Used to implement text modification.
-         */
-        onDeselect: {
-            type: Function,
-            required: false
-        },
-    });
+
     const note = useVextNote();
     const app = useVextApp();
     const shape = ref("circle");
 
-    const strokeWidth = ref(2)
+    const emit = defineEmits(["select", "deselect"]);
+
+    const strokeWidth = ref(note.brushSize)
     const dimx = ref(30)
     const dimy = ref(30)
 
@@ -128,28 +111,17 @@
                     fontSize: dimx.value,
                     fill: note.color,
                 });
-                if (props.onSelect) {
-                    obj.onSelect = () => props.onSelect(obj);
-                }
-                if (props.onDeselect) {
-                    obj.onDeselect = props.onDeselect;
-                }
+                obj.onSelect = () => emit("select", obj);
+                obj.onDeselect = () => emit("deselect");
                 break;
         }
 
         note.addObject(obj)
     }
 
-    function optionToColor(opt) {
-        switch(opt) {
-            case "none": return null;
-            case "primary color": return note.color0;
-            case "secondary color": return note.color1;
-        }
-    }
 </script>
 
-<style scoped>
+<style>
 .small-num {
     max-width: 135px;
     margin-right: 0.5rem;
