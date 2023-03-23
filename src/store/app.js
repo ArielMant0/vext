@@ -3,13 +3,12 @@ import { defineStore } from "pinia"
 const vextAppStore = {
     state: () => {
         return {
-            alertText: "",
-            alertType: "error",
+            alerts: [],
             alertDuration: 6000, // 6 seconds
 
             ttX: 0,
             ttY: 0,
-            ttContent: "",
+            ttContent: null,
             ttPlacement: "auto"
         };
     },
@@ -22,9 +21,12 @@ const vextAppStore = {
          * @param {String} type
          */
         alert(text, type) {
-            this.alertType = type;
-            this.alertText = text;
-            setTimeout(() => this.alertText = "", this.alertDuration);
+            this.alerts.push({ text: text, type: type })
+            setTimeout(() => {
+                if (this.alerts.length > 0) {
+                    this.alerts.splice(0, 1)
+                }
+            }, this.alertDuration);
         },
 
         /**
@@ -82,7 +84,7 @@ const vextAppStore = {
          * Hide the tooltip.
          */
         hideTooltip() {
-            this.ttContent = "";
+            this.ttContent = null;
         },
 
         /**

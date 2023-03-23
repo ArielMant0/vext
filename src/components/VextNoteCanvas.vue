@@ -18,14 +18,20 @@
          */
         width: {
             type: Number,
-            default: 300
+            default: 300,
+            validator(value) {
+                return value >= 0
+            }
         },
         /**
          * Height of the canvas
          */
         height: {
             type: Number,
-            default: 120
+            default: 120,
+            validator(value) {
+                return value >= 0
+            }
         },
         /**
          * Value for the fabric.js decimate option. Larger values result in
@@ -34,6 +40,9 @@
         decimate: {
             type: Number,
             default: 5,
+            validator(value) {
+                return value >= 0
+            }
         },
         /**
          * Background color of the canvas
@@ -46,8 +55,8 @@
          * CSS z-index to set for the canvas
          */
         zIndex: {
-            type: String,
-            default: "100"
+            type: [String, Number],
+            default: 100
         }
     });
 

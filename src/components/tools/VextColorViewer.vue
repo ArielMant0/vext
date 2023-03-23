@@ -35,14 +35,20 @@
          */
         colorPrimary: {
             type: String,
-            default: "#ff0000"
+            default: "#ff0000",
+            validator(value) {
+                return CSS.supports("color", value)
+            }
         },
         /**
          * Initial color of the secondary color
          */
         colorSecondary: {
             type: String,
-            default: "#000000"
+            default: "#000000",
+            validator(value) {
+                return CSS.supports("color", value)
+            }
         },
     });
 

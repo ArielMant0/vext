@@ -1,5 +1,5 @@
 <template>
-    <div ref="wrapper" class="tooltip" v-if="content" :style="{ 'left': x+'px', 'top': y+'px' }">
+    <div ref="wrapper" class="tooltip" v-if="content" :style="{ 'left': tX+'px', 'top': tY+'px' }">
         <v-card style="height: 100%; opacity: 0.9;" color="grey-darken-3">
             <v-list v-if="Array.isArray(content)" class="content">
                 <v-list v-for="(item, idx) in content" :key="idx">
@@ -29,7 +29,6 @@
      * so only one instance per app. Content and position are set via the app store.
      */
 
-    import { useVextApp } from '@/store/app';
     import { ref, watch } from 'vue';
 
     const props = defineProps({
@@ -38,31 +37,77 @@
          */
         width: {
             type: Number,
-            default: 250
+            default: 250,
+            validator(value) {
+                return value >= 0
+            }
         },
         /**
          * Minimum height of the tooltip
          */
         height: {
             type: Number,
-            default: 250
+            default: 250,
+            validator(value) {
+                return value >= 0
+            }
         },
         /**
          * Offset to add to the tooltip position (for x and y)
          */
         offset: {
             type: Number,
-            default: 5
-        }
+            default: 5,
+            validator(value) {
+                return value >= 0
+            }
+        },
+        /**
+         * Content to show in the tooltip.
+         */
+        content: {
+            type: [Object, Array, String],
+            default: null,
+        },
+        /**
+         * How to place the tooltip.
+         */
+        placement: {
+            type: String,
+            default: "auto",
+            validator(value) {
+                return ["auto", "right",
+                    "left", "bottom", "top",
+                    "right-bottom", "right-top",
+                    "left-bottom", "left-top",
+                    ].includes(value)
+            }
+        },
+        /**
+         * Horizontal position of the tooltip.
+         */
+        x: {
+            type: Number,
+            default: 0,
+            validator(value) {
+                return value >= 0
+            }
+        },
+        /**
+         * Vertical position of the tooltip.
+         */
+        y: {
+            type: Number,
+            default: 0,
+            validator(value) {
+                return value >= 0
+            }
+        },
     })
 
     const wrapper = ref(null);
-    const content = ref("")
-    const placementCache = ref("auto");
-    const x = ref(0)
-    const y = ref(0)
-
-    const app = useVextApp();
+    const tX = ref(0);
+    const tY = ref(0);
 
     function findPlacement(mx, my, w, h) {
         const spaceRight = mx < window.innerWidth - w - props.offset*2 - 10;
@@ -79,10 +124,6 @@
     }
 
     function updatePosition(mx, my, placement) {
-
-        if (!placement) {
-            placement = placementCache.value;
-        }
 
         let w = props.width;
         let h = props.height;
@@ -101,90 +142,51 @@
 
         switch (placement) {
             case "left":
-                x.value = mx - w - props.offset;
-                y.value = my - (h * 0.5);
+                tX.value = mx - w - props.offset;
+                tY.value = my - (h * 0.5);
                 break;
             case "left-top":
-                x.value = mx - w - props.offset;
-                y.value = my - h - props.offset;
+                tX.value = mx - w - props.offset;
+                tY.value = my - h - props.offset;
                 break;
             case "left-bottom":
-                x.value = mx - w - props.offset;
-                y.value = my + props.offset;
+                tX.value = mx - w - props.offset;
+                tY.value = my + props.offset;
                 break;
             case "top":
-                x.value = mx - (w * 0.5);
-                y.value = my - h - props.offset;
+                tX.value = mx - (w * 0.5);
+                tY.value = my - h - props.offset;
                 break;
             case "bottom":
-                x.value = mx + (w * 0.5) + props.offset;
-                y.value = my + props.offset;
+                tX.value = mx + (w * 0.5) + props.offset;
+                tY.value = my + props.offset;
                 break;
             case "right-top":
-                x.value = mx + props.offset;
-                y.value = my - h - props.offset;
+                tX.value = mx + props.offset;
+                tY.value = my - h - props.offset;
                 break;
             case "right":
-                x.value = mx + props.offset;
-                y.value = my - (h * 0.5);
+                tX.value = mx + props.offset;
+                tY.value = my - (h * 0.5);
                 break;
             // case "right-bottom":
             default:
-                x.value = mx + props.offset;
-                y.value = my + props.offset;
+                tX.value = mx + props.offset;
+                tY.value = my + props.offset;
                 break;
         }
     }
 
-    function show(ttcontent, mx, my, placement="auto") {
-        content.value = ttcontent;
-        placementCache.value = placement;
-        updatePosition(mx, my, placement);
+    function show() {
+        if (props.content !== null) {
+            updatePosition(props.x, props.y, props.placement);
+        }
     }
 
-    function hide() {
-        content.value = "";
-        placementCache.value = "auto";
-        x.value = 0;
-        y.value = 0;
-    }
+    watch(() => props.content, show, { deep: true });
+    watch(() => props.x, updatePosition);
+    watch(() => props.y, updatePosition);
 
-    watch(() => app.ttContent, () => show(app.ttContent, app.ttX, app.ttY, app.ttPlacement), { deep: true });
-    watch(() => app.ttX, () => updatePosition(app.ttX, app.ttY));
-    watch(() => app.ttY, () => updatePosition(app.ttX, app.ttY));
-
-    defineExpose({
-        /**
-         * Show the tooltip with 'content' at position [mx, my] and 'placement'.
-         * Content can be either a sting, object or array of objects.
-         *
-         * @param {*} content tooltip content
-         * @param {Number} mx x position in the document
-         * @param {Number} my y position in the document
-         * @param {String} placement tooltip placement
-         *
-         * @public
-         */
-        show,
-        /**
-         * Hide the tooltip
-         * @public
-         */
-        hide,
-        /**
-         * Update the position of the tooltip wit coordinates [mx, my] and placement
-         * 'placement'. This may be useful if you want the tooltip to stay at the same
-         * position relative to the mouse. If no placement is given, the last set
-         * placement is used.
-         *
-         * @param {Number} mx x position in the document
-         * @param {Number} my y position in the document
-         * @param {String} placement tooltip placement
-         *
-         * @public
-         */
-        updatePosition
-    });
 </script>
 
 <style>

@@ -6,7 +6,8 @@
     <section ref="el" style="margin:5px; width: 100%;">
       <div style="position: relative;">
           <VextNoteCanvas :width="visAreaWidth" :height="visAreaHeight"/>
-        </div>
+      </div>
+      <VextGlobalToolTip/>
     </section>
   </div>
 </template>
@@ -15,14 +16,28 @@
 
   import VextNoteCanvas from '@/components/VextNoteCanvas.vue'
   import VextNoteConfiguration from '@/components/VextNoteConfiguration.vue'
+  import VextGlobalToolTip from '@/components/VextGlobalToolTip.vue';
 
-  import { ref, reactive, computed } from 'vue'
+  import { ref, reactive, computed, onMounted } from 'vue'
   import { useElementSize } from '@vueuse/core'
+  import { useVextApp } from '@/store/app';
 
   const el = ref(null);
   const visAreaWidth = computed(() => size.width);
   const visAreaHeight = computed(() => size.height);
   const size = reactive(useElementSize(el));
+
+  const app = useVextApp();
+
+  onMounted(function() {
+    app.showTooltip({ msg: "hello", number: 5 }, 250, 300)
+    setTimeout(() => {
+      app.hideTooltip()
+      app.error("some error");
+      app.info("some info");
+    }, 5000);
+
+  })
 
 </script>
 

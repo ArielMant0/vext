@@ -42,6 +42,9 @@
         initialSize: {
             type: Number,
             default: 1,
+            validator(value) {
+                return value >= 0
+            }
         }
     });
 
