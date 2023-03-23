@@ -11,6 +11,7 @@
 | color1 | secondary color | string | -      | `"#000000"` |
 | activeColor | which color is active | number | `[0, 1]` | `0` |
 | brushSize | size of the canvas brush in pixel | number | - | `1` |
+| brushDecimation | how much to decimate lines | number | - | `5` |
 | tool | which tool is currently active | string | `["layer", "brush", "shape", "edit"]` | `"layer"` |
 | currentState | current state as stored in the state store | object | - | `null` |
 | layers | list of all layers | array | - | `[]` |
@@ -20,6 +21,49 @@
 | activeObjectUUID | UUID of the selected fabric.js object | string | - | `null` |
 | activeObject | the selected fabric.js object | object | - | `{}` |
 | defaultColors | colors to include in the color picker palette that are used when a new layer is created automatically | array | - | `["#4e79a7", "#f28e2c", "#e15759", "#76b7b2", "#59a14f", "#edc949", "#af7aa1", "#ff9da7", "#9c755f", "#bab0ab"]` |
+
+## Getters
+
+### tools
+
+> JavaScript object of all available tools.
+
+### canvas
+
+> fabris.js canvas (null if not set)
+
+### layerModeValues
+
+> Array of possible layer mode values.
+
+### layerModeEnum
+
+> JavaScript object of all possible layer modes.
+
+### currentLayer
+
+> Current layer object if it exists, null otherwise.
+
+### color
+
+> Currently active color.
+
+### layerColors
+
+> Array of layer colors.
+
+### swatch
+
+> Array of default and layer colors.
+
+### nextColor
+
+> Next available color from the default colors.
+> Will cycle if the number of layers exceeds the number of default colors.
+
+### nextID
+
+> An ID for a next layer.
 
 ## Methods
 
@@ -48,6 +92,7 @@
 > <br>`@param {boolean}` record - whether to record this action in history
 > <br>`@param {string}` id - id for the new layer
 > <br>`@param {string}`color - color for the new layer
+> <br>`@param {array}`items - items to be included in the layer
 
 ### removeLayer
 
@@ -71,6 +116,7 @@
 > <br>`@param {number}` value - opacity value
 > <br>`@param {string}` id
 > <br>`@param {boolean}` record - whether to record this action in history
+> <br>`@param {boolean}` render - whether to request a re-render of the canvas
 
 ### setLayerOpacity
 
@@ -88,32 +134,38 @@
 
 ### setBrushSize
 
-> Set the brush size for drawing
+> Set the brush size for drawing.
 > <br>`@param {number}` size - brush size in pixel
+> <br>`@param {boolean}` record - whether to record this action in history
+
+### setBrushDecimation
+
+> Set the decimation value for drawing.
+> <br>`@param {number}` value - decimation value
 > <br>`@param {boolean}` record - whether to record this action in history
 
 ### selectColor
 
-> Select either the primary or secondary color
+> Select either the primary or secondary color.
 > <br>`@param {number}` id - 0 if primary color, else 1
 > <br>`@param {boolean}` record - whether to record this action in history
 
 ### setColorPrimary
 
-> Set the primary color
+> Set the primary color.
 > <br>`@param {string}` color
 > <br>`@param {boolean}` record - whether to record this action in history
 
 
 ### setColorSecondary
 
-> Set the secondary color
+> Set the secondary color.
 > <br>`@param {string}` color
 > <br>`@param {boolean}` record - whether to record this action in history
 
 ### addObject
 
-> Add an object to the active layer
+> Add an object to the active layer.
 > <br>`@param {object}` obj - fabric.js objects
 > <br>`@param {boolean}` addToCanvas - whether to add them to the canvas
 > <br>`@param {boolean}` record - whether to record this action in history
@@ -154,13 +206,13 @@
 
 ### removeLastObject
 
-> Remove the last object that was added
+> Remove the last object that was added.
 > <br>`@param {string}` layer - id of the layer to remove the object from
 > <br>`@param {boolean}` record - whether to record this action in history
 
 ### removeLastObject
 
-> Get the currently active fabric.js selection
+> Get the currently active fabric.js selection.
 > <br>`@returns` active object
 
 ### deleteCurrentObj
@@ -170,15 +222,20 @@
 
 ### layerFromItem
 
-> Get the layer object for a given fabric.js item
+> Get the layer object for a given fabric.js item.
 > <br>`@param {object}` item
 > <br>`@returns` layer object if exists, else undefined
 
 ### resizeCanvas
 
-> Resize the fabric.js canvas to [width, height]
+> Resize the fabric.js canvas to [width, height].
 > <br>`@param {number}` width
 > <br>`@param {number}` height
+
+### setCanvasZIndex
+
+> Sets the z-index for the canvas and wrapper elements.
+> <br>`@param {number}` value - z-index value to set
 
 ### setCanvas
 

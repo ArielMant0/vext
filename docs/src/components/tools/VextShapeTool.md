@@ -1,10 +1,10 @@
 # VextShapeTool
 
-## Props
+## Events
 
-| Prop name  | Description                                                                                                                                                                  | Type | Values | Default |
-| ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---- | ------ | ------- |
-| onSelect   | Function that is set as the onSelect callback for<br/>created text objects. Used to implement text modification.<br/>When the function is called, the text object is passed. | func | -      |         |
-| onDeselect | Function that is set as the onDeselect callback for<br/>created text objects. Used to implement text modification.                                                           | func | -      |         |
+| Event name | Properties | Description                                                                                           |
+| ---------- | ---------- | ----------------------------------------------------------------------------------------------------- |
+| select     |            | This event is emitted when a text object is selected with the<br/>object itself as the event payload. |
+| deselect   |            | This event is emitted when a text object is deselected.                                               |
 
 ---

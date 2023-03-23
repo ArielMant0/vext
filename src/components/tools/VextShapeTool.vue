@@ -50,7 +50,17 @@
     const app = useVextApp();
     const shape = ref("circle");
 
-    const emit = defineEmits(["select", "deselect"]);
+    const emit = defineEmits([
+        /**
+         * This event is emitted when a text object is selected with the
+         * object itself as the event payload.
+         */
+        "select",
+        /**
+         * This event is emitted when a text object is deselected.
+         */
+        "deselect"
+    ]);
 
     const strokeWidth = ref(note.brushSize)
     const dimx = ref(30)
