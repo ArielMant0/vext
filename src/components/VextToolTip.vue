@@ -136,8 +136,8 @@
         }
     }
 
-    function show(content, mx, my, placement="auto") {
-        content.value = content;
+    function show(ttcontent, mx, my, placement="auto") {
+        content.value = ttcontent;
         placementCache.value = placement;
         updatePosition(mx, my, placement);
     }
