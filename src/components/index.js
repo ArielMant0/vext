@@ -2,6 +2,7 @@ import VextHistoryControls from './VextHistoryControls'
 import VextHistoryDrawer from './VextHistoryDrawer'
 import VextNoteCanvas from './VextNoteCanvas'
 import VextNoteConfiguration from './VextNoteConfiguration'
+import VextNoteDrawer from './VextNoteDrawer'
 import VextToolTip from './VextToolTip'
 import VextGlobalToolTip from './VextGlobalToolTip'
 import VextAlertBox from './VextAlertBox.vue'
@@ -17,6 +18,7 @@ export {
     VextHistoryDrawer,
     VextNoteCanvas,
     VextNoteConfiguration,
+    VextNoteDrawer,
     VextToolTip,
     VextGlobalToolTip,
     VextAlertBox,
