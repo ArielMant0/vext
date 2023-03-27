@@ -11,6 +11,7 @@ export default {
                 items: [
                     { text: 'VextNoteCanvas', link: 'src/components/VextNoteCanvas' },
                     { text: 'VextNoteConfiguration', link: 'src/components/VextNoteConfiguration' },
+                    { text: 'VextNoteDrawer', link: 'src/components/VextNoteDrawer' },
                     { text: 'VextHistoryControls', link: 'src/components/VextHistoryControls' },
                     { text: 'VextHistoryDrawer', link: 'src/components/VextHistoryDrawer' },
                     { text: 'VextToolTip', link: 'src/components/VextToolTip' },
