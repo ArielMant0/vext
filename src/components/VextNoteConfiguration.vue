@@ -39,7 +39,6 @@
     import { useVextNote } from '@/store/note'
     import { useVextState } from '@/store/state';
 
-
     const props = defineProps({
         /**
          * Vuetify icon for the layers tool
@@ -79,6 +78,11 @@
     const activeText = ref(null);
 
     function setTool() { note.setTool(tmpTool.value); }
+    function loadTool() {
+        if (tool.value !== tmpTool.value) {
+            tmpTool.value = tool.value;
+        }
+    }
 
     function updateTextNode(key) {
         const text = activeText.value.text;
@@ -131,6 +135,7 @@
     onMounted(init);
 
     watch(() => state.hash, saveState)
+    watch(() => note.tool, loadTool);
     watch(() => note.activeLayer, loadState)
 
 </script>

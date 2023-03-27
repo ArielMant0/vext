@@ -1,7 +1,7 @@
 <template>
   <div style="display: flex;">
     <div style="height: 96vh; position: sticky; top: 0; left: 0; margin: 5px;">
-        <VextNoteConfiguration/>
+      <VextNoteDrawer/>
     </div>
     <section ref="el" style="margin:5px; width: 100%;">
       <div style="position: relative;">
@@ -15,8 +15,8 @@
 <script setup>
 
   import VextNoteCanvas from '@/components/VextNoteCanvas.vue'
-  import VextNoteConfiguration from '@/components/VextNoteConfiguration.vue'
   import VextGlobalToolTip from '@/components/VextGlobalToolTip.vue';
+  import VextNoteDrawer from '@/components/VextNoteDrawer.vue';
 
   import { ref, reactive, computed, onMounted } from 'vue'
   import { useElementSize } from '@vueuse/core'
