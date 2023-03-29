@@ -1,10 +1,13 @@
 <template>
-    <v-btn :icon="undoIcon" @click="backward" :disabled="!hasUndo"></v-btn>
-    <v-btn :icon="redoIcon" @click="forward" :disabled="!hasRedo"></v-btn>
-    <v-btn :icon="menu ? menuOpenIcon : menuClosedIcon" @click.stop="toggleMenu"></v-btn>
+    <v-btn rounded="0" :icon="undoIcon" @click="backward" :disabled="!hasUndo"></v-btn>
+    <v-btn rounded="0" :icon="redoIcon" @click="forward" :disabled="!hasRedo"></v-btn>
+    <v-btn rounded="0" :icon="menu ? menuOpenIcon : menuClosedIcon" @click.stop="toggleMenu"></v-btn>
 </template>
 
 <script setup>
+    // <v-tooltip location="bottom" activator="parent" text="undo the last recorded action"/>
+    // <v-tooltip location="bottom" activator="parent" text="redo the last recorded action that was undone"/>
+    // <v-tooltip location="bottom" activator="parent" text="open or close the action history menu"/>
     /**
      * Component that holds two buttons to use un-/do capabilities of the history
      * store and a button to show/hide the HistoryDrawer.

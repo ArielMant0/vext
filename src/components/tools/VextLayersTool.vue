@@ -4,7 +4,7 @@
             <v-slider v-model="opacity" prepend-icon="mdi-opacity" class="mr-4"
                 min="0" max="1" thumb-size="15"/>
             <div>
-                <v-btn icon="mdi-plus" color="info" size="x-small" rounded="0" @click="openAddDialog" class="me-1"></v-btn>
+                <v-btn icon="mdi-plus" color="primary" size="x-small" rounded="0" @click="openAddDialog" class="me-1"></v-btn>
                 <v-btn icon="mdi-delete" color="error" size="x-small" rounded="0" @click="openDelDialog"></v-btn>
             </div>
         </div>
@@ -39,7 +39,7 @@
                     remove layers without annotations
                     <v-icon size="small" icon="mdi-information" v-bind="props"/>
                 </div>
-                <v-btn size="small" @click="removeEmptyLayers" class="mb-3" color="info">remove empty layers</v-btn>
+                <v-btn size="small" @click="removeEmptyLayers" class="mb-3" color="primary">remove empty layers</v-btn>
             </template>
         </v-tooltip>
 
@@ -50,7 +50,7 @@
                     <v-icon size="small" icon="mdi-information" v-bind="props"/>
                 </div>
                 <div class="mb-3">
-                    <v-btn size="small" @click="saveState" color="info">save state</v-btn>
+                    <v-btn size="small" @click="saveState" color="primary">save state</v-btn>
                     <v-btn v-if="dataChange" size="small" class="ml-1 blob" color="error" density="compact" rounded="0" icon>
                         <v-icon>mdi-exclamation-thick</v-icon>
                         <v-tooltip activator="parent" location="end">state has (unsaved) changes</v-tooltip>
@@ -72,14 +72,14 @@
             <v-item v-for="(layer, idx) in layers" :key="idx" :value="layer.id">
                 <v-card v-if="!filterLayers || layer.group.length > 0"
                     :variant="activeLayer === layer.id ? 'elevated' : 'tonal'"
-                    class="mb-2 layer-card" style="width: 99%"
+                    class="mb-2 vext-layer-card" style="width: 99%"
                     >
-                    <v-card-title class="layer">
+                    <v-card-title class="vext-layer">
                         <span>
                             <v-badge :content="layer.group.length" inline :color="layer.color" style="line-height: .9rem;"></v-badge>
                             <v-icon :icon="activeLayer === layer.id ? 'mdi-checkbox-marked' : 'mdi-checkbox-blank-outline'" @click="selectLayer(layer.id)"/>
                         </span>
-                        <span class="layer-selector" @click="toggleLayerOpen(layer.id)">{{ layer.id }}</span>
+                        <span class="vext-layer-selector" @click="toggleLayerOpen(layer.id)">{{ layer.id }}</span>
                         <v-icon :icon="layer.visible ? 'mdi-eye' : 'mdi-eye-off'" @click="changeVisibility(layer.id, !layer.visible)"></v-icon>
                     </v-card-title>
                     <v-card-text v-if="layerUI.open[layer.id]">
@@ -199,16 +199,16 @@
 </script>
 
 <style>
-.layer {
+.vext-layer {
     display: flex;
     justify-content: space-between;
     font-size: 15px;
 }
-.layer-selector { cursor: pointer; }
-.layer-selector:hover { font-weight: bolder; }
-.layer-card { max-width: 285px; }
+.vext-layer-selector { cursor: pointer; }
+.vext-layer-selector:hover { font-weight: bolder; }
+.vext-layer-card { max-width: 285px; }
 
-.blob {
+.vext-blob {
     cursor: default;
 	animation: wiggle 2s infinite;
 }
@@ -237,7 +237,7 @@
   }
 }
 
-.layer-card .v-badge {
+.vext-layer-card .v-badge {
     line-height: inherit;
 }
 </style>

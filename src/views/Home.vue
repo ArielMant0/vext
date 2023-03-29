@@ -1,12 +1,11 @@
 <template>
-  <div style="display: flex;">
-    <div style="height: 96vh; position: sticky; top: 0; left: 0; margin: 5px;">
-      <VextNoteDrawer/>
-    </div>
-    <section ref="el" style="margin:5px; width: 100%;">
-      <div style="position: relative;">
-          <VextNoteCanvas :width="visAreaWidth" :height="visAreaHeight"/>
-      </div>
+  <div class="d-flex" style="height: 96%">
+    <VextNoteDrawer/>
+    <section ref="el" class="ma-2" style="width: 100%; height: 100%;">
+      <v-btn class="ma-1" size="small" variant="outlined" @click="setHeight(500)">500</v-btn>
+      <v-btn class="ma-1" size="small" variant="outlined" @click="setHeight(1000)">1000</v-btn>
+      <v-btn class="ma-1" size="small" variant="outlined" @click="setHeight()">reset</v-btn>
+      <VextNoteCanvas :width="visAreaWidth" :height="visAreaHeight" show-border/>
       <VextGlobalToolTip/>
     </section>
   </div>
@@ -18,26 +17,30 @@
   import VextGlobalToolTip from '@/components/VextGlobalToolTip.vue';
   import VextNoteDrawer from '@/components/VextNoteDrawer.vue';
 
-  import { ref, reactive, computed, onMounted } from 'vue'
+  import { ref, reactive, computed } from 'vue'
   import { useElementSize } from '@vueuse/core'
-  import { useVextApp } from '@/store/app';
+  // import { useVextApp } from '@/store/app';
 
   const el = ref(null);
   const visAreaWidth = computed(() => size.width);
   const visAreaHeight = computed(() => size.height);
   const size = reactive(useElementSize(el));
 
-  const app = useVextApp();
+  // const app = useVextApp();
 
-  onMounted(function() {
-    app.showTooltip({ msg: "hello", number: 5 }, 250, 300)
-    setTimeout(() => {
-      app.hideTooltip()
-      app.error("some error");
-      app.info("some info");
-    }, 5000);
+  function setHeight(h) {
+    el.value.style.height = h ? h+'px' : null;
+  }
 
-  })
+  // testing functionality
+  // onMounted(function() {
+  //   app.showTooltip({ msg: "hello", number: 5 }, 250, 300)
+  //   setTimeout(() => {
+  //     app.hideTooltip()
+  //     app.error("some error");
+  //     app.info("some info");
+  //   }, 5000);
+  // })
 
 </script>
 

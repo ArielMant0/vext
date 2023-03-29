@@ -31,7 +31,7 @@
         </v-slider>
         <v-select v-if="shape !== 'text'" v-model="stroke" label="stroke" :items="['primary color', 'secondary color', 'none']" density="compact" variant="solo" style="max-width: 275px;"></v-select>
         <v-select v-if="shape !== 'text'" v-model="fill" label="fill" :items="['primary color', 'secondary color', 'none']" density="compact" variant="solo" style="max-width: 275px;"></v-select>
-        <v-btn size="small" @click="addObject" color="info">add item</v-btn>
+        <v-btn size="small" @click="addObject" color="primary">add item</v-btn>
         <VextColorViewer/>
     </div>
 </template>

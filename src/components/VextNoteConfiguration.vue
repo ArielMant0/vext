@@ -1,10 +1,10 @@
 <template>
     <div style="min-width: 280px">
         <v-tabs v-model="tmpTool" density="compact" mandatory @update:modelValue="setTool">
-            <v-tab style="min-width: 50px;padding: 0 4px 0 16px;" :prepend-icon="props.layerIcon" :value="tools.LAYER"></v-tab>
-            <v-tab style="min-width: 50px;padding: 0 4px 0 16px;" :prepend-icon="props.brushIcon" :value="tools.BRUSH"></v-tab>
-            <v-tab style="min-width: 50px;padding: 0 4px 0 16px;" :prepend-icon="props.shapeIcon" :value="tools.SHAPE"></v-tab>
-            <v-tab style="min-width: 50px;padding: 0 4px 0 16px;" :prepend-icon="props.editIcon" :value="tools.EDIT"></v-tab>
+            <v-tab :color="selectColor" style="min-width: 50px;padding: 0 4px 0 16px;" :prepend-icon="props.layerIcon" :value="tools.LAYER"></v-tab>
+            <v-tab :color="selectColor" style="min-width: 50px;padding: 0 4px 0 16px;" :prepend-icon="props.brushIcon" :value="tools.BRUSH"></v-tab>
+            <v-tab :color="selectColor" style="min-width: 50px;padding: 0 4px 0 16px;" :prepend-icon="props.shapeIcon" :value="tools.SHAPE"></v-tab>
+            <v-tab :color="selectColor" style="min-width: 50px;padding: 0 4px 0 16px;" :prepend-icon="props.editIcon" :value="tools.EDIT"></v-tab>
         </v-tabs>
 
         <v-window v-model="tool">
@@ -67,6 +67,13 @@
         brushIcon: {
             type: String,
             default: "mdi-draw"
+        },
+        /**
+         * How to color the icons in the small nav bar when they are selected.
+         */
+         selectColor: {
+            type: String,
+            default: "blue"
         },
     });
 

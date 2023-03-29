@@ -15,12 +15,12 @@
             </template>
         </v-slider>
         <div class="mb-2" style="display:flex;justify-content: space-evenly;">
-            <v-btn @click="setBrushSize(1)" size="x-small" rounded="pill" color="info">1</v-btn>
-            <v-btn @click="setBrushSize(2)" size="x-small" rounded="pill" color="info">2</v-btn>
-            <v-btn @click="setBrushSize(3)" size="x-small" rounded="pill" color="info">3</v-btn>
-            <v-btn @click="setBrushSize(5)" size="x-small" rounded="pill" color="info">5</v-btn>
-            <v-btn @click="setBrushSize(10)" size="x-small" rounded="pill" color="info">10</v-btn>
-            <v-btn @click="setBrushSize(15)" size="x-small" rounded="pill" color="info">15</v-btn>
+            <v-btn @click="setBrushSize(1)" size="x-small" rounded="pill" color="primary">1</v-btn>
+            <v-btn @click="setBrushSize(2)" size="x-small" rounded="pill" color="primary">2</v-btn>
+            <v-btn @click="setBrushSize(3)" size="x-small" rounded="pill" color="primary">3</v-btn>
+            <v-btn @click="setBrushSize(5)" size="x-small" rounded="pill" color="primary">5</v-btn>
+            <v-btn @click="setBrushSize(10)" size="x-small" rounded="pill" color="primary">10</v-btn>
+            <v-btn @click="setBrushSize(15)" size="x-small" rounded="pill" color="primary">15</v-btn>
         </div>
         <VextColorViewer/>
     </div>

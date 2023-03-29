@@ -129,20 +129,24 @@ const vextNoteStore = {
             const layer = this.currentLayer;
             if (layer) {
                 layer.state = state;
+                layer.width = _CANVAS.getWidth();
+                layer.height = _CANVAS.getHeight();
             } else {
                 this.addLayer(state, true)
             }
         },
 
-        addLayer(state, record=true, id=null, color=null, items=[]) {
+        addLayer(state, record=true, id=null, color=null, width=null, height=null, items=[]) {
             id = id === null ? this.nextID : id;
             color = color === null ? this.nextColor : color;
+            width = width === null ? _CANVAS.getWidth() : width;
+            height = height === null ? _CANVAS.getHeight() : height
 
             if (record) {
                 const history = useVextHistory();
                 const json = items.map(d => d.toJSON("uuid"));
                 history.do("add layer " + id,
-                    this.addLayer.bind(this, false, id, color, json),
+                    this.addLayer.bind(this, false, id, color, width, height, json),
                     this.removeLayer.bind(this, id, false)
                 )
             }
@@ -153,6 +157,8 @@ const vextNoteStore = {
                 visible: true,
                 opacity: 1,
                 group: items,
+                width: width,
+                height: height,
                 time: new Date(Date.now()),
                 state: state
             });
@@ -189,7 +195,7 @@ const vextNoteStore = {
                     const items = item.group.map(d => d.toJSON("uuid"))
                     history.do("remove layer "+id,
                         this.removeLayer.bind(this, id, false),
-                        this.addLayer.bind(this, false, item.id, item.color, items)
+                        this.addLayer.bind(this, false, item.id, item.color, item.width, item.height, items)
                     )
                 }
 
@@ -226,6 +232,10 @@ const vextNoteStore = {
                         this.setLayerVisibility(t.id === id, t.id, false, false)
                     }
                 });
+                this.resizeCanvas(
+                    this.layers[newIndex].width,
+                    this.layers[newIndex].height
+                );
                 _CANVAS.requestRenderAll();
             }
         },
