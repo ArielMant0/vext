@@ -48,7 +48,7 @@ export default defineConfig({
       fileName: "vext",
     },
     rollupOptions: {
-      external: ['vue', 'pinia', 'vuetify', 'fabric', 'jspdf', 'html2canvas', 'filesaver'],
+      external: ['vue', 'pinia', 'vuetify', 'fabric', 'jspdf', 'jszip', 'html2canvas', 'filesaver'],
       output: {
         // Provide global variables to use in the UMD build
         // Add external deps here
@@ -57,7 +57,8 @@ export default defineConfig({
           pinia: 'pinia',
           vuetify: 'vuetify',
           fabric: 'fabric',
-          jspdf: 'jspdf',
+          jspdf: 'jsPDF',
+          jszip: 'JSZip',
           html2canvas: 'html2canvas',
           filesaver: 'file-saver'
         },
