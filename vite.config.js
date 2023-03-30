@@ -48,7 +48,7 @@ export default defineConfig({
       fileName: "vext",
     },
     rollupOptions: {
-      external: ['vue', 'pinia', 'vuetify', 'fabric'],
+      external: ['vue', 'pinia', 'vuetify'],
       output: {
         // Provide global variables to use in the UMD build
         // Add external deps here
@@ -56,7 +56,6 @@ export default defineConfig({
           vue: 'vue',
           pinia: 'pinia',
           vuetify: 'vuetify',
-          fabric: 'fabric',
         },
       },
     },
