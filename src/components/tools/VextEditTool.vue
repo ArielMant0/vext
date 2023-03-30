@@ -6,7 +6,7 @@
                 </v-text-field>
             </v-item>
         </v-item-group>
-        <div v-else style="text-align: center; width: 100%;">no active selection</div>
+        <div v-else style="text-align: center;" class="mt-5">select an annotation to see its settings</div>
     </div>
 </template>
 

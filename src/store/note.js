@@ -3,6 +3,7 @@ import { useVextHistory } from "@/store/history";
 import { createFabricObject } from '@/use/util';
 import { toRaw } from 'vue';
 import { v4 as uuidv4 } from 'uuid';
+import { useExportPDF } from "@/use/export-pdf";
 
 const TOOLS = Object.freeze({
     BRUSH: "brush",
@@ -17,6 +18,7 @@ const LAYER_MODES = Object.freeze({
 });
 // https://stackoverflow.com/questions/69881048/cannot-resize-edit-objects-until-i-group-ungroup-them-alpinejs-fabricjs/70564680#70564680
 let _CANVAS = null;
+let _CONTENT = null;
 
 function setCanvasPointerEvents(enable) {
     _CANVAS.wrapperEl.style.pointerEvents = enable ? null : "none";
@@ -68,7 +70,7 @@ const vextNoteStore = {
             LAYER_ID_IDX: 0,
 
             activeObjectUUID: null,
-            activeObject: {},
+            activeObject: null,
 
             // d3.schemeTableau10
             defaultColors: [
@@ -156,7 +158,7 @@ const vextNoteStore = {
                 color: color,
                 visible: true,
                 opacity: 1,
-                group: items,
+                group: [],
                 width: width,
                 height: height,
                 time: new Date(Date.now()),
@@ -170,11 +172,13 @@ const vextNoteStore = {
                         obj.set("opacity", 1);
                         obj.set("visible", true)
                         _CANVAS.add(obj)
+                        this.layers[0].group.push(obj);
                     } else if (typeof item === "object") {
                         item.set("opacity", 1);
                         item.set("visible", true)
                         item.set("uuid", uuidv4())
                         _CANVAS.add(toRaw(item))
+                        this.layers[0].group.push(item);
                     }
                 })
             }
@@ -583,6 +587,10 @@ const vextNoteStore = {
             }
         },
 
+        setContentNode(node) {
+            _CONTENT = node;
+        },
+
         setCanvas(canvas) {
             _CANVAS = canvas;
             setCanvasPointerEvents(false);
@@ -624,6 +632,68 @@ const vextNoteStore = {
 
         setState(state) {
             this.currentState = state;
+        },
+
+        async importLayer(layer) {
+            const id = this.isUniqueID(layer.id) ? id : id+"_import";
+            this.addLayer(
+                layer.state,
+                true,
+                id,
+                layer.color,
+                layer.width,
+                layer.height,
+                layer.items
+            );
+        },
+
+        async exportLayer() {
+            const layer = this.currentLayer;
+            if (layer) {
+                return {
+                    id: layer.id,
+                    width: layer.width,
+                    height: layer.height,
+                    color: layer.color,
+                    items: layer.group.map(d => d.toJSON("uuid"))
+                }
+            }
+        },
+
+        async exportZIP(canvasOnly=false) {
+
+            if (this.layers.length > 0) {
+
+                const expPDF = useExportPDF();
+                const pdf = expPDF.createPDF();
+                expPDF.addText(pdf, "VEXT Annotation Report", 8);
+                expPDF.addText(pdf, ""+this.activeLayer, 20)
+
+                if (canvasOnly && _CANVAS !== null) {
+                    const bg = _CANVAS.backgroundColor;
+                    _CANVAS.setBackgroundColor("rgba(255,255,255,1)")
+                    _CANVAS.requestRenderAll();
+                    expPDF.addImage(pdf, _CANVAS.toDataURL({
+                        format: 'jpeg',
+                        quality: 0.9
+                    }));
+                    _CANVAS.setBackgroundColor(bg)
+                    _CANVAS.requestRenderAll();
+                } else {
+                    const node = _CONTENT !== null ? _CONTENT : _CANVAS.wrapperEl.parentNode.parentNode;
+                    console.log(node)
+                    const rect = node.getBoundingClientRect();
+                    await expPDF.addImageFromHTML(
+                        pdf,
+                        node,
+                        rect.width,
+                        rect.height
+                    );
+                }
+                expPDF.addText(pdf, "Associated Application State", 14)
+                expPDF.addText(pdf, JSON.stringify(this.currentLayer.state.state, null, 2))
+                expPDF.savePDF(pdf);
+            }
         }
 
     },

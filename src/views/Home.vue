@@ -6,6 +6,7 @@
       <v-btn class="ma-1" size="small" variant="outlined" @click="setHeight(1000)">1000</v-btn>
       <v-btn class="ma-1" size="small" variant="outlined" @click="setHeight()">reset</v-btn>
       <VextNoteCanvas :width="visAreaWidth" :height="visAreaHeight" show-border/>
+      <ScatterPlot/>
       <VextGlobalToolTip/>
     </section>
   </div>
@@ -19,29 +20,16 @@
 
   import { ref, reactive, computed } from 'vue'
   import { useElementSize } from '@vueuse/core'
-  // import { useVextApp } from '@/store/app';
+  import ScatterPlot from '@/components/test/ScatterPlot.vue';
 
   const el = ref(null);
   const visAreaWidth = computed(() => size.width);
   const visAreaHeight = computed(() => size.height);
   const size = reactive(useElementSize(el));
 
-  // const app = useVextApp();
-
   function setHeight(h) {
     el.value.style.height = h ? h+'px' : null;
   }
-
-  // testing functionality
-  // onMounted(function() {
-  //   app.showTooltip({ msg: "hello", number: 5 }, 250, 300)
-  //   setTimeout(() => {
-  //     app.hideTooltip()
-  //     app.error("some error");
-  //     app.info("some info");
-  //   }, 5000);
-  // })
-
 </script>
 
 <style>

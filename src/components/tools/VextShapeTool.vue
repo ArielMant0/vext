@@ -17,10 +17,10 @@
             <v-text-field v-model="dimy" type="number" label="height" density="compact" variant="outlined" class="small-num"></v-text-field>
         </div>
         <div class="text-caption">stroke width</div>
-        <v-slider v-model="stroke" min="1" max="250" step="1" thumb-size="15" density="compact">
+        <v-slider v-model="strokeWidth" min="1" max="250" step="1" thumb-size="15" density="compact">
             <template v-slot:append>
                 <v-text-field
-                    v-model="stroke"
+                    v-model="strokeWidth"
                     type="number"
                     style="width: 80px"
                     density="compact"
@@ -31,7 +31,7 @@
         </v-slider>
         <v-select v-if="shape !== 'text'" v-model="stroke" label="stroke" :items="['primary color', 'secondary color', 'none']" density="compact" variant="solo" style="max-width: 275px;"></v-select>
         <v-select v-if="shape !== 'text'" v-model="fill" label="fill" :items="['primary color', 'secondary color', 'none']" density="compact" variant="solo" style="max-width: 275px;"></v-select>
-        <v-btn size="small" @click="addObject" color="primary">add item</v-btn>
+        <v-btn size="small" @click="addObject" color="primary" class="mb-3">add item</v-btn>
         <VextColorViewer/>
     </div>
 </template>

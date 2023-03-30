@@ -1,11 +1,20 @@
 <template>
     <div>
+        <div class="text-caption">layer opacity</div>
         <div style="display: flex; justify-content: end;" class="mt-2">
             <v-slider v-model="opacity" prepend-icon="mdi-opacity" class="mr-4"
-                min="0" max="1" thumb-size="15"/>
+                min="0" max="1" thumb-size="15" hide-details/>
             <div>
-                <v-btn icon="mdi-plus" color="primary" size="x-small" rounded="0" @click="openAddDialog" class="me-1"></v-btn>
-                <v-btn icon="mdi-delete" color="error" size="x-small" rounded="0" @click="openDelDialog"></v-btn>
+                <v-tooltip text="add a new annotation layer" location="bottom">
+                    <template v-slot:activator="{ props }">
+                        <v-btn v-bind="props" icon="mdi-plus" color="primary" size="x-small" rounded="0" @click="openAddDialog" class="me-1"></v-btn>
+                    </template>
+                </v-tooltip>
+                <v-tooltip text="delete the active annotation layer" location="bottom">
+                    <template v-slot:activator="{ props }">
+                        <v-btn v-bind="props" icon="mdi-delete" color="error" size="x-small" rounded="0" @click="openDelDialog"></v-btn>
+                    </template>
+                </v-tooltip>
             </div>
         </div>
 
@@ -15,7 +24,7 @@
             ... when the state changed (without annotations)<br/>
             ... manually
             <template v-slot:activator="{ props }">
-                <div class="text-caption">
+                <div class="text-caption mb-1">
                     layer mode
                     <v-icon size="small" icon="mdi-information" v-bind="props"/>
                 </div>
@@ -33,13 +42,17 @@
         </v-tooltip>
         <v-checkbox v-model="filterLayers" density="compact" class="mb-1" hide-details></v-checkbox>
 
+        <v-expansion-panels class="mt-3 mb-3" density="compact">
+        <v-expansion-panel title="Actions">
+        <v-expansion-panel-text>
+
         <v-tooltip text="remove all layers that contain no annotations (one will always remain)">
             <template v-slot:activator="{ props }">
                 <div class="text-caption">
                     remove layers without annotations
                     <v-icon size="small" icon="mdi-information" v-bind="props"/>
                 </div>
-                <v-btn size="small" @click="removeEmptyLayers" class="mb-3" color="primary">remove empty layers</v-btn>
+                <v-btn size="small" @click="removeEmptyLayers" class="mb-1" color="primary">remove empty layers</v-btn>
             </template>
         </v-tooltip>
 
@@ -49,7 +62,7 @@
                     save state
                     <v-icon size="small" icon="mdi-information" v-bind="props"/>
                 </div>
-                <div class="mb-3">
+                <div class="mb-1">
                     <v-btn size="small" @click="saveState" color="primary">save state</v-btn>
                     <v-btn v-if="dataChange" size="small" class="ml-1 blob" color="error" density="compact" rounded="0" icon>
                         <v-icon>mdi-exclamation-thick</v-icon>
@@ -58,6 +71,20 @@
                 </div>
             </template>
         </v-tooltip>
+
+        <v-tooltip text="export the current layer and visualizations to a PDF">
+            <template v-slot:activator="{ props }">
+                <div class="text-caption">
+                    export annotations to pdf
+                    <v-icon size="small" icon="mdi-information" v-bind="props"/>
+                </div>
+                <v-btn size="small" @click="note.exportZIP()" class="mb-3" color="default">export</v-btn>
+            </template>
+        </v-tooltip>
+
+        </v-expansion-panel-text>
+        </v-expansion-panel>
+        </v-expansion-panels>
 
         <v-tooltip text="layers that store the application state and annotations - click to select a layer">
             <template v-slot:activator="{ props }">

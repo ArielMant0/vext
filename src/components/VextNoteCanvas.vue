@@ -49,7 +49,7 @@
          */
         backgroundColor: {
             type: String,
-            default: 'rgba(0, 0, 0, 0)',
+            default: 'rgba(255, 255, 255, 0)',
             validator(value) {
                 return CSS.supports("color", value)
             }
@@ -132,7 +132,7 @@
         note.setCanvas(canvas);
 
         // hacky but okay
-        const el = document.querySelector(".canvas-container")
+        const el = document.querySelector(`.${canvas.containerClass}`)
         el.style.position = "absolute";
         el.style.top = 0;
         el.style.left = 0;
@@ -147,7 +147,7 @@
     }
 
     function setBorderStyle() {
-        const el = document.querySelector(".canvas-container")
+        const el = document.querySelector(`.${note.canvas.containerClass}`)
         if (props.showBorder) {
             const size = props.borderSize + (typeof props.borderSize === "string" ? "" : "px")
             el.style.border = `${size} ${props.borderStyle} ${props.borderColor}`;

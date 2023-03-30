@@ -12,7 +12,8 @@ import { resolve } from 'path'
 export default defineConfig({
   plugins: [
     vue({
-      template: { transformAssetUrls }
+      template: { transformAssetUrls },
+      configFile: "vue.config.js"
     }),
     // https://github.com/vuetifyjs/vuetify-loader/tree/next/packages/vite-plugin
     vuetify({
@@ -47,14 +48,17 @@ export default defineConfig({
       fileName: "vext",
     },
     rollupOptions: {
-      external: ['vue', 'pinia', 'vuetify'],
+      external: ['vue', 'pinia', 'vuetify', 'fabric', 'jspdf', 'html2canvas'],
       output: {
         // Provide global variables to use in the UMD build
         // Add external deps here
         globals: {
           vue: 'vue',
           pinia: 'pinia',
-          vuetify: 'uetify',
+          vuetify: 'vuetify',
+          fabric: 'fabric',
+          jspdf: 'jspdf',
+          html2canvas: 'html2canvas'
         },
       },
     },

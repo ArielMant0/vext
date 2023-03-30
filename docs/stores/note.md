@@ -19,7 +19,7 @@
 | layerMode | how layers are added | string | `["on annotation", "on state change", "manual"]` | `on annotation` |
 | LAYER_ID_IDX | number for the next layer id | number | - | `0` |
 | activeObjectUUID | UUID of the selected fabric.js object | string | - | `null` |
-| activeObject | the selected fabric.js object | object | - | `{}` |
+| activeObject | the selected fabric.js object | object | - | `null` |
 | defaultColors | colors to include in the color picker palette that are used when a new layer is created automatically | array | - | `["#4e79a7", "#f28e2c", "#e15759", "#76b7b2", "#59a14f", "#edc949", "#af7aa1", "#ff9da7", "#9c755f", "#bab0ab"]` |
 
 ## Getters
@@ -259,3 +259,15 @@
 
 > Set the current application state
 > <br>`@param {object}` state
+
+### setContentNode
+
+> Sets the content (HTML) node to be used for PDF exports.
+> <br>`@param {object}` node
+
+### exportLayer
+
+> Exports the currently active layer and content into a PDF that is downloaded.
+> If the content node is null, the parent of the VextNoteCanvas
+> component is used as the content node.
+> <br>`@param {boolean}` canvasOnly - whether to only export the canvas with annotations
