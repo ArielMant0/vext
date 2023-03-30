@@ -267,8 +267,8 @@
 
 ### importLayer
 
-> Adds the given layer object (that was read from a file).
-> <br>`@param {object}` layer - layer object
+> Reads the json file and creates a layer from it
+> <br>`@param {object}` file - json file
 
 ### exportLayer
 

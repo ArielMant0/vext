@@ -5,6 +5,7 @@ import { toRaw } from 'vue';
 import { v4 as uuidv4 } from 'uuid';
 import { useExportPDF } from "@/use/export-pdf";
 import { useExportZIP } from "@/use/export-zip";
+import { fabric } from "fabric";
 
 const TOOLS = Object.freeze({
     BRUSH: "brush",
@@ -165,21 +166,24 @@ const vextNoteStore = {
                 time: new Date(Date.now()),
                 state: state
             });
+
             // add items
             if (items.length > 0) {
                 items.forEach(item => {
-                    if (typeof item === "string") {
-                        const obj = createFabricObject(item.type, item);
-                        obj.set("opacity", 1);
-                        obj.set("visible", true)
-                        _CANVAS.add(obj)
-                        this.layers[0].group.push(obj);
-                    } else if (typeof item === "object") {
+                    // fabric object
+                    if (typeof item === "object" && item.set !== undefined && item.get !== undefined) {
                         item.set("opacity", 1);
                         item.set("visible", true)
                         item.set("uuid", uuidv4())
                         _CANVAS.add(toRaw(item))
                         this.layers[0].group.push(item);
+                    } else {
+                        const obj = createFabricObject(item.type, item);
+                        obj.set("opacity", 1);
+                        obj.set("visible", true)
+                        obj.set("uuid", item.uuid ? item.uuid : uuidv4())
+                        _CANVAS.add(obj)
+                        this.layers[0].group.push(obj);
                     }
                 })
             }
@@ -635,17 +639,24 @@ const vextNoteStore = {
             this.currentState = state;
         },
 
-        async importLayer(layer) {
-            const id = this.isUniqueID(layer.id) ? id : id+"_import";
-            this.addLayer(
-                layer.state,
-                true,
-                id,
-                layer.color,
-                layer.width,
-                layer.height,
-                layer.items
-            );
+        async importLayer(file) {
+            const reader = new FileReader();
+            reader.addEventListener("load", () => {
+                const layer = JSON.parse(reader.result);
+                const id = this.isUniqueID(layer.id) ? layer.id : layer.id+"_import";
+                this.addLayer(
+                    layer.state,
+                    false,
+                    id,
+                    layer.color,
+                    layer.width,
+                    layer.height,
+                    layer.items
+                );
+            }, false)
+
+            reader.readAsText(file);
+
         },
 
         exportLayer() {
@@ -656,6 +667,7 @@ const vextNoteStore = {
                     width: layer.width,
                     height: layer.height,
                     color: layer.color,
+                    state: layer.state,
                     items: layer.group.map(d => d.toJSON("uuid"))
                 }
             }

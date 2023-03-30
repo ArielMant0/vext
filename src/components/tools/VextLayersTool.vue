@@ -62,15 +62,29 @@
             </template>
         </v-tooltip>
 
-        <v-tooltip text="export the current layer, visualizations and application state to a .zip file">
-            <template v-slot:activator="{ props }">
-                <div class="text-caption">
-                    export to zip
-                    <v-icon size="small" icon="mdi-information" v-bind="props"/>
-                </div>
-                <v-btn size="small" @click="note.exportZIP()" class="mb-3" color="default">export</v-btn>
-            </template>
-        </v-tooltip>
+        <div  class="mb-1">
+
+            <v-tooltip text="import a layer from a previously exported layer file (JSON)">
+                <template v-slot:activator="{ props }">
+                    <div class="text-caption">
+                        import layer
+                        <v-icon size="small" icon="mdi-information" v-bind="props"/>
+                    </div>
+                    <v-file-input label="layer JSON file" accept="application/json" @update:model-value="files => note.importLayer(files[0])"></v-file-input>
+                </template>
+            </v-tooltip>
+
+            <v-tooltip text="export the current layer, visualizations and application state to a .zip file">
+                <template v-slot:activator="{ props }">
+                    <div class="text-caption">
+                        export to zip
+                        <v-icon size="small" icon="mdi-information" v-bind="props"/>
+                    </div>
+                    <v-btn size="small" @click="note.exportZIP()" color="default">export</v-btn>
+                </template>
+            </v-tooltip>
+
+        </div>
 
         </v-expansion-panel-text>
         </v-expansion-panel>
