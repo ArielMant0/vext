@@ -70,7 +70,13 @@
                         import layer
                         <v-icon size="small" icon="mdi-information" v-bind="props"/>
                     </div>
-                    <v-file-input label="layer JSON file" accept="application/json" @update:model-value="files => note.importLayer(files[0])"></v-file-input>
+                    <v-file-input
+                        label="layer file"
+                        accept="application/json"
+                        density="compact"
+                        hide-details
+                        class="mb-1"
+                        @update:model-value="files => note.importLayer(files[0])"></v-file-input>
                 </template>
             </v-tooltip>
 
@@ -243,10 +249,15 @@
 .vext-layer {
     display: flex;
     justify-content: space-between;
-    font-size: 15px;
+    font-size: small;
 }
-.vext-layer-selector { cursor: pointer; }
-.vext-layer-selector:hover { font-weight: bolder; }
+.vext-layer-selector {
+    cursor: pointer;
+    font-size: small;
+}
+.vext-layer-selector:hover {
+    font-weight: bolder;
+}
 .vext-layer-card { max-width: 285px; }
 
 .vext-blob {

@@ -9,16 +9,24 @@
 
         <v-window v-model="tool">
             <v-window-item :value="tools.LAYER">
-                <VextLayersTool/>
+                <KeepAlive>
+                    <VextLayersTool/>
+                </KeepAlive>
             </v-window-item>
             <v-window-item :value="tools.EDIT">
-                <VextEditTool/>
+                <KeepAlive>
+                    <VextEditTool/>
+                </KeepAlive>
             </v-window-item>
             <v-window-item :value="tools.BRUSH">
-                <VextBrushTool/>
+                <KeepAlive>
+                    <VextBrushTool/>
+                </KeepAlive>
             </v-window-item>
             <v-window-item :value="tools.SHAPE">
-                <VextShapeTool @select="onTextSelect" @deselect="onTextDeselect"/>
+                <KeepAlive>
+                    <VextShapeTool @select="onTextSelect" @deselect="onTextDeselect"/>
+                </KeepAlive>
             </v-window-item>
         </v-window>
     </div>
