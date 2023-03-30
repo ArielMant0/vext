@@ -27,12 +27,19 @@ npm install @nullbuild/vext
 
 ## Dependencies
 
+These dependencies are required to use VEXT, but declared as external when building the project,
+i.e. they are not included in the bundle.
+
 - [Vue](https://vuejs.org)
 - [Vuetify](https://vuetifyjs.com/en/)
 - [VueUse](https://vueuse.org)
 - [Pinia](https://pinia.vuejs.org)
 - [fabric.js](http://fabricjs.com)
 - [vue-json-pretty](https://www.npmjs.com/package/vue-json-pretty)
+- [jsPDF](https://parall.ax/products/jspdf)
+- [JSZip](https://stuk.github.io/jszip/)
+- [html2canvas](https://html2canvas.hertzen.com)
+- [FileSaver.js](https://github.com/eligrey/FileSaver.js/)
 
 ## Usage
 

@@ -4,6 +4,7 @@ import { createFabricObject } from '@/use/util';
 import { toRaw } from 'vue';
 import { v4 as uuidv4 } from 'uuid';
 import { useExportPDF } from "@/use/export-pdf";
+import { useExportZIP } from "@/use/export-zip";
 
 const TOOLS = Object.freeze({
     BRUSH: "brush",
@@ -647,7 +648,7 @@ const vextNoteStore = {
             );
         },
 
-        async exportLayer() {
+        exportLayer() {
             const layer = this.currentLayer;
             if (layer) {
                 return {
@@ -658,9 +659,10 @@ const vextNoteStore = {
                     items: layer.group.map(d => d.toJSON("uuid"))
                 }
             }
+            return {}
         },
 
-        async exportZIP(canvasOnly=false) {
+        async exportZIP(name=null, canvasOnly=false) {
 
             if (this.layers.length > 0) {
 
@@ -681,7 +683,6 @@ const vextNoteStore = {
                     _CANVAS.requestRenderAll();
                 } else {
                     const node = _CONTENT !== null ? _CONTENT : _CANVAS.wrapperEl.parentNode.parentNode;
-                    console.log(node)
                     const rect = node.getBoundingClientRect();
                     await expPDF.addImageFromHTML(
                         pdf,
@@ -692,7 +693,16 @@ const vextNoteStore = {
                 }
                 expPDF.addText(pdf, "Associated Application State", 14)
                 expPDF.addText(pdf, JSON.stringify(this.currentLayer.state.state, null, 2))
-                expPDF.savePDF(pdf);
+
+                const expZIP = useExportZIP();
+                const zip = expZIP.createZIP();
+                expZIP.addFile(zip, "report.pdf", expPDF.outputPDF(pdf))
+                expZIP.addObjectAsFile(zip, "layer.json", this.exportLayer())
+                expZIP.addObjectAsFile(zip, "state.json", this.currentLayer.state)
+                const now = new Date();
+                const datetime = now.getFullYear()+'-'+now.getMonth()+'-'+now.getDate()+'-'+
+                    now.getHours()+'-'+now.getMinutes()+'-'+now.getSeconds();
+                expZIP.downloadZIP(zip, name !== null ? name : `vext_export_${datetime}`);
             }
         }
 

@@ -2,9 +2,7 @@
     <div style="position: absolute;">
         <v-navigation-drawer permanent rail>
         <v-list nav density="compact">
-            <v-list-item :prepend-icon="open ? openIcon : closedIcon" @click="open = !open">
-                <v-tooltip activator="parent" text="open or close the VEXT configuration panel"/>
-            </v-list-item>
+            <v-list-item :prepend-icon="open ? openIcon : closedIcon" @click="open = !open"/>
         </v-list>
 
             <v-divider></v-divider>

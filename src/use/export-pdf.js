@@ -70,6 +70,10 @@ export function useExportPDF() {
         pdf.save(name.endsWith(".pdf") ? name : name+".pdf")
     }
 
+    function outputPDF(pdf, name="export") {
+        return pdf.output("blob", name.endsWith(".pdf") ? name : name+".pdf")
+    }
+
     return {
         createPDF,
         createImage,
@@ -78,6 +82,7 @@ export function useExportPDF() {
         addImageFromHTML,
         addText,
         addVerticalSpace,
-        savePDF
+        savePDF,
+        outputPDF
     }
 }

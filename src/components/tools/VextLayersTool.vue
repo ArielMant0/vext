@@ -32,16 +32,6 @@
         </v-tooltip>
         <v-select v-model="layerMode" :items="layerModeValues" density="compact" class="no-input-details mb-2"></v-select>
 
-        <v-tooltip text="only show layers that you have already annotated">
-            <template v-slot:activator="{ props }">
-                <div class="text-caption">
-                    only show layers with annotations
-                    <v-icon size="small" icon="mdi-information" v-bind="props"/>
-                </div>
-            </template>
-        </v-tooltip>
-        <v-checkbox v-model="filterLayers" density="compact" class="mb-1" hide-details></v-checkbox>
-
         <v-expansion-panels class="mt-3 mb-3" density="compact">
         <v-expansion-panel title="Actions">
         <v-expansion-panel-text>
@@ -72,10 +62,10 @@
             </template>
         </v-tooltip>
 
-        <v-tooltip text="export the current layer and visualizations to a PDF">
+        <v-tooltip text="export the current layer, visualizations and application state to a .zip file">
             <template v-slot:activator="{ props }">
                 <div class="text-caption">
-                    export annotations to pdf
+                    export to zip
                     <v-icon size="small" icon="mdi-information" v-bind="props"/>
                 </div>
                 <v-btn size="small" @click="note.exportZIP()" class="mb-3" color="default">export</v-btn>
@@ -85,6 +75,16 @@
         </v-expansion-panel-text>
         </v-expansion-panel>
         </v-expansion-panels>
+
+        <v-tooltip text="only show layers that you have already annotated">
+            <template v-slot:activator="{ props }">
+                <div class="text-caption">
+                    only show layers with annotations
+                    <v-icon size="small" icon="mdi-information" v-bind="props"/>
+                </div>
+            </template>
+        </v-tooltip>
+        <v-checkbox v-model="filterLayers" density="compact" class="mb-1" hide-details></v-checkbox>
 
         <v-tooltip text="layers that store the application state and annotations - click to select a layer">
             <template v-slot:activator="{ props }">

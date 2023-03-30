@@ -265,9 +265,20 @@
 > Sets the content (HTML) node to be used for PDF exports.
 > <br>`@param {object}` node
 
+### importLayer
+
+> Adds the given layer object (that was read from a file).
+> <br>`@param {object}` layer - layer object
+
 ### exportLayer
 
-> Exports the currently active layer and content into a PDF that is downloaded.
-> If the content node is null, the parent of the VextNoteCanvas
-> component is used as the content node.
-> <br>`@param {boolean}` canvasOnly - whether to only export the canvas with annotations
+> Return the currently active layer as a JavaScript object.
+> <br>`@returns` layer object if exists, else an empty object
+
+### exportZIP
+
+> Creates a .zip archive containing a report PDF, the layer as JSON, and state as JSON
+> that is then automatically downloaded.
+> <br>`@param {string}` name - name to use for the zip file (default available)
+> <br>`@param {boolean}` canvasOnly - one include the canvas, not the whole content in the report PDF
+
