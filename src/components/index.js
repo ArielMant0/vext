@@ -1,5 +1,6 @@
 import VextHistoryControls from './VextHistoryControls'
 import VextHistoryDrawer from './VextHistoryDrawer'
+import VextAppBarControls from './VextAppBarControls'
 import VextNoteCanvas from './VextNoteCanvas'
 import VextNoteConfiguration from './VextNoteConfiguration'
 import VextNoteDrawer from './VextNoteDrawer'
@@ -14,6 +15,7 @@ import VextShapeTool from './tools/VextShapeTool'
 import VextColorViewer from './tools/VextColorViewer'
 
 export {
+    VextAppBarControls,
     VextHistoryControls,
     VextHistoryDrawer,
     VextNoteCanvas,
