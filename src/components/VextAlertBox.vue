@@ -13,11 +13,3 @@
 
     const { alerts } = storeToRefs(useVextApp());
 </script>
-
-<style>
-.vext-alert {
-  margin: .5rem;
-  width: 99%;
-  z-index: 2000;
-}
-</style>

@@ -51,6 +51,9 @@ function parseObject(obj, layer) {
         visible: obj.visible
     }
 }
+function isFabric(d) {
+    return typeof d === "object" && d.set !== undefined && d.get !== undefined
+}
 
 const vextNoteStore = {
 
@@ -140,7 +143,83 @@ const vextNoteStore = {
             }
         },
 
-        addLayer(state, record=true, id=null, color=null, width=null, height=null, items=[]) {
+        renameLayer(oldId, newId) {
+            const idx = this.getLayerIndex(oldId);
+            if (idx >= 0) {
+                if (this.isUniqueID(newId)) {
+                    this.layers[idx].id = newId;
+                    if (this.activeLayer === oldId) {
+                        this.activeLayer = newId;
+                    }
+                    return true;
+                } else {
+                    throw new Error(`id ${newId} is not unique`)
+                }
+            } else {
+                throw new Error(`layer ${oldId} does not exist`)
+            }
+        },
+
+        addLayerComment(comment, id=null) {
+            id = id === null ? this.activeLayer : id;
+            const idx = this.getLayerIndex(id);
+            if (idx >= 0) {
+                this.layers[idx].comments.push(comment);
+                return true;
+            }
+            return false;
+        },
+
+        updateLayerComment(comment, id=null, index=0) {
+            id = id === null ? this.activeLayer : id;
+            const idx = this.getLayerIndex(id);
+            if (idx >= 0 && index >= 0 && index <= this.layers[idx].comments.length) {
+                this.layers[idx].comments[index] = comment;
+                return true;
+            }
+            return false;
+        },
+
+        removeLayerComment(id=null, index=0) {
+            id = id === null ? this.activeLayer : id;
+            const idx = this.getLayerIndex(id);
+            if (idx >= 0 && index >= 0 && index <= this.layers[idx].comments.length) {
+                this.layers[idx].comments.splice(index, 1);
+                return true;
+            }
+            return false;
+        },
+
+        removeLayerComments(id=null) {
+            id = id === null ? this.activeLayer : id;
+            const idx = this.getLayerIndex(id);
+            if (idx >= 0) {
+                this.layers[idx].comments = [];
+                return true;
+            }
+            return false;
+        },
+
+        mergeLayers(idFrom, idInto=null) {
+            idInto = idInto === null ? this.activeLayer : idInto;
+            const i0 = this.getLayerIndex(idFrom);
+            const i1 = this.getLayerIndex(idInto);
+            if (i0 >= 0 && i1 >= 0) {
+                this.layers[i0].group.forEach(d => this.layers[i1].group.push(toRaw(d)));
+                this.layers[i0].comments.forEach(d => this.layers[i1].comments.push(d));
+                this.layers.splice(i0, 1);
+
+                if (idInto == this.activeLayer) {
+                    this.layers[i1].group.forEach(d => d.set("visible", true))
+                    _CANVAS.requestRenderAll();
+                }
+            } else {
+                throw Error("one of the merge layers does not exist")
+            }
+
+        },
+
+        addLayer(state, record=false, id=null, color=null, width=null, height=null, items=[], comments=[]) {
             id = id === null ? this.nextID : id;
             color = color === null ? this.nextColor : color;
             width = width === null ? _CANVAS.getWidth() : width;
@@ -148,9 +227,9 @@ const vextNoteStore = {
 
             if (record) {
                 const history = useVextHistory();
-                const json = items.map(d => d.toJSON("uuid"));
+                const json = items.map(d => isFabric(d) ? d.toJSON("uuid") : d);
                 history.do("add layer " + id,
-                    this.addLayer.bind(this, false, id, color, width, height, json),
+                    this.addLayer.bind(this, state, false, id, color, width, height, json, comments),
                     this.removeLayer.bind(this, id, false)
                 )
             }
@@ -161,6 +240,7 @@ const vextNoteStore = {
                 visible: true,
                 opacity: 1,
                 group: [],
+                comments: comments,
                 width: width,
                 height: height,
                 time: new Date(Date.now()),
@@ -171,7 +251,7 @@ const vextNoteStore = {
             if (items.length > 0) {
                 items.forEach(item => {
                     // fabric object
-                    if (typeof item === "object" && item.set !== undefined && item.get !== undefined) {
+                    if (isFabric(item)) {
                         item.set("opacity", 1);
                         item.set("visible", true)
                         item.set("uuid", uuidv4())
@@ -192,7 +272,7 @@ const vextNoteStore = {
             this.setActiveLayer(id, false);
         },
 
-        removeLayer(id, record=false) {
+        removeLayer(id, record=true) {
             if (id === undefined) { id = this.activeLayer }
             let idx = this.getLayerIndex(id)
             if (idx >= 0) {
@@ -204,7 +284,7 @@ const vextNoteStore = {
                     const items = item.group.map(d => d.toJSON("uuid"))
                     history.do("remove layer "+id,
                         this.removeLayer.bind(this, id, false),
-                        this.addLayer.bind(this, false, item.id, item.color, item.width, item.height, items)
+                        this.addLayer.bind(this, item.state, false, item.id, item.color, item.width, item.height, items, toRaw(item.comments))
                     )
                 }
 
@@ -214,6 +294,8 @@ const vextNoteStore = {
                 if (index < 0) {
                     this.setActiveLayer(this.layers.length === 0 ? null : this.layers[0].id, false);
                 }
+            } else {
+                throw new Error(`layer ${id} does not exist`)
             }
         },
 
@@ -226,6 +308,11 @@ const vextNoteStore = {
         },
 
         setActiveLayer(id, record=true) {
+            if (id === null) {
+                this.activeLayer = null;
+                return;
+            }
+
             const newIndex = this.getLayerIndex(id);
             if (newIndex >= 0) {
                 if (record) {
@@ -246,6 +333,8 @@ const vextNoteStore = {
                     this.layers[newIndex].height
                 );
                 _CANVAS.requestRenderAll();
+            } else {
+                throw new Error(`layer ${id} does not exist`)
             }
         },
 
@@ -651,7 +740,8 @@ const vextNoteStore = {
                     layer.color,
                     layer.width,
                     layer.height,
-                    layer.items
+                    layer.items,
+                    layer.comments,
                 );
             }, false)
 
@@ -668,19 +758,21 @@ const vextNoteStore = {
                     height: layer.height,
                     color: layer.color,
                     state: layer.state,
-                    items: layer.group.map(d => d.toJSON("uuid"))
+                    items: layer.group.map(d => d.toJSON("uuid")),
+                    comments: layer.comments,
                 }
+            } else {
+                throw new ("no layer to export")
             }
-            return {}
         },
 
         async exportZIP(name=null, canvasOnly=false) {
-
             if (this.layers.length > 0) {
 
                 const expPDF = useExportPDF();
                 const pdf = expPDF.createPDF();
                 expPDF.addText(pdf, "VEXT Annotation Report", 8);
+                expPDF.addVerticalSpace(pdf, 5);
                 expPDF.addText(pdf, ""+this.activeLayer, 20)
 
                 if (canvasOnly && _CANVAS !== null) {
@@ -703,8 +795,10 @@ const vextNoteStore = {
                         rect.height
                     );
                 }
-                expPDF.addText(pdf, "Associated Application State", 14)
-                expPDF.addText(pdf, JSON.stringify(this.currentLayer.state.state, null, 2))
+                if (this.currentLayer.comments.length > 0) {
+                    expPDF.addText(pdf, "Comments", 16)
+                    this.currentLayer.comments.forEach(c => expPDF.addText(pdf, c));
+                }
 
                 const expZIP = useExportZIP();
                 const zip = expZIP.createZIP();
@@ -714,10 +808,11 @@ const vextNoteStore = {
                 const now = new Date();
                 const datetime = now.getFullYear()+'-'+now.getMonth()+'-'+now.getDate()+'-'+
                     now.getHours()+'-'+now.getMinutes()+'-'+now.getSeconds();
-                expZIP.downloadZIP(zip, name !== null ? name : `vext_export_${datetime}`);
+                expZIP.downloadZIP(zip, name !== null ? name : `vext_${datetime}_${this.activeLayer}`);
+            } else {
+                throw new Error(`no layer to include in archive`)
             }
         }
-
     },
 };
 

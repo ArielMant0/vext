@@ -171,9 +171,3 @@
     watch(() => props.zIndex, () => note.setCanvasZIndex(props.zIndex));
 
 </script>
-
-<style>
-.noshow {
-    display: none;
-}
-</style>

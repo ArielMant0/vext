@@ -7,26 +7,28 @@ export function useExportPDF() {
     let _y = 20;
     let _fontSize = 11;
     const _width = 170;
+    const _conv = 0.45;
 
     const DEFAULT_OPTIONS = Object.freeze({
         orientation: "portrait",
         unit: "mm",
         format: "A4",
-        fontSize: _fontSize,
+        fontSize: 11,
     });
 
     function addVerticalSpace(pdf, size) {
         _y += size;
     }
 
-    function addEmptyLine(pdf) {
-        addVerticalSpace(pdf, _fontSize * pdf.getLineHeightFactor())
+    function addEmptyLine(pdf, fontSize=_fontSize) {
+        addVerticalSpace(pdf, Math.max(4, fontSize * _conv * pdf.getLineHeightFactor()))
     }
 
     function createPDF(options={}) {
         _x = 20;
         _y = 20;
         if (options.fontSize) _fontSize = options.fontSize;
+        else _fontSize = DEFAULT_OPTIONS.fontSize;
         return new jsPDF(Object.create(DEFAULT_OPTIONS, options));
     }
 
@@ -44,7 +46,7 @@ export function useExportPDF() {
     function addText(pdf, text, fontSize=_fontSize) {
         pdf.setFontSize(fontSize);
         pdf.text(text, _x, _y);
-        _y += fontSize * pdf.getLineHeightFactor();
+        addEmptyLine(pdf, fontSize);
     }
 
     function addImage(pdf, image, w, h, imageType="JPEG") {

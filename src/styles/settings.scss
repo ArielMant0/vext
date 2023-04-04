@@ -6,3 +6,80 @@
 
 // https://next.vuetifyjs.com/features/sass-variables/`
 @use 'vuetify/settings';
+
+.vext-layer {
+    display: flex;
+    justify-content: space-between;
+    font-size: small;
+}
+.vext-layer-selector {
+    cursor: pointer;
+    font-size: small;
+}
+.vext-layer-selector:hover {
+    font-weight: bolder;
+}
+.vext-layer-card { max-width: 285px; }
+
+.vext-blob {
+    cursor: default;
+	animation: wiggle 2s infinite;
+}
+
+@keyframes wiggle {
+  0%, 7% {
+    transform: rotateZ(0);
+  }
+  15% {
+    transform: rotateZ(-15deg);
+  }
+  20% {
+    transform: rotateZ(10deg);
+  }
+  25% {
+    transform: rotateZ(-10deg);
+  }
+  30% {
+    transform: rotateZ(6deg);
+  }
+  35% {
+    transform: rotateZ(-4deg);
+  }
+  40%, 100% {
+    transform: rotateZ(0);
+  }
+}
+
+.vext-layer-card .v-badge {
+    line-height: inherit;
+}
+
+.vext-tt-content {
+  overflow-y: auto;
+  word-wrap: break-word;
+  font-size: 12px;
+  padding: 10px;
+}
+.vext-tooltip {
+  min-width: 200px;
+  position: fixed;
+  padding: 0;
+  margin: 0;
+  z-index: 10;
+  border-radius: 3px;
+}
+
+.vext-alert {
+  margin: .5rem;
+  width: 99%;
+  z-index: 2000;
+}
+
+.vext-small-num {
+  max-width: 135px;
+  margin-right: 0.5rem;
+}
+
+.v-card.vext-color-choice {
+  border: 3px outset gray;
+}

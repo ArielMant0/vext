@@ -1,7 +1,7 @@
 <template>
-    <div ref="wrapper" class="tooltip" v-if="content" :style="{ 'left': tX+'px', 'top': tY+'px' }">
+    <div ref="wrapper" class="vext-tooltip" v-if="content" :style="{ 'left': tX+'px', 'top': tY+'px' }">
         <v-card style="height: 100%; opacity: 0.9;" color="grey-darken-3">
-            <v-list v-if="Array.isArray(content)" class="content">
+            <v-list v-if="Array.isArray(content)" class="vext-tt-content">
                 <v-list v-for="(item, idx) in content" :key="idx">
                     <v-list-item v-for="(value, key) in item" :key="key" class="d-flex _justify-content:space-between">
                         <span><b>{{ key }}: </b></span>
@@ -188,20 +188,3 @@
     watch(() => props.y, updatePosition);
 
 </script>
-
-<style>
-.content {
-    overflow-y: auto;
-    word-wrap: break-word;
-    font-size: 12px;
-    padding: 10px;
-}
-.tooltip {
-    min-width: 200px;
-    position: fixed;
-    padding: 0;
-    margin: 0;
-    z-index: 10;
-    border-radius: 3px;
-}
-</style>

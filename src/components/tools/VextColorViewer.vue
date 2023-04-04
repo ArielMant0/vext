@@ -1,7 +1,7 @@
 <template>
     <div>
         <div class="text-caption">primary and secondary color</div>
-        <v-item-group mandatory v-model="tmpActive" selected-class="color-choice" @update:modelValue="chooseColor" class="d-flex mb-2">
+        <v-item-group mandatory v-model="tmpActive" selected-class="vext-color-choice" @update:modelValue="chooseColor" class="d-flex mb-2">
             <v-item v-slot="{ toggle, isSelected }">
                 <v-card :color="color0" @click="toggle" :width="50" :height="50" style="margin-right:5px;">
                     <v-icon v-if="isSelected" icon="mdi-check-circle-outline" size="50" style="opacity: 0.5" color="white"></v-icon>

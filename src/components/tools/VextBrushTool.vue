@@ -84,8 +84,3 @@
 
 </script>
 
-<style>
-.v-card.color-choice {
-    border: 3px outset gray;
-}
-</style>

@@ -104,7 +104,24 @@
                 </div>
             </template>
         </v-tooltip>
-        <v-checkbox v-model="filterLayers" density="compact" class="mb-1" hide-details></v-checkbox>
+        <v-checkbox v-model="filterLayers" density="compact" hide-details></v-checkbox>
+
+        <v-tooltip text="search for layers where comments match the search">
+            <template v-slot:activator="{ props }">
+                <div class="text-caption">
+                    search layer comments
+                    <v-icon size="small" icon="mdi-information" v-bind="props"/>
+                </div>
+            </template>
+        </v-tooltip>
+        <v-text-field
+            v-model="searchLayers"
+            class="mb-2" clearable
+            hide-details density="compact"
+            placeholder="search layer comments .."
+            append-inner-icon="mdi-magnify"
+            @click:append-inner="filterSearchLayers"
+            @click:clear="filterSearchLayers"/>
 
         <v-tooltip text="layers that store the application state and annotations - click to select a layer">
             <template v-slot:activator="{ props }">
@@ -116,7 +133,7 @@
         </v-tooltip>
 
         <v-item-group mandatory :multiple="false">
-            <v-item v-for="(layer, idx) in layers" :key="idx" :value="layer.id">
+            <v-item v-for="layer in layerSearch" :key="layer.id" :value="layer.id">
                 <v-card v-if="!filterLayers || layer.group.length > 0"
                     :variant="activeLayer === layer.id ? 'elevated' : 'tonal'"
                     class="mb-2 vext-layer-card" style="width: 99%"
@@ -124,14 +141,53 @@
                     <v-card-title class="vext-layer">
                         <span>
                             <v-badge :content="layer.group.length" inline :color="layer.color" style="line-height: .9rem;"></v-badge>
-                            <v-icon :icon="activeLayer === layer.id ? 'mdi-checkbox-marked' : 'mdi-checkbox-blank-outline'" @click="selectLayer(layer.id)"/>
+                            <v-tooltip text="click to select this layer" location="top">
+                                <template v-slot:activator="{ props }">
+                                    <v-icon v-bind="props" :icon="activeLayer === layer.id ? 'mdi-checkbox-marked' : 'mdi-checkbox-blank-outline'" @click="selectLayer(layer.id)"/>
+                                </template>
+                            </v-tooltip>
                         </span>
-                        <span class="vext-layer-selector" @click="toggleLayerOpen(layer.id)">{{ layer.id }}</span>
-                        <v-icon :icon="layer.visible ? 'mdi-eye' : 'mdi-eye-off'" @click="changeVisibility(layer.id, !layer.visible)"></v-icon>
+                        <v-tooltip text="click to toggle layer info panel" location="top">
+                            <template v-slot:activator="{ props }">
+                                <span v-bind="props" class="vext-layer-selector" @click="toggleLayerOpen(layer.id)">{{ layer.id }}</span>
+                            </template>
+                        </v-tooltip>
+                        <v-tooltip text="click to toggle layer visibility" location="top">
+                            <template v-slot:activator="{ props }">
+                                <v-icon v-bind="props" :icon="layer.visible ? 'mdi-eye' : 'mdi-eye-off'" @click="changeVisibility(layer.id, !layer.visible)"></v-icon>
+                            </template>
+                        </v-tooltip>
                     </v-card-title>
+
                     <v-card-text v-if="layerUI.open[layer.id]">
-                        <vue-json-pretty :data="JSON.parse(layer.state.state)" :showDoubleQuotes="false" :deep="treeDepth" @nodeClick="updateTreeDepth"/>
+                        <v-sheet v-if="layer.id !== activeLayer">
+                            <v-btn size="x-small" color="error" @click="mergeLayers(layer.id)">merge into active layer</v-btn>
+                        </v-sheet>
+                        <v-sheet>
+                            <div class="text-caption">layer id:</div>
+                            <v-text-field class="mb-2"
+                                :model-value="layer.id" hide-details density="compact"
+                                @update:model-value="name => setLayerName(layer.id, name)"/>
+                        </v-sheet>
+                        <v-sheet>
+                            <div class="text-caption">comments:</div>
+                            <v-text-field v-for="(c, idx) in layer.comments" :model-value="c"
+                                @update:model-value="content => updateLayerComment(layer.id, idx, content)"
+                                hide-details density="compact" class="mb-1"
+                                append-inner-icon="mdi-delete" variant="outlined"
+                                @click:append-inner="removeLayerComment(layer.id, idx)"/>
+                            <v-text-field v-model="layerUI.comment[layer.id]"
+                                placeholder="add a comment .."
+                                hide-details density="compact"
+                                append-inner-icon="mdi-plus" variant="outlined"
+                                @click:append-inner="addLayerComment(layer.id)"/>
+                        </v-sheet>
+                        <v-sheet>
+                            <div class="text-caption">application state:</div>
+                            <vue-json-pretty :data="JSON.parse(layer.state.state)" :showDoubleQuotes="false" :deep="treeDepth" @nodeClick="updateTreeDepth"/>
+                        </v-sheet>
                     </v-card-text>
+
                 </v-card>
             </v-item>
         </v-item-group>
@@ -160,6 +216,21 @@
                 </v-card-actions>
             </v-card>
         </v-dialog>
+
+        <v-dialog v-model="mergeDialog" width="auto">
+            <v-card title="Merge layers">
+                <v-card-text>
+                    Are you sure you want to merge layer
+                    <b>{{ mergeLayer }}</b> into layer
+                    <b>{{ activeLayer }}</b>?<br/>
+                    The state from layer <b>{{ mergeLayer }}</b> will be lost.
+                </v-card-text>
+                <v-card-actions>
+                    <v-btn color="warning" @click="mergeDialog = false">cancel</v-btn>
+                    <v-btn color="error" @click="executeMergeLayers">merge</v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
     </div>
 </template>
 
@@ -175,6 +246,10 @@
 
     const addDialog = ref(false);
     const delDialog = ref(false);
+    const mergeDialog = ref(false);
+    const searchLayers = ref("");
+    const searchTerm = ref("");
+    const mergeLayer = ref("");
 
     const filterLayers = ref(false);
     const layerColor = ref("#ddd")
@@ -184,17 +259,58 @@
 
     const layerUI = reactive({
         open: {},
+        comment: {}
     });
 
     const state = useVextState();
 
     const note = useVextNote();
-    const { layers, activeLayer, layerMode, layerModeValues } = storeToRefs(note);
+    const { activeLayer, layerMode, layerModeValues } = storeToRefs(note);
 
     const dataChange = computed(() => {
         return note.currentLayer !== null && state.hash !== null &&
             note.currentLayer.state.hash !== state.hash;
     })
+
+    const layerSearch = computed(() => {
+        if (!searchTerm.value || searchTerm.value.length === 0) return note.layers;
+        return note.layers.filter(d => {
+            return d.comments.length > 0 && d.comments.some(c => c.includes(searchTerm.value))
+        })
+    })
+
+    function mergeLayers(id) {
+        mergeLayer.value = id;
+        mergeDialog.value = true;
+    }
+    function executeMergeLayers() {
+        note.mergeLayers(mergeLayer.value, activeLayer.value);
+        mergeDialog.value = false;
+    }
+
+    function filterSearchLayers() {
+        searchTerm.value = searchLayers.value;
+    }
+
+    function setLayerName(id, name) {
+        if (note.renameLayer(id, name)) {
+            delete layerUI.open[id];
+            layerUI.open[name] = true;
+            layerUI.comment[name] = "";
+        }
+    }
+    function addLayerComment(id) {
+        if (layerUI.comment[id]) {
+            note.addLayerComment(layerUI.comment[id], id)
+            layerUI.comment[id] = "";
+        }
+    }
+    function updateLayerComment(id, index, comment) {
+        note.updateLayerComment(comment, id, index);
+    }
+    function removeLayerComment(id, index) {
+        note.removeLayerComment(id, index)
+    }
 
     function changeOpacity() {
         note.setLayerOpacity(opacity.value)
@@ -216,7 +332,9 @@
         const layer = note.currentLayer;
         opacity.value = layer !== null ? layer.opacity : 1;
         layerUI.open = {}
-        layerUI.open[layer.id] = true;
+        layerUI.comment = {}
+        if (layer !== null) layerUI.open[layer.id] = true;
+        note.layers.forEach(l => layerUI.comment[l.id] = "")
     }
     function toggleLayerOpen(id) {
         layerUI.open[id] = !layerUI.open[id];
@@ -244,52 +362,3 @@
     watch(() => opacity.value, changeOpacity);
 
 </script>
-
-<style>
-.vext-layer {
-    display: flex;
-    justify-content: space-between;
-    font-size: small;
-}
-.vext-layer-selector {
-    cursor: pointer;
-    font-size: small;
-}
-.vext-layer-selector:hover {
-    font-weight: bolder;
-}
-.vext-layer-card { max-width: 285px; }
-
-.vext-blob {
-    cursor: default;
-	animation: wiggle 2s infinite;
-}
-
-@keyframes wiggle {
-  0%, 7% {
-    transform: rotateZ(0);
-  }
-  15% {
-    transform: rotateZ(-15deg);
-  }
-  20% {
-    transform: rotateZ(10deg);
-  }
-  25% {
-    transform: rotateZ(-10deg);
-  }
-  30% {
-    transform: rotateZ(6deg);
-  }
-  35% {
-    transform: rotateZ(-4deg);
-  }
-  40%, 100% {
-    transform: rotateZ(0);
-  }
-}
-
-.vext-layer-card .v-badge {
-    line-height: inherit;
-}
-</style>

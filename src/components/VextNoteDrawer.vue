@@ -29,7 +29,9 @@
                 :brush-icon="brushIcon"
                 :edit-icon="editIcon"
                 :shape-icon="shapeIcon"
-                :select-color="selectColor"/>
+                :select-color="selectColor"
+                :hotkeys="hotkeys"
+                :hotkeyMap="hotkeyMap"/>
         </v-navigation-drawer>
     </div>
 </template>
@@ -104,6 +106,31 @@
             type: Boolean,
             default: false,
         },
+        /**
+         * Whether to use keyboard shortcuts (hotkeys) for tool switching.
+         */
+        hotkeys: {
+            type: Boolean,
+            default: false,
+        },
+        /**
+         * Hotkey map to use when using hotkeys for tool switching.
+         * By default, these are the 1, 2, 3, 4 keys are used for the layer,
+         * brush, shape and edit tool respectively. The object should have the key
+         * code as returned by the keydown event "key" property as key and the tool id
+         * as value.
+         */
+        hotkeyMap: {
+            type: Object,
+            default() {
+                return {
+                    "1": "layer",
+                    "2": "brush",
+                    "3": "shape",
+                    "4": "edit",
+                }
+            }
+        }
     });
 
     const note = useVextNote();

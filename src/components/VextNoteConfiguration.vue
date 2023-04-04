@@ -79,10 +79,35 @@
         /**
          * How to color the icons in the small nav bar when they are selected.
          */
-         selectColor: {
+        selectColor: {
             type: String,
-            default: "blue"
+            default: "black"
         },
+        /**
+         * Whether to use keyboard shortcuts (hotkeys) for tool switching.
+         */
+        hotkeys: {
+            type: Boolean,
+            default: false,
+        },
+        /**
+         * Hotkey map to use when using hotkeys for tool switching.
+         * By default, these are the 1, 2, 3, 4 keys are used for the layer,
+         * brush, shape and edit tool respectively. The object should have the key
+         * code as returned by the keydown event "key" property as key and the tool id
+         * as value.
+         */
+        hotkeyMap: {
+            type: Object,
+            default() {
+                return {
+                    "1": "layer",
+                    "2": "brush",
+                    "3": "shape",
+                    "4": "edit",
+                }
+            }
+        }
     });
 
     const state = useVextState();
@@ -108,6 +133,14 @@
             case "Enter":
                 activeText.value.set("text", text + "\n");
                 break;
+            case "Delete": case "Control": case "Shift": case "CapsLock":
+            case "Escape": case "PrintScreen": case "ScrollLock": case "Pause":
+            case "NumLock": case "ArrowUp": case "ArrowDown": case "ArrowLeft":
+            case "ArrowRight": case "Clear": case "Home": case "PageUp":
+            case "PageDown": case "Insert": case "ContextMenu": case "Meta":
+            case "F1": case "F2": case "F3": case "F4":
+            case "F5": case "F6": case "F7": case "F8": case "F9":
+                break;
             default:
                 activeText.value.set("text", text + key)
         }
@@ -120,6 +153,11 @@
                 updateTextNode(event.key)
             } else if (event.key === "Delete" || event.key === "Backspace") {
                 note.deleteCurrentObj();
+            } else {
+                const which = props.hotkeyMap[event.key];
+                if (which) {
+                    note.setTool(which, false);
+                }
             }
         };
     }

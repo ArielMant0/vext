@@ -7,14 +7,14 @@
             <v-btn icon="mdi-format-text" size="small" round value="text"/>
         </v-btn-toggle>
         <div v-if="shape === 'circle'" style="display: flex;" class="mt-2">
-            <v-text-field v-model="dimx" type="number" label="radius" density="compact" variant="outlined" class="small-num"></v-text-field>
+            <v-text-field v-model="dimx" type="number" label="radius" density="compact" variant="outlined" class="vext-small-num"></v-text-field>
         </div>
         <div v-else-if="shape === 'text'" style="display: flex;" class="mt-2">
-            <v-text-field v-model="dimx" type="number" label="font size" density="compact" variant="outlined" class="small-num"></v-text-field>
+            <v-text-field v-model="dimx" type="number" label="font size" density="compact" variant="outlined" class="vext-small-num"></v-text-field>
         </div>
         <div v-else style="display: flex;" class="mt-2">
-            <v-text-field v-model="dimx" type="number" label="width" density="compact" variant="outlined" class="small-num"></v-text-field>
-            <v-text-field v-model="dimy" type="number" label="height" density="compact" variant="outlined" class="small-num"></v-text-field>
+            <v-text-field v-model="dimx" type="number" label="width" density="compact" variant="outlined" class="vext-small-num"></v-text-field>
+            <v-text-field v-model="dimy" type="number" label="height" density="compact" variant="outlined" class="vext-small-num"></v-text-field>
         </div>
         <div class="text-caption">stroke width</div>
         <v-slider v-model="strokeWidth" min="1" max="250" step="1" thumb-size="15" density="compact">
@@ -130,10 +130,3 @@
     }
 
 </script>
-
-<style>
-.small-num {
-    max-width: 135px;
-    margin-right: 0.5rem;
-}
-</style>
