@@ -59,6 +59,8 @@ const vextNoteStore = {
 
     state: () => {
         return {
+            enabled: true,
+
             color0: "#ff0000",
             color1: "#000000",
             activeColor: 0,
@@ -124,6 +126,14 @@ const vextNoteStore = {
 
     actions: {
 
+        enable() {
+            this.enabled = true;
+        },
+
+        disable() {
+            this.enabled = false;
+        },
+
         isUniqueID(id) {
             return !this.layers.some(d => d.id === id);
         },
@@ -144,6 +154,8 @@ const vextNoteStore = {
         },
 
         renameLayer(oldId, newId) {
+            if (!this.enabled) return false;
+
             const idx = this.getLayerIndex(oldId);
             if (idx >= 0) {
                 if (this.isUniqueID(newId)) {
@@ -161,6 +173,8 @@ const vextNoteStore = {
         },
 
         addLayerComment(comment, id=null) {
+            if (!this.enabled) return false;
+
             id = id === null ? this.activeLayer : id;
             const idx = this.getLayerIndex(id);
             if (idx >= 0) {
@@ -171,6 +185,8 @@ const vextNoteStore = {
         },
 
         updateLayerComment(comment, id=null, index=0) {
+            if (!this.enabled) return false;
+
             id = id === null ? this.activeLayer : id;
             const idx = this.getLayerIndex(id);
             if (idx >= 0 && index >= 0 && index <= this.layers[idx].comments.length) {
@@ -181,6 +197,8 @@ const vextNoteStore = {
         },
 
         removeLayerComment(id=null, index=0) {
+            if (!this.enabled) return false;
+
             id = id === null ? this.activeLayer : id;
             const idx = this.getLayerIndex(id);
             if (idx >= 0 && index >= 0 && index <= this.layers[idx].comments.length) {
@@ -191,6 +209,8 @@ const vextNoteStore = {
         },
 
         removeLayerComments(id=null) {
+            if (!this.enabled) return false;
+
             id = id === null ? this.activeLayer : id;
             const idx = this.getLayerIndex(id);
             if (idx >= 0) {
@@ -201,6 +221,8 @@ const vextNoteStore = {
         },
 
         mergeLayers(idFrom, idInto=null) {
+            if (!this.enabled) return;
+
             idInto = idInto === null ? this.activeLayer : idInto;
             const i0 = this.getLayerIndex(idFrom);
             const i1 = this.getLayerIndex(idInto);
@@ -220,6 +242,8 @@ const vextNoteStore = {
         },
 
         addLayer(state, record=false, id=null, color=null, width=null, height=null, items=[], comments=[]) {
+            if (!this.enabled) return;
+
             id = id === null ? this.nextID : id;
             color = color === null ? this.nextColor : color;
             width = width === null ? _CANVAS.getWidth() : width;
@@ -273,6 +297,8 @@ const vextNoteStore = {
         },
 
         removeLayer(id, record=true) {
+            if (!this.enabled) return;
+
             if (id === undefined) { id = this.activeLayer }
             let idx = this.getLayerIndex(id)
             if (idx >= 0) {
@@ -300,6 +326,8 @@ const vextNoteStore = {
         },
 
         removeEmptyLayers() {
+            if (!this.enabled) return;
+
             this.layers = this.layers.filter(d => d.group.length > 0);
             const index = this.getLayerIndex(this.activeLayer);
             if (index < 0) {
@@ -308,6 +336,8 @@ const vextNoteStore = {
         },
 
         setActiveLayer(id, record=true) {
+            if (!this.enabled) return;
+
             if (id === null) {
                 this.activeLayer = null;
                 return;
@@ -339,6 +369,7 @@ const vextNoteStore = {
         },
 
         setLayerOpacity(value, id=null, record=true, render=true) {
+            if (!this.enabled) return;
 
             if (id === null) id = this.activeLayer
 
@@ -360,6 +391,7 @@ const vextNoteStore = {
         },
 
         setLayerVisibility(visible, id=null, record=true, render=true) {
+            if (!this.enabled) return;
 
             if (id === null) id = this.activeLayer
 
@@ -382,7 +414,6 @@ const vextNoteStore = {
         },
 
         setTool(tool, record=false) {
-
             if (tool !== this.tool) {
                 if (record) {
                     const history = useVextHistory();
@@ -447,6 +478,7 @@ const vextNoteStore = {
         },
 
         selectColor(id, record=true) {
+            if (!this.enabled) return;
             const newColor = id === 0 || id === 1 ? id : this.activeColor;
             if (record) {
                 const history = useVextHistory();
@@ -462,6 +494,7 @@ const vextNoteStore = {
         },
 
         setColorPrimary(color, record=true) {
+            if (!this.enabled) return;
             if (record) {
                 const history = useVextHistory();
                 history.do("set primary color to "+color,
@@ -476,6 +509,7 @@ const vextNoteStore = {
         },
 
         setColorSecondary(color, record=true) {
+            if (!this.enabled) return;
             if (record) {
                 const history = useVextHistory();
                 history.do("set secondary color to "+color,
@@ -490,6 +524,7 @@ const vextNoteStore = {
         },
 
         addObject(obj, addToCanvas=true, record=true) {
+            if (!this.enabled) return;
 
             if (this.layerMode === LAYER_MODES.ANNOTATE) {
                 // no state available
@@ -526,6 +561,7 @@ const vextNoteStore = {
         },
 
         addObjects(objs, addToCanvas=true, record=true) {
+            if (!this.enabled) return;
 
             if (this.layerMode === LAYER_MODES.ANNOTATE && this.currentState !== null) {
                 const l = this.layerFromStateHash(this.currentState.hash);
@@ -557,6 +593,7 @@ const vextNoteStore = {
         },
 
         addObjectFromJSON(json, layer=null, record=true) {
+            if (!this.enabled) return;
             layer = layer === null ? this.activeLayer : layer;
             const index = this.getLayerIndex(layer)
             const obj = createFabricObject(json.type, json);
@@ -573,6 +610,7 @@ const vextNoteStore = {
         },
 
         addObjectsFromJSON(json, layer=null, record=true) {
+            if (!this.enabled) return;
             layer = layer === null ? this.activeLayer : layer;
             const index = this.getLayerIndex(layer)
             const objs = json.map(d => createFabricObject(d.type, d));
@@ -592,6 +630,7 @@ const vextNoteStore = {
         },
 
         removeObject(uuid, layer=null, record=true) {
+            if (!this.enabled) return;
             const layerIdx = this.getLayerIndex(layer === null ? this.activeLayer : layer);
             const idx = this.layers[layerIdx].group.findIndex(obj => obj.get("uuid") === uuid);
             if (idx >= 0) {
@@ -611,6 +650,7 @@ const vextNoteStore = {
         },
 
         removeObjects(uuids, layer=null, record=true) {
+            if (!this.enabled) return;
             const layerIdx = this.getLayerIndex(layer === null ? this.activeLayer : layer);
             const objs = this.layers[layerIdx].group.filter(d => uuids.includes(d.get("uuid")));
             const objsJson = objs.map(d => d.toJSON(["uuid"]));
@@ -626,6 +666,7 @@ const vextNoteStore = {
         },
 
         removeLastObject(layer=null, record=true) {
+            if (!this.enabled) return;
             const index = this.getLayerIndex(layer === null ? this.activeLayer : layer);
             if (this.layers[index].group.length > 0) {
 
@@ -648,6 +689,7 @@ const vextNoteStore = {
         },
 
         deleteCurrentObj(record=true) {
+            if (!this.enabled) return;
             const obj = _CANVAS.getActiveObject();
             if (obj) {
                 _CANVAS.discardActiveObject();
@@ -691,7 +733,7 @@ const vextNoteStore = {
 
             canvas
                 .on("path:created", (obj) => {
-                    if (this.tool === TOOLS.BRUSH) {
+                    if (this.enabled && this.tool === TOOLS.BRUSH) {
                         // obj already part of the canvas
                         this.addObject(obj.path, false)
                     }
@@ -729,6 +771,7 @@ const vextNoteStore = {
         },
 
         async importLayer(file) {
+            if (!this.enabled) return;
             const reader = new FileReader();
             reader.addEventListener("load", () => {
                 const layer = JSON.parse(reader.result);
@@ -750,6 +793,7 @@ const vextNoteStore = {
         },
 
         exportLayer() {
+            if (!this.enabled) return;
             const layer = this.currentLayer;
             if (layer) {
                 return {
@@ -767,6 +811,7 @@ const vextNoteStore = {
         },
 
         async exportZIP(name=null, canvasOnly=false) {
+            if (!this.enabled) return;
             if (this.layers.length > 0) {
 
                 const expPDF = useExportPDF();

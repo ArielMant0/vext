@@ -1,5 +1,5 @@
 <template>
-    <div style="min-width: 280px">
+    <div :style="{ 'min-width': width+'px' }">
         <v-tabs v-model="tmpTool" density="compact" mandatory @update:modelValue="setTool">
             <v-tab :color="selectColor" style="min-width: 50px;padding: 0 4px 0 16px;" :prepend-icon="props.layerIcon" :value="tools.LAYER"></v-tab>
             <v-tab :color="selectColor" style="min-width: 50px;padding: 0 4px 0 16px;" :prepend-icon="props.brushIcon" :value="tools.BRUSH"></v-tab>
@@ -48,6 +48,13 @@
     import { useVextState } from '@/store/state';
 
     const props = defineProps({
+        /**
+         * The width of this component.
+         */
+         width: {
+            type: Number,
+            default: 280
+        },
         /**
          * Vuetify icon for the layers tool
          */
@@ -112,12 +119,14 @@
 
     const state = useVextState();
     const note = useVextNote();
-    const { tool, tools } = storeToRefs(note);
+    const { tool, tools, enabled } = storeToRefs(note);
     const tmpTool = ref(tool.value);
 
     const activeText = ref(null);
 
-    function setTool() { note.setTool(tmpTool.value); }
+    function setTool() {
+        note.setTool(tmpTool.value);
+    }
     function loadTool() {
         if (tool.value !== tmpTool.value) {
             tmpTool.value = tool.value;
@@ -126,6 +135,7 @@
 
     function updateTextNode(key) {
         const text = activeText.value.text;
+
         switch(key) {
             case "Backspace":
                 activeText.value.set("text", text.slice(0, text.length-1));
@@ -149,6 +159,8 @@
 
     function init() {
         window.onkeyup = function(event) {
+            if (!enabled.value) return;
+
             if (activeText.value !== null && event.key !== "Delete") {
                 updateTextNode(event.key)
             } else if (event.key === "Delete" || event.key === "Backspace") {

@@ -2,12 +2,12 @@
     <div style="position: absolute;">
         <v-navigation-drawer permanent rail>
         <v-list nav density="compact">
-            <v-list-item :prepend-icon="open ? openIcon : closedIcon" @click="open = !open"/>
+            <v-list-item :disabled="!enabled" :prepend-icon="open && enabled ? openIcon : closedIcon" @click="open = !open"/>
         </v-list>
 
             <v-divider></v-divider>
 
-            <v-list nav density="compact" :selected="tmpTool" mandatory @update:selected="setTool">
+            <v-list nav density="compact" :selected="tmpTool" mandatory @update:selected="setTool" :disabled="!enabled">
                 <v-list-item :active-color="selectColor" :prepend-icon="layerIcon" :value="tools.LAYER">
                     <v-tooltip activator="parent" text="interact with your visualizations and modify|inspect|select layers"/>
                 </v-list-item>
@@ -23,7 +23,7 @@
             </v-list>
         </v-navigation-drawer>
 
-        <v-navigation-drawer :model-value="open" :temporary="floating" width="320" class="pl-2 pr-2">
+        <v-navigation-drawer :model-value="open && enabled" :temporary="floating" :width="width" class="pl-2 pr-2">
             <VextNoteConfiguration
                 :layer-icon="layerIcon"
                 :brush-icon="brushIcon"
@@ -31,7 +31,8 @@
                 :shape-icon="shapeIcon"
                 :select-color="selectColor"
                 :hotkeys="hotkeys"
-                :hotkeyMap="hotkeyMap"/>
+                :hotkeyMap="hotkeyMap"
+                :width="width-30"/>
         </v-navigation-drawer>
     </div>
 </template>
@@ -93,6 +94,13 @@
             default: "default"
         },
         /**
+         * The width of the drawer (when opened).
+         */
+        width: {
+            type: Number,
+            default: 320
+        },
+        /**
          * Whether this component should take up space or float.
          */
         floating: {
@@ -134,7 +142,7 @@
     });
 
     const note = useVextNote();
-    const { tool, tools } = storeToRefs(note);
+    const { tool, tools, enabled } = storeToRefs(note);
 
     const tmpTool = ref([tool.value]);
     const open = ref(props.open);

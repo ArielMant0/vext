@@ -4,10 +4,10 @@
             <v-icon icon="mdi-lead-pencil"/>
             VEXT
         </v-app-bar-title>
-        <VextHistoryControls/>
+        <VextAppBarControls/>
     </v-app-bar>
 </template>
 
 <script setup>
-import VextHistoryControls from '@/components/VextHistoryControls';
+import VextAppBarControls from '@/components/VextAppBarControls.vue';
 </script>
