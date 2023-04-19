@@ -159,7 +159,8 @@
 
     function init() {
         window.onkeyup = function(event) {
-            if (!enabled.value) return;
+            const focus = document.activeElement;
+            if (!enabled.value || (focus !== null && focus.isContentEditable)) return;
 
             if (activeText.value !== null && event.key !== "Delete") {
                 updateTextNode(event.key)
@@ -168,10 +169,35 @@
             } else {
                 const which = props.hotkeyMap[event.key];
                 if (which) {
-                    note.setTool(which, false);
+                    switch (typeof which) {
+                        case 'string':
+                            note.setTool(which, false);
+                            break;
+                        case 'object':
+                            if ((which.shift && event.shiftKey) ||
+                                (which.alt && event.altKey) ||
+                                (which.ctrl && event.ctrlKey) ||
+                                (which.meta && event.metaKey)) {
+                                note.setTool(which.mode, false);
+                            }
+                            break;
+                        case 'function':
+                            if (which.validator(event)) {
+                                note.setTool(which.mode, false);
+                            }
+                            break;
+                    }
                 }
             }
         };
+        window.onpointerdown = function(event) {
+            const type = event.pointerType;
+            if (type === 'pen' && tool.value !== tools.value.BRUSH) {
+                note.setTool(tools.value.BRUSH, false);
+            } else if (type !== 'pen' && tool.value === tools.value.BRUSH) {
+                note.setTool(tools.value.LAYER, false);
+            }
+        }
     }
 
     function onTextSelect(obj) { activeText.value = obj; }

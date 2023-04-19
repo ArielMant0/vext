@@ -165,10 +165,10 @@ const vextNoteStore = {
                     }
                     return true;
                 } else {
-                    throw new Error(`id ${newId} is not unique`)
+                    return false;
                 }
             } else {
-                throw new Error(`layer ${oldId} does not exist`)
+                return false;
             }
         },
 

@@ -5,12 +5,12 @@
             <v-slider v-model="opacity" prepend-icon="mdi-opacity" class="mr-4"
                 min="0" max="1" thumb-size="15" hide-details/>
             <div>
-                <v-tooltip text="add a new annotation layer" location="bottom">
+                <v-tooltip text="add a new annotation layer" location="bottom" :open-delay="tooltipDelay">
                     <template v-slot:activator="{ props }">
                         <v-btn v-bind="props" icon="mdi-plus" color="primary" size="x-small" rounded="0" @click="openAddDialog" class="me-1"></v-btn>
                     </template>
                 </v-tooltip>
-                <v-tooltip text="delete the active annotation layer" location="bottom">
+                <v-tooltip text="delete the active annotation layer" location="bottom" :open-delay="tooltipDelay">
                     <template v-slot:activator="{ props }">
                         <v-btn v-bind="props" icon="mdi-delete" color="error" size="x-small" rounded="0" @click="openDelDialog"></v-btn>
                     </template>
@@ -18,7 +18,7 @@
             </div>
         </div>
 
-        <v-tooltip>
+        <v-tooltip :open-delay="tooltipDelay">
             when layers should be added<br/>
             ... when the state changed and you annotate<br/>
             ... when the state changed (without annotations)<br/>
@@ -32,88 +32,46 @@
         </v-tooltip>
         <v-select v-model="layerMode" :items="layerModeValues" density="compact" class="no-input-details mb-2"></v-select>
 
-        <v-expansion-panels class="mt-3 mb-3" density="compact">
-        <v-expansion-panel title="Actions">
-        <v-expansion-panel-text>
+        <div class="text-caption">layer actions</div>
+        <div class="d-flex mb-2">
 
-        <v-tooltip text="remove all layers that contain no annotations (one will always remain)">
-            <template v-slot:activator="{ props }">
-                <div class="text-caption">
-                    remove layers without annotations
-                    <v-icon size="small" icon="mdi-information" v-bind="props"/>
-                </div>
-                <v-btn size="small" @click="removeEmptyLayers" class="mb-1" color="primary">remove empty layers</v-btn>
-            </template>
-        </v-tooltip>
-
-        <v-tooltip text="save the application state to the current layer">
-            <template v-slot:activator="{ props }">
-                <div class="text-caption">
-                    save state
-                    <v-icon size="small" icon="mdi-information" v-bind="props"/>
-                </div>
-                <div class="mb-1">
-                    <v-btn size="small" @click="saveState" color="primary">save state</v-btn>
-                    <v-btn v-if="dataChange" size="small" class="ml-1 blob" color="error" density="compact" rounded="0" icon>
-                        <v-icon>mdi-exclamation-thick</v-icon>
-                        <v-tooltip activator="parent" location="end">state has (unsaved) changes</v-tooltip>
-                    </v-btn>
-                </div>
-            </template>
-        </v-tooltip>
-
-        <div  class="mb-1">
-
-            <v-tooltip text="import a layer from a previously exported layer file (JSON)">
+            <v-tooltip text="only show layers that you have already annotated" :open-delay="tooltipDelay">
                 <template v-slot:activator="{ props }">
-                    <div class="text-caption">
-                        import layer
-                        <v-icon size="small" icon="mdi-information" v-bind="props"/>
-                    </div>
-                    <v-file-input
-                        label="layer file"
-                        accept="application/json"
-                        density="compact"
-                        hide-details
-                        class="mb-1"
-                        @update:model-value="files => note.importLayer(files[0])"></v-file-input>
+                    <v-icon
+                        :icon="filterLayers ? 'mdi-filter' : 'mdi-filter-off'"
+                        v-bind="props"
+                        @click="filterLayers = !filterLayers"/>
                 </template>
             </v-tooltip>
 
-            <v-tooltip text="export the current layer, visualizations and application state to a .zip file">
+            <v-tooltip text="remove all layers that contain no annotations (one will always remain)" :open-delay="tooltipDelay">
                 <template v-slot:activator="{ props }">
-                    <div class="text-caption">
-                        export to zip
-                        <v-icon size="small" icon="mdi-information" v-bind="props"/>
-                    </div>
-                    <v-btn size="small" @click="note.exportZIP()" color="default">export</v-btn>
+                    <v-icon
+                        icon="mdi-silverware-clean"
+                        v-bind="props"
+                        @click="removeEmptyLayers"/>
                 </template>
             </v-tooltip>
 
+            <v-tooltip text="export the current layer, visualizations and application state to a .zip archive" :open-delay="tooltipDelay">
+                <template v-slot:activator="{ props }">
+                    <v-icon
+                        icon="mdi-download"
+                        @click="note.exportZIP()"
+                        v-bind="props"/>
+                </template>
+            </v-tooltip>
+
+            <v-tooltip text="import a layer from a previously exported layer file (JSON)" :open-delay="tooltipDelay">
+                <template v-slot:activator="{ props }">
+                    <v-icon
+                        icon="mdi-upload"
+                        v-bind="props"
+                        @click="importDialog = true"/>
+                </template>
+            </v-tooltip>
         </div>
 
-        </v-expansion-panel-text>
-        </v-expansion-panel>
-        </v-expansion-panels>
-
-        <v-tooltip text="only show layers that you have already annotated">
-            <template v-slot:activator="{ props }">
-                <div class="text-caption">
-                    only show layers with annotations
-                    <v-icon size="small" icon="mdi-information" v-bind="props"/>
-                </div>
-            </template>
-        </v-tooltip>
-        <v-checkbox v-model="filterLayers" density="compact" hide-details></v-checkbox>
-
-        <v-tooltip text="search for layers where comments match the search">
-            <template v-slot:activator="{ props }">
-                <div class="text-caption">
-                    search layer comments
-                    <v-icon size="small" icon="mdi-information" v-bind="props"/>
-                </div>
-            </template>
-        </v-tooltip>
         <v-text-field
             v-model="searchLayers"
             class="mb-2" clearable
@@ -123,7 +81,7 @@
             @click:append-inner="filterSearchLayers"
             @click:clear="filterSearchLayers"/>
 
-        <v-tooltip text="layers that store the application state and annotations - click to select a layer">
+        <v-tooltip text="layers that store the application state and annotations - click the checkbox to select a layer"  :open-delay="tooltipDelay">
             <template v-slot:activator="{ props }">
                 <div class="text-caption mb-1">
                     layers
@@ -141,18 +99,18 @@
                     <v-card-title class="vext-layer">
                         <span>
                             <v-badge :content="layer.group.length" inline :color="layer.color" style="line-height: .9rem;"></v-badge>
-                            <v-tooltip text="click to select this layer" location="top">
+                            <v-tooltip text="click to select this layer" location="top" :open-delay="tooltipDelay">
                                 <template v-slot:activator="{ props }">
                                     <v-icon v-bind="props" :icon="activeLayer === layer.id ? 'mdi-checkbox-marked' : 'mdi-checkbox-blank-outline'" @click="selectLayer(layer.id)"/>
                                 </template>
                             </v-tooltip>
                         </span>
-                        <v-tooltip text="click to toggle layer info panel" location="top">
+                        <v-tooltip text="click to toggle layer info panel" location="top" :open-delay="tooltipDelay">
                             <template v-slot:activator="{ props }">
                                 <span v-bind="props" class="vext-layer-selector" @click="toggleLayerOpen(layer.id)">{{ layer.id }}</span>
                             </template>
                         </v-tooltip>
-                        <v-tooltip text="click to toggle layer visibility" location="top">
+                        <v-tooltip text="click to toggle layer visibility" location="top" :open-delay="tooltipDelay">
                             <template v-slot:activator="{ props }">
                                 <v-icon v-bind="props" :icon="layer.visible ? 'mdi-eye' : 'mdi-eye-off'" @click="changeVisibility(layer.id, !layer.visible)"></v-icon>
                             </template>
@@ -166,8 +124,9 @@
                         <v-sheet>
                             <div class="text-caption">layer id:</div>
                             <v-text-field class="mb-2"
-                                :model-value="layer.id" hide-details density="compact"
-                                @update:model-value="name => setLayerName(layer.id, name)"/>
+                                v-model="layerUI.name[layer.id]" hide-details density="compact"
+                                append-icon="mdi-sync"
+                                @click:append="setLayerName(layer.id)"/>
                         </v-sheet>
                         <v-sheet>
                             <div class="text-caption">comments:</div>
@@ -231,6 +190,24 @@
                 </v-card-actions>
             </v-card>
         </v-dialog>
+
+        <v-dialog v-model="importDialog" width="auto">
+            <v-card title="Import Layer">
+                <v-card-text>
+                    Choose a file from you computer..
+                    <v-file-input
+                        label="layer file"
+                        accept="application/json"
+                        density="compact"
+                        hide-details
+                        class="mb-1"
+                        @update:model-value="files => note.importLayer(files[0])"></v-file-input>
+                </v-card-text>
+                <v-card-actions>
+                    <v-btn color="warning" @click="importDialog = false">cancel</v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
     </div>
 </template>
 
@@ -247,6 +224,7 @@
     const addDialog = ref(false);
     const delDialog = ref(false);
     const mergeDialog = ref(false);
+    const importDialog = ref(false);
     const searchLayers = ref("");
     const searchTerm = ref("");
     const mergeLayer = ref("");
@@ -257,9 +235,20 @@
     const opacity = ref(1);
     const treeDepth = ref(0);
 
+    const props = defineProps({
+        tooltipDelay: {
+            type: [Number, String],
+            default: 500,
+            validator(value) {
+                return +value >= 0;
+            }
+        }
+    })
+
     const layerUI = reactive({
         open: {},
-        comment: {}
+        comment: {},
+        name: {}
     });
 
     const state = useVextState();
@@ -292,11 +281,15 @@
         searchTerm.value = searchLayers.value;
     }
 
-    function setLayerName(id, name) {
+    function setLayerName(id) {
+        const name = layerUI.name[id];
         if (note.renameLayer(id, name)) {
             delete layerUI.open[id];
+            delete layerUI.comment[id];
+            delete layerUI.name[id];
             layerUI.open[name] = true;
             layerUI.comment[name] = "";
+            layerUI.name[name] = name;
         }
     }
     function addLayerComment(id) {
@@ -333,8 +326,12 @@
         opacity.value = layer !== null ? layer.opacity : 1;
         layerUI.open = {}
         layerUI.comment = {}
+        layerUI.name = {}
         if (layer !== null) layerUI.open[layer.id] = true;
-        note.layers.forEach(l => layerUI.comment[l.id] = "")
+        note.layers.forEach(l => {
+            layerUI.comment[l.id] = "";
+            layerUI.name[l.id] = l.id;
+        })
     }
     function toggleLayerOpen(id) {
         layerUI.open[id] = !layerUI.open[id];

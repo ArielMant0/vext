@@ -1,24 +1,24 @@
 <template>
     <div style="position: absolute;">
         <v-navigation-drawer permanent rail>
-        <v-list nav density="compact">
-            <v-list-item :disabled="!enabled" :prepend-icon="open && enabled ? openIcon : closedIcon" @click="open = !open"/>
+        <v-list nav density="compact" :disabled="!enabled">
+            <v-list-item :prepend-icon="open && enabled ? openIcon : closedIcon" @click="open = !open"/>
         </v-list>
 
             <v-divider></v-divider>
 
             <v-list nav density="compact" :selected="tmpTool" mandatory @update:selected="setTool" :disabled="!enabled">
                 <v-list-item :active-color="selectColor" :prepend-icon="layerIcon" :value="tools.LAYER">
-                    <v-tooltip activator="parent" text="interact with your visualizations and modify|inspect|select layers"/>
+                    <v-tooltip activator="parent" text="interact with your visualizations and modify|inspect|select layers" :open-delay="tooltipDelay"/>
                 </v-list-item>
                 <v-list-item :active-color="selectColor" :prepend-icon="brushIcon" :value="tools.BRUSH">
-                    <v-tooltip activator="parent" text="choose brush settings for drawing on the VEXT canvas"/>
+                    <v-tooltip activator="parent" text="choose brush settings for drawing on the VEXT canvas" :open-delay="tooltipDelay"/>
                 </v-list-item>
                 <v-list-item :active-color="selectColor" :prepend-icon="shapeIcon" :value="tools.SHAPE">
-                    <v-tooltip activator="parent" text="add shapes or text to your VEXT canvas"/>
+                    <v-tooltip activator="parent" text="add shapes or text to your VEXT canvas" :open-delay="tooltipDelay"/>
                 </v-list-item>
                 <v-list-item :active-color="selectColor" :prepend-icon="editIcon" :value="tools.EDIT">
-                    <v-tooltip activator="parent" text="select items on the VEXT canvas to inspect or modify"/>
+                    <v-tooltip activator="parent" text="select items on the VEXT canvas to inspect or modify" :open-delay="tooltipDelay"/>
                 </v-list-item>
             </v-list>
         </v-navigation-drawer>
@@ -97,8 +97,11 @@
          * The width of the drawer (when opened).
          */
         width: {
-            type: Number,
-            default: 320
+            type: [Number, String],
+            default: 320,
+            validator(value) {
+                return +value >= 0;
+            }
         },
         /**
          * Whether this component should take up space or float.
@@ -138,6 +141,16 @@
                     "4": "edit",
                 }
             }
+        },
+        /**
+         * The delay with which to open tooltips on hover (default 500).
+         */
+        tooltipDelay: {
+            type: [Number, String],
+            default: 500,
+            validator(value) {
+                return +value >= 0;
+            }
         }
     });
 
@@ -147,8 +160,14 @@
     const tmpTool = ref([tool.value]);
     const open = ref(props.open);
 
-    function setTool(newvalue) {
-        note.setTool(newvalue[0]);
+    function setTool(toolValue) {
+        tmpTool.value[0] = toolValue[0];
+        if (tmpTool.value[0] !== tool.value) {
+            note.setTool(tmpTool.value[0]);
+            open.value = true;
+        } else {
+            open.value = !open.value;
+        }
     }
     function loadTool() {
         if (tool.value !== tmpTool.value[0]) {
