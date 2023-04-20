@@ -352,12 +352,9 @@ const vextNoteStore = {
                         this.setActiveLayer.bind(this, this.activeLayer, false),
                     )
                 }
+                this.setLayerVisibility(false, this.activeLayer, false, false)
+                this.setLayerVisibility(true, id, false, false)
                 this.activeLayer = id;
-                this.layers.forEach(t => {
-                    if (t.visible !== (t.id === id)) {
-                        this.setLayerVisibility(t.id === id, t.id, false, false)
-                    }
-                });
                 this.resizeCanvas(
                     this.layers[newIndex].width,
                     this.layers[newIndex].height

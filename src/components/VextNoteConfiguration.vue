@@ -10,7 +10,7 @@
         <v-window v-model="tool">
             <v-window-item :value="tools.LAYER">
                 <KeepAlive>
-                    <VextLayersTool/>
+                    <VextLayersTool :tooltip-delay="tooltipDelay"/>
                 </KeepAlive>
             </v-window-item>
             <v-window-item :value="tools.EDIT">
@@ -114,6 +114,24 @@
                     "4": "edit",
                 }
             }
+        },
+        /**
+         * The delay with which to open tooltips on hover (default 500).
+         */
+        tooltipDelay: {
+            type: [Number, String],
+            default: 500,
+            validator(value) {
+                return +value >= 0;
+            }
+        },
+        /**
+         * Whether to switch between brush and other modes automatically, depending
+         * on whether the pen is used to interact (or the mouse/touch).
+         */
+        autoToolSwitch: {
+            type: Boolean,
+            default: true,
         }
     });
 
@@ -123,6 +141,7 @@
     const tmpTool = ref(tool.value);
 
     const activeText = ref(null);
+    const lastTool = ref(tool.value);
 
     function setTool() {
         note.setTool(tmpTool.value);
@@ -158,45 +177,60 @@
     }
 
     function init() {
-        window.onkeyup = function(event) {
-            const focus = document.activeElement;
-            if (!enabled.value || (focus !== null && focus.isContentEditable)) return;
+        window.addEventListener("keyup", onKeyUp);
+        setToolSwitch();
+    }
 
-            if (activeText.value !== null && event.key !== "Delete") {
-                updateTextNode(event.key)
-            } else if (event.key === "Delete" || event.key === "Backspace") {
-                note.deleteCurrentObj();
-            } else {
-                const which = props.hotkeyMap[event.key];
-                if (which) {
-                    switch (typeof which) {
-                        case 'string':
-                            note.setTool(which, false);
-                            break;
-                        case 'object':
-                            if ((which.shift && event.shiftKey) ||
-                                (which.alt && event.altKey) ||
-                                (which.ctrl && event.ctrlKey) ||
-                                (which.meta && event.metaKey)) {
-                                note.setTool(which.mode, false);
-                            }
-                            break;
-                        case 'function':
-                            if (which.validator(event)) {
-                                note.setTool(which.mode, false);
-                            }
-                            break;
-                    }
+    function onPointerDown(event) {
+        const type = event.pointerType;
+        if (type === 'pen' && tool.value !== tools.value.BRUSH) {
+            lastTool.value = tool.value;
+            note.setTool(tools.value.BRUSH, false);
+        } else if (type !== 'pen' && tool.value === tools.value.BRUSH) {
+            note.setTool(lastTool.value, false);
+        }
+    }
+
+    function onKeyUp(event) {
+        const focus = document.activeElement;
+        if (!enabled.value || (focus !== null && focus.tagName === "INPUT")) return;
+
+        if (focus !== null) focus.blur()
+
+        if (activeText.value !== null && event.key !== "Delete") {
+            updateTextNode(event.key)
+        } else if (event.key === "Delete" || event.key === "Backspace") {
+            note.deleteCurrentObj();
+        } else {
+            const which = props.hotkeyMap[event.key];
+            if (which) {
+                switch (typeof which) {
+                    case 'string':
+                        note.setTool(which, false);
+                        break;
+                    case 'object':
+                        if ((which.shift && event.shiftKey) ||
+                            (which.alt && event.altKey) ||
+                            (which.ctrl && event.ctrlKey) ||
+                            (which.meta && event.metaKey)) {
+                            note.setTool(which.mode, false);
+                        }
+                        break;
+                    case 'function':
+                        if (which.validator(event)) {
+                            note.setTool(which.mode, false);
+                        }
+                        break;
                 }
             }
-        };
-        window.onpointerdown = function(event) {
-            const type = event.pointerType;
-            if (type === 'pen' && tool.value !== tools.value.BRUSH) {
-                note.setTool(tools.value.BRUSH, false);
-            } else if (type !== 'pen' && tool.value === tools.value.BRUSH) {
-                note.setTool(tools.value.LAYER, false);
-            }
+        }
+    }
+
+    function setToolSwitch() {
+        if (props.autoToolSwitch) {
+            window.addEventListener("pointerdown", onPointerDown);
+        } else {
+            window.removeEventListener("pointerdown", onPointerDown)
         }
     }
 
@@ -213,7 +247,16 @@
                 note.addLayer(state.exportState(true), false)
             }
         } else {
-            note.setState(state.exportState(false))
+            const layer = note.layerFromStateHash(state.hash);
+            if (layer) {
+                // load matching layer
+                note.setActiveLayer(layer.id);
+                note.setState(state.exportState(true))
+            } else {
+                // set state and hide current layer
+                note.setState(state.exportState(false))
+                note.setLayerVisibility(false);
+            }
         }
     }
 
@@ -228,5 +271,7 @@
     watch(() => state.hash, saveState)
     watch(() => note.tool, loadTool);
     watch(() => note.activeLayer, loadState)
+
+    watch(() => props.autoToolSwitch, setToolSwitch)
 
 </script>

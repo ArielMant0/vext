@@ -32,6 +32,8 @@
                 :select-color="selectColor"
                 :hotkeys="hotkeys"
                 :hotkeyMap="hotkeyMap"
+                :tooltip-delay="tooltipDelay"
+                :auto-tool-switch="autoToolSwitch"
                 :width="width-30"/>
         </v-navigation-drawer>
     </div>
@@ -151,6 +153,14 @@
             validator(value) {
                 return +value >= 0;
             }
+        },
+        /**
+         * Whether to switch between brush and other modes automatically, depending
+         * on whether the pen is used to interact (or the mouse/touch).
+         */
+        autoToolSwitch: {
+            type: Boolean,
+            default: true,
         }
     });
 

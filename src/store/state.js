@@ -28,6 +28,10 @@ const vextStateStore = {
             return this.dataChange;
         },
 
+        setCallback(func) {
+            this.callback = func;
+        },
+
         setData(data, check=true) {
             this.data = data;
             if (check) {
