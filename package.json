@@ -1,6 +1,6 @@
 {
   "name": "@nullbuild/vext",
-  "version": "0.1.14",
+  "version": "0.1.15",
   "license": "MIT",
   "publishConfig": {
     "access": "public"
@@ -11,6 +11,7 @@
   ],
   "main": "./dist/vext.umd.js",
   "module": "./dist/vext.cjs",
+  "style": "./dist/style.css",
   "exports": {
     ".": {
       "import": "./dist/vext.js",
