@@ -58,6 +58,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^3.0.3",
+    "d3": "^7.8.4",
     "eslint": "^8.22.0",
     "eslint-plugin-vue": "^9.3.0",
     "sass": "^1.55.0",
@@ -69,16 +70,16 @@
   "peerDependencies": {
     "@vueuse/core": "^9.13.0",
     "fabric": "^5.3.0",
+    "file-saver": "^2.0.5",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^2.5.1",
+    "jszip": "^3.10.1",
     "object-hash": "^3.0.0",
     "pinia": "^2.0.23",
     "uuid": "^9.0.0",
     "vue": "^3.2.13",
     "vue-json-pretty": "^2.2.3",
     "vue-router": "^4.0.0",
-    "vuetify": "^3.0.0",
-    "html2canvas": "^1.4.1",
-    "file-saver": "^2.0.5",
-    "jspdf": "^2.5.1",
-    "jszip": "^3.10.1"
+    "vuetify": "^3.0.0"
   }
 }

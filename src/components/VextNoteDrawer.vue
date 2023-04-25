@@ -1,42 +1,44 @@
 <template>
-    <div style="position: absolute;">
-        <v-navigation-drawer permanent rail>
-        <v-list nav density="compact" :disabled="!enabled">
-            <v-list-item :prepend-icon="open && enabled ? openIcon : closedIcon" @click="open = !open"/>
+    <v-navigation-drawer permanent rail>
+    <v-list nav density="compact" :disabled="!enabled">
+        <v-list-item :prepend-icon="open && enabled ? openIcon : closedIcon" @click="open = !open"/>
+    </v-list>
+
+        <v-divider></v-divider>
+
+        <v-list nav density="compact" :selected="tmpTool" mandatory @update:selected="setTool" :disabled="!enabled">
+            <v-list-item :active-color="selectColor" :prepend-icon="layerIcon" :value="tools.LAYER">
+                <v-tooltip activator="parent" text="interact with your visualizations and modify|inspect|select layers" :open-delay="tooltipDelay"/>
+            </v-list-item>
+            <v-list-item :active-color="selectColor" :prepend-icon="brushIcon" :value="tools.BRUSH">
+                <v-tooltip activator="parent" text="choose brush settings for drawing on the VEXT canvas" :open-delay="tooltipDelay"/>
+            </v-list-item>
+            <v-list-item :active-color="selectColor" :prepend-icon="shapeIcon" :value="tools.SHAPE">
+                <v-tooltip activator="parent" text="add shapes or text to your VEXT canvas" :open-delay="tooltipDelay"/>
+            </v-list-item>
+            <v-list-item :active-color="selectColor" :prepend-icon="connectIcon" :value="tools.CONNECT">
+                <v-tooltip activator="parent" text="connect data points to annotations" :open-delay="tooltipDelay"/>
+            </v-list-item>
+            <v-list-item :active-color="selectColor" :prepend-icon="editIcon" :value="tools.EDIT">
+                <v-tooltip activator="parent" text="select items on the VEXT canvas to inspect or modify" :open-delay="tooltipDelay"/>
+            </v-list-item>
         </v-list>
+    </v-navigation-drawer>
 
-            <v-divider></v-divider>
-
-            <v-list nav density="compact" :selected="tmpTool" mandatory @update:selected="setTool" :disabled="!enabled">
-                <v-list-item :active-color="selectColor" :prepend-icon="layerIcon" :value="tools.LAYER">
-                    <v-tooltip activator="parent" text="interact with your visualizations and modify|inspect|select layers" :open-delay="tooltipDelay"/>
-                </v-list-item>
-                <v-list-item :active-color="selectColor" :prepend-icon="brushIcon" :value="tools.BRUSH">
-                    <v-tooltip activator="parent" text="choose brush settings for drawing on the VEXT canvas" :open-delay="tooltipDelay"/>
-                </v-list-item>
-                <v-list-item :active-color="selectColor" :prepend-icon="shapeIcon" :value="tools.SHAPE">
-                    <v-tooltip activator="parent" text="add shapes or text to your VEXT canvas" :open-delay="tooltipDelay"/>
-                </v-list-item>
-                <v-list-item :active-color="selectColor" :prepend-icon="editIcon" :value="tools.EDIT">
-                    <v-tooltip activator="parent" text="select items on the VEXT canvas to inspect or modify" :open-delay="tooltipDelay"/>
-                </v-list-item>
-            </v-list>
-        </v-navigation-drawer>
-
-        <v-navigation-drawer :model-value="open && enabled" :temporary="floating" :width="width" class="pl-2 pr-2">
-            <VextNoteConfiguration
-                :layer-icon="layerIcon"
-                :brush-icon="brushIcon"
-                :edit-icon="editIcon"
-                :shape-icon="shapeIcon"
-                :select-color="selectColor"
-                :hotkeys="hotkeys"
-                :hotkeyMap="hotkeyMap"
-                :tooltip-delay="tooltipDelay"
-                :auto-tool-switch="autoToolSwitch"
-                :width="width-30"/>
-        </v-navigation-drawer>
-    </div>
+    <v-navigation-drawer :model-value="open && enabled" :temporary="floating" :width="width" class="pl-2 pr-2" @update:model-value="val => open = val">
+        <VextNoteConfiguration
+            :layer-icon="layerIcon"
+            :brush-icon="brushIcon"
+            :edit-icon="editIcon"
+            :shape-icon="shapeIcon"
+            :select-color="selectColor"
+            :connect-icon="connectIcon"
+            :hotkeys="hotkeys"
+            :hotkeyMap="hotkeyMap"
+            :tooltip-delay="tooltipDelay"
+            :auto-tool-switch="autoToolSwitch"
+            :width="width-30"/>
+    </v-navigation-drawer>
 </template>
 
 <script setup>
@@ -87,6 +89,13 @@
         brushIcon: {
             type: String,
             default: "mdi-draw"
+        },
+        /**
+         * Vuetify icon for the connection tool.
+         */
+        connectIcon: {
+            type: String,
+            default: "mdi-connection"
         },
         /**
          * How to color the icons in the small nav bar when they are selected.
@@ -140,7 +149,8 @@
                     "1": "layer",
                     "2": "brush",
                     "3": "shape",
-                    "4": "edit",
+                    "4": "connect",
+                    "5": "edit",
                 }
             }
         },
@@ -174,7 +184,6 @@
         tmpTool.value[0] = toolValue[0];
         if (tmpTool.value[0] !== tool.value) {
             note.setTool(tmpTool.value[0]);
-            open.value = true;
         } else {
             open.value = !open.value;
         }

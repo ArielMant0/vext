@@ -14,7 +14,8 @@
                 ></v-text-field>
             </template>
         </v-slider>
-        <div class="mb-2" style="display:flex;justify-content: space-evenly;">
+
+        <div class="mb-2 d-flex" style="justify-content: space-evenly;">
             <v-btn @click="setBrushSize(1)" size="x-small" rounded="pill" color="primary">1</v-btn>
             <v-btn @click="setBrushSize(2)" size="x-small" rounded="pill" color="primary">2</v-btn>
             <v-btn @click="setBrushSize(3)" size="x-small" rounded="pill" color="primary">3</v-btn>
@@ -22,6 +23,22 @@
             <v-btn @click="setBrushSize(10)" size="x-small" rounded="pill" color="primary">10</v-btn>
             <v-btn @click="setBrushSize(15)" size="x-small" rounded="pill" color="primary">15</v-btn>
         </div>
+
+        <div class="text-caption">smoothing</div>
+        <v-slider v-model="decimation" :min="0" :max="100" step="1" thumb-size="15" density="compact" @update:modelValue="transferDecimation">
+            <template v-slot:append>
+                <v-text-field
+                    @update:modelValue="transferDecimation"
+                    v-model="decimation"
+                    type="number"
+                    style="width: 80px"
+                    density="compact"
+                    hide-details
+                    variant="solo"
+                ></v-text-field>
+            </template>
+        </v-slider>
+
         <VextColorViewer/>
     </div>
 </template>
@@ -50,37 +67,36 @@
 
     const note = useVextNote();
     const size = ref(props.initialSize);
+    const decimation = ref(note.brushDecimation);
 
     function readBrushSize() {
         if (note.brushSize !== size.value) {
             size.value = note.brushSize;
         }
     }
+    function readBrushDecimation() {
+        if (note.brushDecimation !== decimation.value) {
+            decimation.value = note.brushDecimation;
+        }
+    }
 
-    function transferBrushSize() { note.setBrushSize(size.value); }
+    function transferBrushSize(value) { note.setBrushSize(value); }
+    function transferDecimation(value) { note.setBrushDecimation(value); }
 
     function setBrushSize(brushSize) {
         if (brushSize !== size.value) {
             size.value = brushSize;
-            transferBrushSize();
+            transferBrushSize(size.value);
         }
     }
 
-    onMounted(transferBrushSize);
+    onMounted(function() {
+        readBrushSize();
+        readBrushDecimation()
+    });
 
     watch(() => note.brushSize, readBrushSize)
-
-    defineExpose({
-        /**
-         * Sets the brush size to brushSize
-         * @param {Number} brushSize size of the brush in pixels
-         */
-        setBrushSize,
-        /**
-         * Transfer the brush size to the note store
-         */
-        transferBrushSize
-    })
+    watch(() => note.brushDecimation, readBrushDecimation)
 
 </script>
 

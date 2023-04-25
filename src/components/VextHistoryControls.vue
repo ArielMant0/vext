@@ -5,9 +5,6 @@
 </template>
 
 <script setup>
-    // <v-tooltip location="bottom" activator="parent" text="undo the last recorded action"/>
-    // <v-tooltip location="bottom" activator="parent" text="redo the last recorded action that was undone"/>
-    // <v-tooltip location="bottom" activator="parent" text="open or close the action history menu"/>
     /**
      * Component that holds two buttons to use un-/do capabilities of the history
      * store and a button to show/hide the HistoryDrawer.
@@ -45,7 +42,7 @@
          */
         menuClosedIcon: {
             type: String,
-            default: "mdi-menu"
+            default: "mdi-history"
         },
     });
 

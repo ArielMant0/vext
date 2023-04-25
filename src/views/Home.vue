@@ -4,7 +4,7 @@
     <section ref="el" class="ma-2" style="width: 100%; height: 100%;">
         <div class="d-flex">
             <v-btn class="ma-1" size="small" variant="outlined" @click="setHeight(500)">500</v-btn>
-            <v-btn class="ma-1" size="small" variant="outlined" @click="setHeight(1000)">1000</v-btn>
+            <v-btn class="ma-1" size="small" variant="outlined" @click="setHeight(2500)">2500</v-btn>
             <v-btn class="ma-1" size="small" variant="outlined" @click="setHeight()">reset</v-btn>
             <div class="d-flex">
                 <v-slider min="1" step="1" max="5000"
@@ -19,9 +19,25 @@
                     :model-value="count"
                     @update:model-value="n => testStore.setCount(Number.parseInt(n))"/>
             </div>
+            <div class="d-flex">
+                <v-slider min="1" step="1" max="25"
+                    style="width: 200px"
+                    hide-details
+                    density="compact"
+                    :model-value="rows"
+                    @update:model-value="n => testStore.setRows(Number.parseInt(n))"/>
+                <v-text-field type="number"
+                    hide-details
+                    density="compact"
+                    :model-value="rows"
+                    @update:model-value="n => testStore.setRows(Number.parseInt(n))"/>
+            </div>
       </div>
       <VextNoteCanvas :width="visAreaWidth" :height="visAreaHeight" show-border/>
-      <ScatterPlot :n="count"/>
+      <div class="d-flex" style="align-items: flex-start;">
+        <ScatterPlot :n="count"/>
+        <SmallMultiples :rows="rows"/>
+      </div>
       <VextGlobalToolTip/>
     </section>
   </div>
@@ -33,12 +49,14 @@
     import VextGlobalToolTip from '@/components/VextGlobalToolTip.vue';
     import VextNoteDrawer from '@/components/VextNoteDrawer.vue';
 
-    import { ref, reactive, computed } from 'vue'
+    import { ref, reactive, computed, onMounted } from 'vue'
     import { useElementSize } from '@vueuse/core'
+
     import ScatterPlot from '@/components/test/ScatterPlot.vue';
+    import SmallMultiples from '@/components/test/SmallMultiples.vue';
+
     import { useTestStore } from '@/store/test';
     import { storeToRefs } from 'pinia';
-    import { onMounted } from 'vue';
 
     const el = ref(null);
     const visAreaWidth = computed(() => size.width);
@@ -47,7 +65,7 @@
 
     const testStore = useTestStore()
 
-    const { count } = storeToRefs(testStore);
+    const { count, rows } = storeToRefs(testStore);
 
     function setHeight(h) {
         el.value.style.height = h ? h+'px' : null;

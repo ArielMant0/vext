@@ -52,10 +52,6 @@
 
 > Array of layer colors.
 
-### swatch
-
-> Array of default and layer colors.
-
 ### nextColor
 
 > Next available color from the default colors.

@@ -14,7 +14,7 @@
             </v-item>
         </v-item-group>
         <div class="text-caption">color picker</div>
-        <v-color-picker hide-inputs v-model="tmpColor" @update:modelValue="changeColor" :swatches="swatch" :width="275" class="mb-3"
+        <v-color-picker hide-inputs v-model="tmpColor" @update:modelValue="changeColor" :width="275" class="mb-3"
             show-swatches swatches-max-height="150"/>
     </div>
 </template>

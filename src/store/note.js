@@ -5,13 +5,13 @@ import { toRaw } from 'vue';
 import { v4 as uuidv4 } from 'uuid';
 import { useExportPDF } from "@/use/export-pdf";
 import { useExportZIP } from "@/use/export-zip";
-import { fabric } from "fabric";
 
 const TOOLS = Object.freeze({
     BRUSH: "brush",
     EDIT: "edit",
     SHAPE: "shape",
     LAYER: "layer",
+    CONNECT: "connect"
 })
 const LAYER_MODES = Object.freeze({
     ANNOTATE: "on annotation",
@@ -31,6 +31,7 @@ function canSelect(tool) {
     switch (tool) {
         case TOOLS.BRUSH:
         case TOOLS.LAYER:
+        case TOOLS.CONNECT:
             return false;
         default:
             return true;
@@ -53,6 +54,23 @@ function parseObject(obj, layer) {
 }
 function isFabric(d) {
     return typeof d === "object" && d.set !== undefined && d.get !== undefined
+}
+function getCanvasCoords(x, y) {
+    const rect = _CANVAS.wrapperEl.getBoundingClientRect();
+    const left = x < rect.x ? 0 : (x > rect.x+rect.width ? rect.width : x - rect.x)
+    const top = y < rect.y ? 0 : (y > rect.y+rect.height ? rect.height : y - rect.y)
+    return [left, top]
+}
+function getClosestMidpoint(x, y, rect) {
+    const left = Math.sqrt(Math.pow(x - rect.left, 2) + Math.pow(y - (rect.top+rect.height*0.5), 2));
+    const top = Math.sqrt(Math.pow(x - (rect.left+rect.width*0.5), 2) + Math.pow(y - rect.top, 2));
+    const right = Math.sqrt(Math.pow(x - (rect.left+rect.width), 2) + Math.pow(y - (rect.top+rect.height*0.5), 2));
+    const bot = Math.sqrt(Math.pow(x - (rect.left+rect.width*0.5), 2) + Math.pow(y - (rect.top+rect.height), 2));
+
+    if (left <= right && left <= top && left <= bot) return [rect.left, rect.top + rect.height * 0.5];
+    if (right <= left && right <= top && right <= bot) return [rect.left + rect.width, rect.top + rect.height * 0.5];
+    if (top <= left && top <= right && top <= bot) return [rect.left + rect.width * 0.5, rect.top];
+    return [rect.left+rect.width*0.5, rect.top+rect.height]
 }
 
 const vextNoteStore = {
@@ -78,6 +96,9 @@ const vextNoteStore = {
 
             activeObjectUUID: null,
             activeObject: null,
+
+            connectLocation: [0, 0],
+            connectObject: null,
 
             // d3.schemeTableau10
             defaultColors: [
@@ -107,21 +128,9 @@ const vextNoteStore = {
 
         color: (state) => state.activeColor === 0 ? state.color0 : state.color1,
         layerColors: (state) => state.layers.map(t => t.color),
-        swatch: (state) => {
-            const l = state.layers.length;
-            const array = []
-            for (let i = 0; i < state.defaultColors.length; i+=5) {
-                array.push(state.defaultColors.slice(i, i+5));
-            }
-            for (let i = 0; i < l; i+=5) {
-                array.push(state.layers.slice(i, i+5).map(d => d.color));
-            }
-            return array
-        },
 
         nextColor: (state) => state.defaultColors[state.layers.length % state.defaultColors.length],
         nextID: (state) => "layer " + state.LAYER_ID_IDX,
-
     },
 
     actions: {
@@ -241,7 +250,7 @@ const vextNoteStore = {
 
         },
 
-        addLayer(state, record=false, id=null, color=null, width=null, height=null, items=[], comments=[]) {
+        addLayer(state, record=false, id=null, color=null, width=null, height=null, items=[], comments=[], connections={}) {
             if (!this.enabled) return;
 
             id = id === null ? this.nextID : id;
@@ -253,7 +262,7 @@ const vextNoteStore = {
                 const history = useVextHistory();
                 const json = items.map(d => isFabric(d) ? d.toJSON("uuid") : d);
                 history.do("add layer " + id,
-                    this.addLayer.bind(this, state, false, id, color, width, height, json, comments),
+                    this.addLayer.bind(this, state, false, id, color, width, height, json, comments, connections),
                     this.removeLayer.bind(this, id, false)
                 )
             }
@@ -265,6 +274,7 @@ const vextNoteStore = {
                 opacity: 1,
                 group: [],
                 comments: comments,
+                connections: connections,
                 width: width,
                 height: height,
                 time: new Date(Date.now()),
@@ -292,6 +302,13 @@ const vextNoteStore = {
                 })
             }
 
+            // TODO:
+            // for (const uuid in connections) {
+            //     connections[uuid].forEach(item => {
+
+            //     })
+            // }
+
             this.LAYER_ID_IDX++;
             this.setActiveLayer(id, false);
         },
@@ -310,7 +327,11 @@ const vextNoteStore = {
                     const items = item.group.map(d => d.toJSON("uuid"))
                     history.do("remove layer "+id,
                         this.removeLayer.bind(this, id, false),
-                        this.addLayer.bind(this, item.state, false, item.id, item.color, item.width, item.height, items, toRaw(item.comments))
+                        this.addLayer.bind(this,
+                            item.state, false, item.id,
+                            item.color, item.width, item.height,
+                            items, toRaw(item.comments), toRaw(item.connections)
+                        )
                     )
                 }
 
@@ -375,6 +396,10 @@ const vextNoteStore = {
                 const prevValue = layer.opacity;
                 layer.opacity = value;
                 layer.group.forEach(d => d.set("opacity", value))
+                for (const uuid in layer.connections) {
+                    layer.connections[uuid].forEach(d => d.path.set("opacity", value))
+                }
+
                 if (render) _CANVAS.requestRenderAll();
 
                 if (record) {
@@ -396,6 +421,9 @@ const vextNoteStore = {
             if (layer && layer.visible !== visible) {
                 layer.visible = visible;
                 layer.group.forEach(d => d.set("visible", visible))
+                for (const uuid in layer.connections) {
+                    layer.connections[uuid].forEach(d => d.path.set("visible", visible))
+                }
 
                 if (id === this.activeLayer && !visible) _CANVAS.discardActiveObject();
                 if (render) _CANVAS.requestRenderAll();
@@ -435,6 +463,7 @@ const vextNoteStore = {
                         break;
                     case TOOLS.SELECT:
                     case TOOLS.LAYER:
+                    case TOOLS.CONNECT:
                         _CANVAS.isDrawingMode = false;
                         setCanvasPointerEvents(false);
                         break;
@@ -750,9 +779,54 @@ const vextNoteStore = {
                 .on("object:modified", ({ target }) => {
                     if (target.get("uuid") === this.activeObjectUUID) {
                         this.activeObject = parseObject(target, this.currentLayer);
+                        if (this.currentLayer.connections[this.activeObjectUUID]) {
+                            this.currentLayer.connections[this.activeObjectUUID].forEach(d => {
+                                const corner = getClosestMidpoint(d.location[0], d.location[1], target.getBoundingRect(true))
+                                d.path.path = [
+                                    ["M", d.location[0], d.location[1]],
+                                    ["L", corner[0], corner[1]],
+                                ]
+                                d.path.setCoords();
+                                d.path.dirty = true;
+                            })
+                            _CANVAS.requestRenderAll();
+                        }
                     }
                 })
-
+                .on("mouse:over", ({ target }) => {
+                    if (target && this.tool === TOOLS.CONNECT) {
+                        if (target.fill) {
+                            target.set({
+                                prevColor: target.fill,
+                                fill: "darkgrey",
+                                dirty: true
+                            })
+                        } else {
+                            target.set({
+                                prevColor: target.stroke,
+                                stroke: "darkgrey",
+                                dirty: true
+                            })
+                        }
+                        _CANVAS.requestRenderAll();
+                    }
+                })
+                .on("mouse:out", ({ target }) => {
+                    if (target && this.tool === TOOLS.CONNECT) {
+                        if (target.fill) {
+                            target.set({
+                                fill: target.prevColor,
+                                dirty: true
+                            })
+                        } else {
+                            target.set({
+                                stroke: target.prevColor,
+                                dirty: true
+                            })
+                        }
+                        _CANVAS.requestRenderAll();
+                    }
+                })
         },
 
         hasStateHash(hash) {
@@ -765,6 +839,88 @@ const vextNoteStore = {
 
         setState(state) {
             this.currentState = state;
+        },
+
+        addConnection(annotation) {
+            if (this.currentLayer === null || this.currentLayer.group.length === 0) return;
+
+            const uuid = annotation.uuid;
+            const [x, y] = getClosestMidpoint(
+                this.connectLocation[0],
+                this.connectLocation[1],
+                annotation.getBoundingRect(true)
+            );
+
+            const obj = {
+                data: Object.assign({}, toRaw(this.connectObject)),
+                location: this.connectLocation.slice(),
+                path: new fabric.Path(`M ${this.connectLocation[0]} ${this.connectLocation[1]} L ${x} ${y}`, {
+                    stroke: this.color,
+                    strokeWidth: 1,
+                    strokeUniform: true,
+                    opacity: 1
+                }),
+                visible: true
+            };
+            _CANVAS.add(obj.path);
+
+            this.connectObject = null;
+
+            if (this.currentLayer.connections[uuid]) {
+                this.currentLayer.connections[uuid].push(obj);
+            } else {
+                this.currentLayer.connections[uuid] = [obj];
+            }
+        },
+
+        startConnect(element, event) {
+            if (this.currentLayer === null || this.tool !== TOOLS.CONNECT ||
+                this.currentLayer.group.length === 0) return;
+
+            const coords = getCanvasCoords(event.pageX, event.pageY)
+            this.connectObject = element;
+            this.connectLocation = coords;
+            const connectEvent = new CustomEvent("v-connectstart", { detail: {
+                x: coords[0], y: coords[1], source: element
+            } });
+
+            setCanvasPointerEvents(true);
+
+            window.dispatchEvent(connectEvent)
+        },
+
+        moveConnect(event) {
+            if (this.currentLayer === null || this.tool !== TOOLS.CONNECT ||
+                this.currentLayer.group.length === 0) return;
+
+            const coords = getCanvasCoords(event.pageX, event.pageY)
+            const connectEvent = new CustomEvent("v-connectmove", { detail: {
+                x: coords[0], y: coords[1],
+            } });
+
+            window.dispatchEvent(connectEvent, coords[0], coords[1])
+        },
+
+        endConnect(event) {
+            setCanvasPointerEvents(false);
+
+            if (this.currentLayer === null || this.tool !== TOOLS.CONNECT ||
+                this.currentLayer.group.length === 0) return;
+
+            _CANVAS.discardActiveObject();
+
+            const coords = getCanvasCoords(event.pageX, event.pageY)
+            const point = new fabric.Point(coords[0], coords[1]);
+            const annotation = this.currentLayer.group.find(d => d.containsPoint(point));
+            if (!annotation) return;
+
+            const connectEvent = new CustomEvent("v-connectend", { detail: {
+                x: coords[0], y: coords[1], target: annotation
+            } });
+
+            window.dispatchEvent(connectEvent)
+
+            this.addConnection(annotation);
         },
 
         async importLayer(file) {

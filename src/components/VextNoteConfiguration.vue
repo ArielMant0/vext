@@ -4,6 +4,7 @@
             <v-tab :color="selectColor" style="min-width: 50px;padding: 0 4px 0 16px;" :prepend-icon="props.layerIcon" :value="tools.LAYER"></v-tab>
             <v-tab :color="selectColor" style="min-width: 50px;padding: 0 4px 0 16px;" :prepend-icon="props.brushIcon" :value="tools.BRUSH"></v-tab>
             <v-tab :color="selectColor" style="min-width: 50px;padding: 0 4px 0 16px;" :prepend-icon="props.shapeIcon" :value="tools.SHAPE"></v-tab>
+            <v-tab :color="selectColor" style="min-width: 50px;padding: 0 4px 0 16px;" :prepend-icon="props.connectIcon" :value="tools.CONNECT"></v-tab>
             <v-tab :color="selectColor" style="min-width: 50px;padding: 0 4px 0 16px;" :prepend-icon="props.editIcon" :value="tools.EDIT"></v-tab>
         </v-tabs>
 
@@ -11,11 +12,6 @@
             <v-window-item :value="tools.LAYER">
                 <KeepAlive>
                     <VextLayersTool :tooltip-delay="tooltipDelay"/>
-                </KeepAlive>
-            </v-window-item>
-            <v-window-item :value="tools.EDIT">
-                <KeepAlive>
-                    <VextEditTool/>
                 </KeepAlive>
             </v-window-item>
             <v-window-item :value="tools.BRUSH">
@@ -26,6 +22,16 @@
             <v-window-item :value="tools.SHAPE">
                 <KeepAlive>
                     <VextShapeTool @select="onTextSelect" @deselect="onTextDeselect"/>
+                </KeepAlive>
+            </v-window-item>
+            <v-window-item :value="tools.CONNECT">
+                <KeepAlive>
+                    <VextConnectTool/>
+                </KeepAlive>
+            </v-window-item>
+            <v-window-item :value="tools.EDIT">
+                <KeepAlive>
+                    <VextEditTool/>
                 </KeepAlive>
             </v-window-item>
         </v-window>
@@ -41,6 +47,7 @@
     import VextBrushTool from '@/components/tools/VextBrushTool.vue';
     import VextShapeTool from '@/components/tools/VextShapeTool.vue';
     import VextLayersTool from '@/components/tools/VextLayersTool.vue';
+    import VextConnectTool from './tools/VextConnectTool.vue';
 
     import { storeToRefs } from 'pinia'
     import { ref, onMounted, watch } from 'vue';
@@ -84,6 +91,13 @@
             default: "mdi-draw"
         },
         /**
+         * Vuetify icon for the connection tool
+         */
+        connectIcon: {
+            type: String,
+            default: "mdi-connection"
+        },
+        /**
          * How to color the icons in the small nav bar when they are selected.
          */
         selectColor: {
@@ -111,7 +125,8 @@
                     "1": "layer",
                     "2": "brush",
                     "3": "shape",
-                    "4": "edit",
+                    "4": "connect",
+                    "5": "edit",
                 }
             }
         },

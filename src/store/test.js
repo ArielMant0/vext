@@ -6,6 +6,7 @@ export const useTestStore = defineStore("vext-test", {
     state: () => {
         return {
             count: 100,
+            rows: 5
         }
     },
 
@@ -19,16 +20,22 @@ export const useTestStore = defineStore("vext-test", {
 
         setState() {
             const state = useVextState();
-            state.setData({ count: this.count });
+            state.setData({ count: this.count, rows: this.rows });
         },
 
         loadState(state) {
-            this.setCount(state.count);
+            this.count = state.count;
+            this.rows = state.rows;
         },
 
         setCount(n) {
             this.count = n;
             this.setState();
-        }
+        },
+
+        setRows(n) {
+            this.rows = n;
+            this.setState();
+        },
     }
 });
