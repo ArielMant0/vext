@@ -72,6 +72,32 @@ function getClosestMidpoint(x, y, rect) {
     if (top <= left && top <= right && top <= bot) return [rect.left + rect.width * 0.5, rect.top];
     return [rect.left+rect.width*0.5, rect.top+rect.height]
 }
+function connToJSON(connection) {
+    return {
+        location: connection.location,
+        path: connection.path.toJSON("uuid"),
+        data: connection.data,
+    }
+}
+function jsonToConn(json, annotation) {
+    const corner = getClosestMidpoint(
+        json.location[0], json.location[1],
+        annotation.getBoundingRect(true)
+    );
+    const line =  new fabric.Line([
+        json.location[0], json.location[1],
+        corner[0], corner[1]
+    ], json.path);
+    line.set({
+        selectable: false,
+        hoverCursor: "default",
+    });
+    return {
+        location: json.location,
+        path: line,
+        data: json.data,
+    }
+}
 
 const vextNoteStore = {
 
@@ -626,6 +652,11 @@ const vextNoteStore = {
             this.layers[index].group.push(obj);
             _CANVAS.add(obj);
 
+            if (json.connections) {
+                this.layers[index].connections[json.uuid] = json.connections.map(d => jsonToConn(d, obj));
+                this.layers[index].connections[json.uuid].forEach(d => _CANVAS.add(d.path));
+            }
+
             if (record) {
                 const history = useVextHistory();
                 history.do("add object of type "+obj.type,
@@ -644,6 +675,13 @@ const vextNoteStore = {
                 this.layers[index].group.push(d)
                 _CANVAS.add(d);
             });
+
+            json.forEach((d, i) => {
+                if (d.connections) {
+                    this.layers[index].connections[d.uuid] = json.connections.map(dd => jsonToConn(dd, objs[i]));
+                    this.layers[index].connections[d.uuid].forEach(dd => _CANVAS.add(dd.path));
+                }
+            })
 
             if (record) {
                 const uuids = json.map(d => d.uuid);
@@ -665,6 +703,14 @@ const vextNoteStore = {
                 const objJson = obj.toJSON(["uuid"]);
                 _CANVAS.remove(toRaw(obj));
 
+                if (this.layers[layerIdx].connections[uuid]) {
+                    objJson.connections = this.layers[layerIdx].connections[uuid].map(d => connToJSON(d))
+                    this.layers[layerIdx].connections[uuid].forEach(d => {
+                        _CANVAS.remove(toRaw(d.path));
+                    });
+                    delete this.layers[layerIdx].connections[uuid]
+                }
+
                 if (record) {
                     const history = useVextHistory();
                     history.do("remove object of type "+obj.type,
@@ -679,8 +725,21 @@ const vextNoteStore = {
             if (!this.enabled) return;
             const layerIdx = this.getLayerIndex(layer === null ? this.activeLayer : layer);
             const objs = this.layers[layerIdx].group.filter(d => uuids.includes(d.get("uuid")));
-            const objsJson = objs.map(d => d.toJSON(["uuid"]));
-            objs.forEach(d => _CANVAS.remove(toRaw(d)));
+            const objsJson = objs.map(d => {
+                const json = d.toJSON(["uuid"])
+                if (this.layers[layerIdx].connections[d.uuid]) {
+                    json.connections = this.layers[layerIdx].connections[d.uuid].map(dd => connToJSON(dd))
+                }
+            });
+            objs.forEach(d => {
+                _CANVAS.remove(toRaw(d))
+                if (this.layers[layerIdx].connections[d.uuid]) {
+                    this.layers[layerIdx].connections[d.uuid].forEach(dd => {
+                        _CANVAS.remove(toRaw(dd.path));
+                    });
+                    delete this.layers[layerIdx].connections[d.uuid]
+                }
+            });
 
             if (record) {
                 const history = useVextHistory();
@@ -699,6 +758,14 @@ const vextNoteStore = {
                 const obj = this.layers[index].group.pop()
                 const objJson = obj.toJSON(["uuid"]);
                 _CANVAS.remove(toRaw(obj));
+
+                if (this.layers[index].connections[obj.uuid]) {
+                    objJson.connections = this.layers[index].connections[obj.uuid].map(d => connToJSON(d))
+                    this.layers[index].connections[obj.uuid].forEach(d => {
+                        _CANVAS.remove(toRaw(d.path));
+                    });
+                    delete this.layers[index].connections[obj.uuid]
+                }
 
                 if (record) {
                     const history = useVextHistory();
@@ -781,50 +848,49 @@ const vextNoteStore = {
                         this.activeObject = parseObject(target, this.currentLayer);
                         if (this.currentLayer.connections[this.activeObjectUUID]) {
                             this.currentLayer.connections[this.activeObjectUUID].forEach(d => {
-                                const corner = getClosestMidpoint(d.location[0], d.location[1], target.getBoundingRect(true))
-                                d.path.path = [
-                                    ["M", d.location[0], d.location[1]],
-                                    ["L", corner[0], corner[1]],
-                                ]
+                                const corner = getClosestMidpoint(
+                                    d.location[0],
+                                    d.location[1],
+                                    target.getBoundingRect(true)
+                                );
+                                d.path.set({
+                                    x2: corner[0],
+                                    y2: corner[1],
+                                    dirty: true
+                                });
                                 d.path.setCoords();
-                                d.path.dirty = true;
                             })
-                            _CANVAS.requestRenderAll();
+                            _CANVAS.renderAll();
                         }
                     }
                 })
                 .on("mouse:over", ({ target }) => {
-                    if (target && this.tool === TOOLS.CONNECT) {
-                        if (target.fill) {
-                            target.set({
-                                prevColor: target.fill,
-                                fill: "darkgrey",
-                                dirty: true
-                            })
-                        } else {
-                            target.set({
-                                prevColor: target.stroke,
-                                stroke: "darkgrey",
-                                dirty: true
-                            })
+                    if (target && target.selectable) {
+                        switch (this.tool) {
+                            case TOOLS.CONNECT:
+                            case TOOLS.EDIT:
+                                target.set({
+                                    prevBackground: target.backgroundColor,
+                                    backgroundColor: "rgba(200,200,200,0.5)",
+                                    dirty: true
+                                });
+                                _CANVAS.requestRenderAll();
+                                break;
                         }
-                        _CANVAS.requestRenderAll();
                     }
                 })
                 .on("mouse:out", ({ target }) => {
-                    if (target && this.tool === TOOLS.CONNECT) {
-                        if (target.fill) {
-                            target.set({
-                                fill: target.prevColor,
-                                dirty: true
-                            })
-                        } else {
-                            target.set({
-                                stroke: target.prevColor,
-                                dirty: true
-                            })
+                    if (target && target.selectable) {
+                        switch (this.tool) {
+                            case TOOLS.CONNECT:
+                            case TOOLS.EDIT:
+                                target.set({
+                                    backgroundColor: target.prevBackground,
+                                    dirty: true
+                                });
+                                _CANVAS.requestRenderAll();
+                                break;
                         }
-                        _CANVAS.requestRenderAll();
                     }
                 })
         },
@@ -854,13 +920,14 @@ const vextNoteStore = {
             const obj = {
                 data: Object.assign({}, toRaw(this.connectObject)),
                 location: this.connectLocation.slice(),
-                path: new fabric.Path(`M ${this.connectLocation[0]} ${this.connectLocation[1]} L ${x} ${y}`, {
+                path: new fabric.Line([this.connectLocation[0], this.connectLocation[1], x, y], {
                     stroke: this.color,
                     strokeWidth: 1,
                     strokeUniform: true,
-                    opacity: 1
+                    opacity: 1,
+                    selectable: false,
+                    hoverCursor: "default"
                 }),
-                visible: true
             };
             _CANVAS.add(obj.path);
 

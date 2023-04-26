@@ -25,18 +25,18 @@
         drawing = true;
         line.x0 = x;
         line.y0 = y;
-        lineObj = new fabric.Path(`M ${x} ${y} L ${x} ${y}`, {
+        lineObj = new fabric.Line([x, y, x, y], {
             stroke: note.color,
             strokeWidth: 1,
             strokeUniform: true,
-            opacity: 1
+            opacity: 1,
+            selectable: false
         });
         note.canvas.add(lineObj);
     }
 
     function update(x, y) {
-        lineObj.set("path", [["M", line.x0, line.y0], ["L", x, y]])
-        lineObj.dirty = true;
+        lineObj.set({ x2: x, y2: y, dirty: true },);
         note.canvas.requestRenderAll();
     }
 
