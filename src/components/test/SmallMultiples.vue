@@ -66,7 +66,7 @@
                 .attr("height", d => y(0)-y(d.y))
                 .attr("fill", "steelblue")
                 .on("click", function(event, d) {
-                    note.startConnect(d, event);
+                    note.startConnect(d, event.pageX, event.pageY);
                 })
     }
 

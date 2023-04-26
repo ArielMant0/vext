@@ -973,11 +973,11 @@ const vextNoteStore = {
             }
         },
 
-        startConnect(element, event) {
+        startConnect(element, x, y) {
             if (this.currentLayer === null || this.tool !== TOOLS.CONNECT ||
                 this.currentLayer.group.length === 0) return;
 
-            const coords = getCanvasCoords(event.pageX, event.pageY)
+            const coords = getCanvasCoords(x, y)
             this.connectObject = element;
             this.connectLocation = coords;
             const connectEvent = new CustomEvent("v-connectstart", { detail: {
@@ -989,11 +989,11 @@ const vextNoteStore = {
             window.dispatchEvent(connectEvent)
         },
 
-        moveConnect(event) {
+        moveConnect(x, y) {
             if (this.currentLayer === null || this.tool !== TOOLS.CONNECT ||
                 this.currentLayer.group.length === 0) return;
 
-            const coords = getCanvasCoords(event.pageX, event.pageY)
+            const coords = getCanvasCoords(x, y)
             const connectEvent = new CustomEvent("v-connectmove", { detail: {
                 x: coords[0], y: coords[1],
             } });
@@ -1001,7 +1001,7 @@ const vextNoteStore = {
             window.dispatchEvent(connectEvent, coords[0], coords[1])
         },
 
-        endConnect(event) {
+        endConnect(x, y) {
             setCanvasPointerEvents(false);
 
             if (this.currentLayer === null || this.tool !== TOOLS.CONNECT ||
@@ -1009,7 +1009,7 @@ const vextNoteStore = {
 
             _CANVAS.discardActiveObject();
 
-            const coords = getCanvasCoords(event.pageX, event.pageY)
+            const coords = getCanvasCoords(x, y)
             const point = new fabric.Point(coords[0], coords[1]);
             const annotation = this.currentLayer.group.find(d => d.containsPoint(point));
             if (!annotation) return;

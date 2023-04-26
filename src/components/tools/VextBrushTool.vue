@@ -39,7 +39,7 @@
             </template>
         </v-slider>
 
-        <VextColorViewer/>
+        <VextColorViewer @color-change="readColor"/>
     </div>
 </template>
 
@@ -50,6 +50,9 @@
      */
     import { ref, watch, onMounted } from 'vue';
     import { useVextNote } from '@/store/note'
+    import { useVextInput } from '@/store/input';
+    import { fabric } from 'fabric';
+
     import VextColorViewer from '@/components/tools/VextColorViewer';
 
     const props = defineProps({
@@ -66,12 +69,27 @@
     });
 
     const note = useVextNote();
+    const input = useVextInput();
     const size = ref(props.initialSize);
     const decimation = ref(note.brushDecimation);
+
+    const preview = new fabric.Circle({
+        top: 10,
+        left: 10,
+        stroke: "black",
+        strokeWidth: 1,
+        fill: note.color,
+        radius: props.initialSize * 0.5
+    })
 
     function readBrushSize() {
         if (note.brushSize !== size.value) {
             size.value = note.brushSize;
+            preview.set({
+                radius: size.value*0.5,
+                dirty: true
+            });
+            note.canvas.requestRenderAll();
         }
     }
     function readBrushDecimation() {
@@ -80,7 +98,14 @@
         }
     }
 
-    function transferBrushSize(value) { note.setBrushSize(value); }
+    function transferBrushSize(value) {
+        note.setBrushSize(value);
+        preview.set({
+            radius: value*0.5,
+            dirty: true
+        });
+        note.canvas.requestRenderAll();
+    }
     function transferDecimation(value) { note.setBrushDecimation(value); }
 
     function setBrushSize(brushSize) {
@@ -90,10 +115,38 @@
         }
     }
 
+    function movePreview() {
+        if (preview.visible) {
+            const coords = input.getPointerMove(note.canvas.upperCanvasEl)
+            preview.set({
+                left: coords[0] - size.value*0.5,
+                top: coords[1] - size.value*0.5,
+                dirty: true
+            });
+            note.canvas.requestRenderAll();
+        }
+    }
+
+    function onSwitch() {
+        preview.visible = note.tool === note.tools.BRUSH;
+    }
+
+    function readColor(color) {
+        preview.set({
+            fill: color,
+            dirty: true
+        });
+        note.canvas.requestRenderAll();
+    }
+
     onMounted(function() {
         readBrushSize();
         readBrushDecimation()
+        note.canvas.add(preview);
     });
+
+    watch(() => note.tool, onSwitch);
+    watch(() => input.pointerMove, movePreview)
 
     watch(() => note.brushSize, readBrushSize)
     watch(() => note.brushDecimation, readBrushDecimation)

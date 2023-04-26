@@ -52,11 +52,13 @@
         },
     });
 
+    const emits = defineEmits(["color-change"]);
+
     const note = useVextNote();
     note.setColorPrimary(props.colorPrimary)
     note.setColorSecondary(props.colorSecondary)
 
-    const { activeColor, color0, color1, swatch } = storeToRefs(note);
+    const { activeColor, color0, color1 } = storeToRefs(note);
 
     const tmpColor = ref(props.colorPrimary)
     const tmpActive = ref(0);
@@ -67,9 +69,11 @@
         } else {
             note.setColorSecondary(tmpColor.value)
         }
+        emits("color-change", tmpColor.value);
     }
     function chooseColor() {
         note.selectColor(tmpActive.value);
+        emits("color-change", note.color);
     }
     function readColor() {
         tmpColor.value = note.color;

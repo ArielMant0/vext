@@ -53,6 +53,7 @@
     import { ref, onMounted, watch } from 'vue';
     import { useVextNote } from '@/store/note'
     import { useVextState } from '@/store/state';
+    import { useVextInput } from '@/store/input';
 
     const props = defineProps({
         /**
@@ -150,6 +151,7 @@
         }
     });
 
+    const input = useVextInput();
     const state = useVextState();
     const note = useVextNote();
     const { tool, tools, enabled } = storeToRefs(note);
@@ -192,25 +194,28 @@
     }
 
     function init() {
-        window.addEventListener("keyup", onKeyUp);
-        setToolSwitch();
+        input.init();
     }
 
-    function onPointerDown(event) {
-        const type = event.pointerType;
-        if (type === 'pen' && tool.value !== tools.value.BRUSH) {
-            lastTool.value = tool.value;
-            note.setTool(tools.value.BRUSH, false);
-        } else if (type !== 'pen' && tool.value === tools.value.BRUSH) {
-            note.setTool(lastTool.value, false);
+    function onPointerDown() {
+        const type = input.pointerDownType;
+        if (props.autoToolSwitch) {
+            if (type === 'pen' && tool.value !== tools.value.BRUSH) {
+                lastTool.value = tool.value;
+                note.setTool(tools.value.BRUSH, false);
+            } else if (type !== 'pen' && tool.value === tools.value.BRUSH) {
+                note.setTool(lastTool.value, false);
+            }
         }
     }
 
-    function onKeyUp(event) {
+    function onKeyDown() {
         const focus = document.activeElement;
         if (!enabled.value || (focus !== null && focus.tagName === "INPUT")) return;
 
         if (focus !== null) focus.blur()
+
+        const event = input.getKey(true);
 
         if (activeText.value !== null && event.key !== "Delete") {
             updateTextNode(event.key)
@@ -224,10 +229,10 @@
                         note.setTool(which, false);
                         break;
                     case 'object':
-                        if ((which.shift && event.shiftKey) ||
-                            (which.alt && event.altKey) ||
-                            (which.ctrl && event.ctrlKey) ||
-                            (which.meta && event.metaKey)) {
+                        if ((which.shift && event.shift) ||
+                            (which.alt && event.alt) ||
+                            (which.ctrl && event.ctrl) ||
+                            (which.meta && event.meta)) {
                             note.setTool(which.mode, false);
                         }
                         break;
@@ -238,14 +243,6 @@
                         break;
                 }
             }
-        }
-    }
-
-    function setToolSwitch() {
-        if (props.autoToolSwitch) {
-            window.addEventListener("pointerdown", onPointerDown);
-        } else {
-            window.removeEventListener("pointerdown", onPointerDown)
         }
     }
 
@@ -287,6 +284,7 @@
     watch(() => note.tool, loadTool);
     watch(() => note.activeLayer, loadState)
 
-    watch(() => props.autoToolSwitch, setToolSwitch)
+    watch(() => input.pointerDown, onPointerDown);
+    watch(() => input.keyTime, onKeyDown);
 
 </script>

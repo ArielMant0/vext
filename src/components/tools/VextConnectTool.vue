@@ -7,11 +7,13 @@
 
 <script setup>
 
-    import { reactive, ref, onMounted } from 'vue';
+    import { watch, reactive, ref, onMounted } from 'vue';
     import { useVextNote } from '@/store/note';
     import { fabric } from 'fabric';
+    import { useVextInput } from '@/store/input';
 
     const note = useVextNote();
+    const input = useVextInput()
     const line = reactive({
         x0: 0,
         y0: 0,
@@ -63,20 +65,20 @@
                 end();
             }
         })
-
-        window.addEventListener("pointermove", function(event) {
-            if (note.tool === note.tools.CONNECT && drawing) {
-                note.moveConnect(event);
-            }
-        })
-        window.addEventListener("pointerup", function(event) {
-            if (note.tool === note.tools.CONNECT && drawing) {
-                note.endConnect(event);
-            }
-        })
-
     }
 
     onMounted(init);
+
+    watch(() => input.pointerDown, function() {
+        if (note.tool === note.tools.CONNECT && drawing) {
+            note.endConnect(input.dx, input.dy);
+        }
+    })
+
+    watch(() => input.pointerMove, function() {
+        if (note.tool === note.tools.CONNECT && drawing) {
+            note.moveConnect(input.mx, input.my);
+        }
+    })
 
 </script>
