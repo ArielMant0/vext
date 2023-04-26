@@ -7,14 +7,14 @@
             <v-btn icon="mdi-format-text" size="small" round value="text"/>
         </v-btn-toggle>
         <div v-if="shape === 'circle'" style="display: flex;" class="mt-2">
-            <v-text-field v-model="dimx" type="number" label="radius" density="compact" variant="outlined" class="vext-small-num"></v-text-field>
+            <v-text-field v-model="brushShape.size0" type="number" label="radius" density="compact" variant="outlined" class="vext-small-num"></v-text-field>
         </div>
         <div v-else-if="shape === 'text'" style="display: flex;" class="mt-2">
-            <v-text-field v-model="dimx" type="number" label="font size" density="compact" variant="outlined" class="vext-small-num"></v-text-field>
+            <v-text-field v-model="brushShape.size0" type="number" label="font size" density="compact" variant="outlined" class="vext-small-num"></v-text-field>
         </div>
         <div v-else style="display: flex;" class="mt-2">
-            <v-text-field v-model="dimx" type="number" label="width" density="compact" variant="outlined" class="vext-small-num"></v-text-field>
-            <v-text-field v-model="dimy" type="number" label="height" density="compact" variant="outlined" class="vext-small-num"></v-text-field>
+            <v-text-field v-model="brushShape.size0" type="number" label="width" density="compact" variant="outlined" class="vext-small-num"></v-text-field>
+            <v-text-field v-model="brushShape.size1" type="number" label="height" density="compact" variant="outlined" class="vext-small-num"></v-text-field>
         </div>
         <div class="text-caption">stroke width</div>
         <v-slider v-model="strokeWidth" min="1" max="250" step="1" thumb-size="15" density="compact">
@@ -31,7 +31,6 @@
         </v-slider>
         <v-select v-if="shape !== 'text'" v-model="stroke" label="stroke" :items="['primary color', 'secondary color', 'none']" density="compact" variant="solo" style="max-width: 275px;"></v-select>
         <v-select v-if="shape !== 'text'" v-model="fill" label="fill" :items="['primary color', 'secondary color', 'none']" density="compact" variant="solo" style="max-width: 275px;"></v-select>
-        <v-btn size="small" @click="addObject" color="primary" class="mb-3">add item</v-btn>
         <VextColorViewer/>
     </div>
 </template>
@@ -40,7 +39,7 @@
     /**
      * Component to add simple shapes or text to the NoteCanvas.
      */
-    import { ref } from 'vue';
+    import { ref, onMounted, toRaw, watch, reactive } from 'vue';
     import { fabric } from 'fabric';
     import { useVextNote } from '@/store/note';
     import { useVextApp } from '@/store/app';
@@ -63,70 +62,163 @@
     ]);
 
     const strokeWidth = ref(note.brushSize)
-    const dimx = ref(30)
-    const dimy = ref(30)
 
     const stroke = ref("primary color")
     const fill = ref("primary color")
 
-    function addObject() {
-        let obj;
+    const brushShape = reactive({
+        x: 10,
+        y: 10,
+        size0: 30,
+        size1: 30,
+        obj: null
+    })
 
-        if (fill.value === "none" && stroke.value === "none") {
-            // show alert
-            app.error("at least one of 'fill' or 'stroke' must have a color");
-            return;
+    function readColor(value) {
+        return value === "none" ? null :
+            (value === "primary color" ? note.color0 : note.color1)
+    }
+
+    function initBrushShape() {
+
+        if (brushShape.obj) {
+            note.canvas.remove(toRaw(brushShape.obj));
         }
 
         switch(shape.value) {
             case "rectangle":
-                obj = new fabric.Rect({
-                    width: dimx.value, height: dimy.value,
-                    top: 10, left: 10,
-                    stroke: stroke.value === "none" ? null :
-                        (stroke.value === "primary color" ? note.color0 : note.color1),
-                    strokeWidth: strokeWidth.value,
-                    strokeUniform: true,
-                    fill: fill.value === "none" ? null :
-                        (fill.value === "primary color" ? note.color0 : note.color1)
-                });
+                brushShape.obj = new fabric.Rect(getShapeOptions());
                 break;
             case "circle":
-                obj = new fabric.Circle({
-                    radius: dimx.value,
-                    top: 10, left: 10,
-                    stroke: stroke.value === "none" ? null :
-                        (stroke.value === "primary color" ? note.color0 : note.color1),
-                    strokeWidth: strokeWidth.value,
-                    strokeUniform: true,
-                    fill: fill.value === "none" ? null :
-                        (fill.value === "primary color" ? note.color0 : note.color1)
-                });
+                brushShape.obj = new fabric.Circle(getShapeOptions());
                 break;
             case "triangle":
-                obj = new fabric.Triangle({
-                    width: dimx.value, height: dimy.value,
-                    top: 10, left: 10,
-                    stroke: stroke.value === "none" ? null :
-                        (stroke.value === "primary color" ? note.color0 : note.color1),
-                    strokeWidth: strokeWidth.value,
-                    strokeUniform: true,
-                    fill: fill.value === "none" ? null :
-                        (fill.value === "primary color" ? note.color0 : note.color1)
-                });
+                brushShape.obj = new fabric.Triangle(getShapeOptions());
                 break;
             case "text":
-                obj = new fabric.Text("new text", {
-                    fontFamily: "Avenir", top: 10, left: 10,
-                    fontSize: dimx.value,
-                    fill: note.color,
-                });
-                obj.onSelect = () => emit("select", obj);
-                obj.onDeselect = () => emit("deselect");
+                brushShape.obj = new fabric.Text("new text", getShapeOptions());
                 break;
         }
 
-        note.addObject(obj)
+        note.canvas.add(toRaw(brushShape.obj))
     }
+
+    function updateShape() {
+        brushShape.obj.set(getShapeOptions());
+        brushShape.obj.set("dirty", true)
+        note.canvas.requestRenderAll();
+    }
+
+    function addShape() {
+        if (brushShape.obj) {
+            if (fill.value === "none" && stroke.value === "none") {
+                // show alert
+                app.error("at least one of 'fill' or 'stroke' must have a color");
+                return;
+            }
+
+            note.canvas.remove(toRaw(brushShape.obj));
+
+            let newObj;
+            switch(shape.value) {
+                case "rectangle":
+                    newObj = new fabric.Rect(getShapeOptions());
+                    break;
+                case "circle":
+                    newObj = new fabric.Circle(getShapeOptions());
+                    break;
+                case "triangle":
+                    newObj = new fabric.Triangle(getShapeOptions());
+                    break;
+                case "text":
+                    newObj = new fabric.Text("new text", getShapeOptions());
+                    newObj.onSelect = () => emit("select", newObj);
+                    newObj.onDeselect = () => emit("deselect")
+                    break;
+            }
+
+            note.addObject(newObj)
+            initBrushShape();
+        }
+    }
+
+    function getShapeOptions() {
+        switch(shape.value) {
+            case "rectangle":
+                return {
+                    width: brushShape.size0,
+                    height: brushShape.size1,
+                    top: brushShape.y-brushShape.size1*0.5,
+                    left: brushShape.x-brushShape.size0*0.5,
+                    stroke: readColor(stroke.value),
+                    strokeWidth: strokeWidth.value,
+                    strokeUniform: true,
+                    fill: readColor(fill.value)
+                };
+            case "circle":
+                return{
+                    radius: brushShape.size0,
+                    top: brushShape.y-brushShape.size0,
+                    left: brushShape.x-brushShape.size0,
+                    stroke: readColor(stroke.value),
+                    strokeWidth: strokeWidth.value,
+                    strokeUniform: true,
+                    fill: readColor(fill.value)
+                };
+            case "triangle":
+                return {
+                    width: brushShape.size0,
+                    height: brushShape.size1,
+                    top: brushShape.y-brushShape.size1*0.5,
+                    left: brushShape.x-brushShape.size0*0.5,
+                    stroke: readColor(stroke.value),
+                    strokeWidth: strokeWidth.value,
+                    strokeUniform: true,
+                    fill: readColor(fill.value)
+                };
+            case "text":
+                return {
+                    fontFamily: "Avenir",
+                    top: brushShape.y,
+                    left: brushShape.x,
+                    fontSize: brushShape.size0,
+                    fill: note.color,
+                };
+        }
+    }
+
+    onMounted(function() {
+        initBrushShape();
+
+        note.canvas
+        .on("mouse:up", function() {
+            if (note.tool === note.tools.SHAPE) {
+                addShape();
+            }
+        })
+        .on("mouse:move", function(event) {
+            if (note.tool === note.tools.SHAPE) {
+                brushShape.x = event.pointer.x;
+                brushShape.y = event.pointer.y;
+                updateShape();
+            }
+        })
+
+    })
+
+    function createOrDestroyShape() {
+        if (note.tool === note.tools.SHAPE) {
+            initBrushShape();
+        } else {
+            if (brushShape.obj) {
+                note.canvas.remove(toRaw(brushShape.obj));
+            }
+            brushShape.obj = null;
+            note.canvas.renderAll();
+        }
+    }
+
+    watch(shape, initBrushShape);
+    watch(() => note.tool, createOrDestroyShape)
 
 </script>

@@ -32,6 +32,7 @@ function canSelect(tool) {
         case TOOLS.BRUSH:
         case TOOLS.LAYER:
         case TOOLS.CONNECT:
+        case TOOLS.SHAPE:
             return false;
         default:
             return true;
@@ -487,7 +488,6 @@ const vextNoteStore = {
                         _CANVAS.isDrawingMode = true;
                         setCanvasPointerEvents(true);
                         break;
-                    case TOOLS.SELECT:
                     case TOOLS.LAYER:
                     case TOOLS.CONNECT:
                         _CANVAS.isDrawingMode = false;
