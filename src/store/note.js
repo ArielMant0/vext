@@ -576,7 +576,7 @@ const vextNoteStore = {
         },
 
         addObject(obj, addToCanvas=true, record=true) {
-            if (!this.enabled) return;
+            if (!this.enabled) return null;
 
             if (this.layerMode === LAYER_MODES.ANNOTATE) {
                 // no state available
@@ -584,7 +584,7 @@ const vextNoteStore = {
                     if (!addToCanvas) {
                         _CANVAS.remove(obj);
                     }
-                    return;
+                    return null;
                 }
 
                 const l = this.layerFromStateHash(this.currentState.hash);
@@ -610,10 +610,12 @@ const vextNoteStore = {
                     this.removeLastObject.bind(this, this.activeLayer, false),
                 );
             }
+
+            return obj.uuid;
         },
 
         addObjects(objs, addToCanvas=true, record=true) {
-            if (!this.enabled) return;
+            if (!this.enabled) return null;
 
             if (this.layerMode === LAYER_MODES.ANNOTATE && this.currentState !== null) {
                 const l = this.layerFromStateHash(this.currentState.hash);
@@ -642,10 +644,14 @@ const vextNoteStore = {
                     this.removeLastObject.bind(this, this.activeLayer, false),
                 );
             }
+
+            return objs.map(d => d.uuid);
         },
 
         addObjectFromJSON(json, layer=null, record=true) {
-            if (!this.enabled) return;
+
+            if (!this.enabled) return null;
+
             layer = layer === null ? this.activeLayer : layer;
             const index = this.getLayerIndex(layer)
             const obj = createFabricObject(json.type, json);
@@ -664,10 +670,14 @@ const vextNoteStore = {
                     this.removeLastObject.bind(this, layer, false),
                 );
             }
+
+            return obj.uuid;
         },
 
         addObjectsFromJSON(json, layer=null, record=true) {
-            if (!this.enabled) return;
+
+            if (!this.enabled) return null;
+
             layer = layer === null ? this.activeLayer : layer;
             const index = this.getLayerIndex(layer)
             const objs = json.map(d => createFabricObject(d.type, d));
@@ -691,10 +701,14 @@ const vextNoteStore = {
                     this.removeObjects.bind(this, uuids, layer, false),
                 );
             }
+
+            return objs.map(d => d.uuid);
         },
 
         removeObject(uuid, layer=null, record=true) {
-            if (!this.enabled) return;
+
+            if (!this.enabled) return null;
+
             const layerIdx = this.getLayerIndex(layer === null ? this.activeLayer : layer);
             const idx = this.layers[layerIdx].group.findIndex(obj => obj.get("uuid") === uuid);
             if (idx >= 0) {
@@ -722,7 +736,9 @@ const vextNoteStore = {
         },
 
         removeObjects(uuids, layer=null, record=true) {
-            if (!this.enabled) return;
+
+            if (!this.enabled) return null;
+
             const layerIdx = this.getLayerIndex(layer === null ? this.activeLayer : layer);
             const objs = this.layers[layerIdx].group.filter(d => uuids.includes(d.get("uuid")));
             const objsJson = objs.map(d => {
@@ -751,7 +767,9 @@ const vextNoteStore = {
         },
 
         removeLastObject(layer=null, record=true) {
-            if (!this.enabled) return;
+
+            if (!this.enabled) return null;
+
             const index = this.getLayerIndex(layer === null ? this.activeLayer : layer);
             if (this.layers[index].group.length > 0) {
 
@@ -777,11 +795,26 @@ const vextNoteStore = {
             }
         },
 
-        getCurrentObj() {
+        setActiveObject(uuid, layer=null) {
+
+            const layerIdx = this.getLayerIndex(layer === null ? this.activeLayer : layer);
+            if (layerIdx >= 0) {
+
+                const obj = this.layers[layerIdx].group.find(d => d.uuid === uuid);
+                if (obj) {
+                    _CANVAS.setActiveObject(obj);
+                    return true;
+                }
+            }
+
+            return false;
+        },
+
+        getActiveObject() {
             return this.activeObject;
         },
 
-        deleteCurrentObj(record=true) {
+        deleteActiveObject(record=true) {
             if (!this.enabled) return;
             const obj = _CANVAS.getActiveObject();
             if (obj) {

@@ -215,7 +215,7 @@
         if (activeText.value !== null && event.key !== "Delete") {
             updateTextNode(event.key)
         } else if (event.key === "Delete" || event.key === "Backspace") {
-            note.deleteCurrentObj();
+            note.deleteActiveObject();
         } else {
             const which = props.hotkeyMap[event.key];
             if (which) {

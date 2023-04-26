@@ -47,7 +47,7 @@
 
     const note = useVextNote();
     const app = useVextApp();
-    const shape = ref("circle");
+    const shape = ref("text");
 
     const emit = defineEmits([
         /**
@@ -64,7 +64,7 @@
     const strokeWidth = ref(note.brushSize)
 
     const stroke = ref("primary color")
-    const fill = ref("primary color")
+    const fill = ref("none")
 
     const brushShape = reactive({
         x: 10,
@@ -131,13 +131,18 @@
                     newObj = new fabric.Triangle(getShapeOptions());
                     break;
                 case "text":
-                    newObj = new fabric.Text("new text", getShapeOptions());
+                    newObj = new fabric.Text("", getShapeOptions());
                     newObj.onSelect = () => emit("select", newObj);
                     newObj.onDeselect = () => emit("deselect")
                     break;
             }
 
-            note.addObject(newObj)
+            const uuid = note.addObject(newObj)
+
+            if (shape.value === "text") {
+                note.setActiveObject(uuid);
+            }
+
             initBrushShape();
         }
     }

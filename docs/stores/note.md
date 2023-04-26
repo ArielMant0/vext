@@ -211,7 +211,7 @@
 > Get the currently active fabric.js selection.
 > <br>`@returns` active object
 
-### deleteCurrentObj
+### deleteActiveObject
 
 > Deletes the object currently selected in fabric.js, if it exists.
 > <br>`@param {boolean}` record - whether to record this action in history
