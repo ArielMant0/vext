@@ -2,6 +2,8 @@ import hash from 'object-hash'
 import { defineStore } from "pinia"
 import { toRaw } from 'vue';
 
+let EID = 0;
+
 const vextStateStore = {
 
     state: () => {
@@ -9,14 +11,18 @@ const vextStateStore = {
             data: null,
             hash: null,
             dataChange: false,
-            callback: null,
+            dataChangeTime: null,
+            callbacks: {
+                change: [],
+                load: []
+            },
         };
     },
 
     actions: {
 
-        calcHash() {
-            return hash(this.data);
+        calcHash(data=this.data) {
+            return hash(data);
         },
 
         checkChanges() {
@@ -28,24 +34,46 @@ const vextStateStore = {
             return this.dataChange;
         },
 
-        setCallback(func) {
-            this.callback = func;
+        on(event, func) {
+            if (!this.callbacks[event]) {
+                return null;
+            }
+            const id = EID++;
+            this.callbacks[event].push({
+                id: id,
+                func: func
+            })
+            return id;
+        },
+
+        off(event, id) {
+            if (!this.callbacks[event]) {
+                return null;
+            }
+            const idx = this.callbacks[event].findIndex(d => d.id === id);
+            if (idx >= 0) {
+                this.callbacks[event].splice(idx, 1);
+            }
         },
 
         setData(data, check=true) {
             this.data = data;
             if (check) {
                 this.checkChanges();
-            } else {
-                this.hash = this.calcHash();
             }
+            this.callbacks.change.forEach(f => f.func(toRaw(data)))
+
         },
 
         loadState(state) {
-            this.setData(JSON.parse(state), false);
+            const stateObj = JSON.parse(state)
+            this.setData(stateObj, false);
             if (this.callback !== null) {
                 this.callback(this.data);
             }
+            window.dispatchEvent(new CustomEvent("vext-state-load", {
+                detail: stateObj
+            }));
         },
 
         resetDataChange() {
