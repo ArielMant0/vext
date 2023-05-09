@@ -9,7 +9,8 @@ const vextStateStore = {
     state: () => {
         return {
             data: null,
-            hash: null,
+            history: [],
+            historySize: 25,
             dataChange: false,
             dataChangeTime: null,
             callbacks: {
@@ -17,6 +18,10 @@ const vextStateStore = {
                 load: []
             },
         };
+    },
+
+    getters: {
+        hash: state => state.history.length > 0 ? state.history[state.history.length-1].hash : null
     },
 
     actions: {
@@ -28,8 +33,15 @@ const vextStateStore = {
         checkChanges() {
             const newHash = this.calcHash();
             if (newHash !== this.hash) {
-                this.hash = newHash;
+                this.history.push({
+                    hash: newHash,
+                    state: JSON.stringify(toRaw(this.data)),
+                });
+                if (this.history.length > this.historySize) {
+                    this.history.splice(0, this.history.length-this.historySize)
+                }
                 this.dataChange = true;
+                this.dataChangeTime = Date.now();
             }
             return this.dataChange;
         },
@@ -47,9 +59,7 @@ const vextStateStore = {
         },
 
         off(event, id) {
-            if (!this.callbacks[event]) {
-                return null;
-            }
+            if (!this.callbacks[event]) return null;
             const idx = this.callbacks[event].findIndex(d => d.id === id);
             if (idx >= 0) {
                 this.callbacks[event].splice(idx, 1);
@@ -58,22 +68,16 @@ const vextStateStore = {
 
         setData(data, check=true) {
             this.data = data;
-            if (check) {
-                this.checkChanges();
+            if (check && this.checkChanges()) {
+                this.callbacks.change.forEach(f => f.func(toRaw(data)));
             }
-            this.callbacks.change.forEach(f => f.func(toRaw(data)))
 
         },
 
         loadState(state) {
             const stateObj = JSON.parse(state)
             this.setData(stateObj, false);
-            if (this.callback !== null) {
-                this.callback(this.data);
-            }
-            window.dispatchEvent(new CustomEvent("vext-state-load", {
-                detail: stateObj
-            }));
+            this.callbacks.load.forEach(f => f.func(toRaw(this.data)))
         },
 
         resetDataChange() {
@@ -92,7 +96,9 @@ const vextStateStore = {
 
         clear() {
             this.data = null;
-            this.hash = null;
+            this.dataChange = false;
+            this.dataChangeTime = null;
+            this.history = [];
         },
 
     },

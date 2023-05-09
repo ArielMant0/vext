@@ -14,7 +14,7 @@ export const useTestStore = defineStore("vext-test", {
 
         init() {
             const state = useVextState();
-            state.setCallback(this.loadState.bind(this));
+            state.on("load", this.loadState.bind(this));
             this.setState();
         },
 

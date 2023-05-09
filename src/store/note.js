@@ -120,6 +120,7 @@ const vextNoteStore = {
             activeLayer: null,
             layerMode: LAYER_MODES.ANNOTATE,
             LAYER_ID_IDX: 0,
+            previewLayerID: null,
 
             activeObjectUUID: null,
             activeObject: null,
@@ -148,16 +149,24 @@ const vextNoteStore = {
         canvas: () => _CANVAS,
         layerModeValues: () => Object.values(LAYER_MODES),
         layerModeEnum: () => LAYER_MODES,
-        currentLayer: (state) => {
+        currentLayer: state => {
             if (state.activeLayer === null) return null;
-            return state.layers[state.getLayerIndex(state.activeLayer)]
+            return state.getLayer(state.activeLayer);
+        },
+        previewLayer: state => {
+            if (state.previewLayerID === null) return null;
+            return state.getLayer(state.previewLayerID);
+        },
+        userLayers: state => {
+            if (state.previewLayerID === null) return state.layers;
+            return state.layers.filter(d => d.id !== state.previewLayerID);
         },
 
-        color: (state) => state.activeColor === 0 ? state.color0 : state.color1,
-        layerColors: (state) => state.layers.map(t => t.color),
+        color: state => state.activeColor === 0 ? state.color0 : state.color1,
+        layerColors: state => state.layers.map(t => t.color),
 
-        nextColor: (state) => state.defaultColors[state.layers.length % state.defaultColors.length],
-        nextID: (state) => "layer " + state.LAYER_ID_IDX,
+        nextColor: state => state.defaultColors[state.layers.length % state.defaultColors.length],
+        nextID: state => "layer " + state.LAYER_ID_IDX,
     },
 
     actions: {
@@ -178,6 +187,11 @@ const vextNoteStore = {
             return this.layers.findIndex(d => d.id === id)
         },
 
+        getLayer(id) {
+            const idx = this.getLayerIndex(id);
+            return idx >= 0 ? this.layers[idx] : null;
+        },
+
         overwriteState(state) {
             const layer = this.currentLayer;
             if (layer) {
@@ -192,10 +206,10 @@ const vextNoteStore = {
         renameLayer(oldId, newId) {
             if (!this.enabled) return false;
 
-            const idx = this.getLayerIndex(oldId);
-            if (idx >= 0) {
+            const l = this.getLayer(oldId);
+            if (l !== null) {
                 if (this.isUniqueID(newId)) {
-                    this.layers[idx].id = newId;
+                    l.id = newId;
                     if (this.activeLayer === oldId) {
                         this.activeLayer = newId;
                     }
@@ -268,7 +282,10 @@ const vextNoteStore = {
                 this.layers.splice(i0, 1);
 
                 if (idInto == this.activeLayer) {
-                    this.layers[i1].group.forEach(d => d.set("visible", true))
+                    this.layers[i1].group.forEach(d => d.set({
+                        visible: true,
+                        dirty: true
+                    }));
                     _CANVAS.requestRenderAll();
                 }
             } else {
@@ -291,7 +308,7 @@ const vextNoteStore = {
                 history.do("add layer " + id,
                     this.addLayer.bind(this, state, false, id, color, width, height, json, comments, connections),
                     this.removeLayer.bind(this, id, false)
-                )
+                );
             }
 
             this.layers.splice(0, 0, {
@@ -933,11 +950,36 @@ const vextNoteStore = {
         },
 
         layerFromStateHash(hash) {
-            return this.layers.find(t => t.state.hash === hash)
+            return this.layers.find(t => t.state.hash === hash && t.id !== this.previewLayerID)
         },
 
         setState(state) {
             this.currentState = state;
+            if (this.previewLayerID === null) {
+                this.addLayer(state, false);
+                this.previewLayerID = this.activeLayer;
+            } else {
+                const layer = this.getLayer(this.previewLayerID);
+                if (layer !== null) {
+                    layer.state = state;
+                    layer.width = _CANVAS.getWidth();
+                    layer.height = _CANVAS.getHeight();
+                    layer.time = new Date(Date.now());
+                }
+            }
+        },
+
+        selectPreviewLayer() {
+            if (this.previewLayerID === null) {
+                if (this.currentState !== null) {
+                    this.addLayer(this.currentState, false);
+                    this.previewLayerID = this.activeLayer
+                } else {
+                    // TODO: do sth!?
+                    return;
+                }
+            }
+            this.setActiveLayer(this.previewLayerID);
         },
 
         addConnection(annotation) {

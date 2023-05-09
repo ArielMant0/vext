@@ -195,6 +195,7 @@
 
     function init() {
         input.init();
+        state.on("change", saveState);
     }
 
     function onPointerDown() {
@@ -263,11 +264,13 @@
             if (layer) {
                 // load matching layer
                 note.setActiveLayer(layer.id);
-                note.setState(state.exportState(true))
+                note.setState(state.exportState(true));
             } else {
                 // set state and hide current layer
-                note.setState(state.exportState(false))
-                note.setLayerVisibility(false);
+                note.setState(state.exportState(false));
+                if (note.layerMode === note.layerModeEnum.ANNOTATE) {
+                    note.selectPreviewLayer();
+                }
             }
         }
     }
@@ -280,7 +283,6 @@
 
     onMounted(init);
 
-    watch(() => state.hash, saveState)
     watch(() => note.tool, loadTool);
     watch(() => note.activeLayer, loadState)
 
