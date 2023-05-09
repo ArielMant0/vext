@@ -74,7 +74,7 @@
 
             <v-item v-if="previewLayer" :key="previewLayer.id" :value="previewLayer.id">
                 <div class="text-caption mb-1">working layer</div>
-                <LayerInfo :data="previewLayer"
+                <VextLayerInfo :data="previewLayer"
                     :active="previewLayer.id === activeLayer"
                     :modify-name="false"
                     :annotations="false"
@@ -90,7 +90,7 @@
 
             <div class="text-caption mb-1">annotation layers</div>
             <v-item v-for="layer in layerSearch" :key="layer.id" :value="layer.id">
-                <LayerInfo :data="layer"
+                <VextLayerInfo :data="layer"
                     :active="layer.id === activeLayer"
                     :tree-depth="treeDepth"
                     :tooltip-delay="tooltipDelay"
@@ -140,7 +140,7 @@
     import { useVextNote } from '@/store/note';
     import { storeToRefs } from 'pinia';
     import { useVextState } from '@/store/state';
-    import LayerInfo from './LayerInfo.vue';
+    import VextLayerInfo from './VextLayerInfo.vue';
 
     const state = useVextState();
 

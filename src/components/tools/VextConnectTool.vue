@@ -49,18 +49,18 @@
     }
 
     function init() {
-        window.addEventListener("v-connectstart", function(event) {
+        note.on("connect:start", function(data) {
             if (note.tool === note.tools.CONNECT) {
-                datapoint.value = event.detail.source;
-                start(event.detail.x, event.detail.y);
+                datapoint.value = data.source;
+                start(data.x, data.y);
             }
         })
-        window.addEventListener("v-connectmove", function(event) {
+        note.on("connect:move", function(data) {
             if (note.tool === note.tools.CONNECT && drawing) {
-                update(event.detail.x, event.detail.y);
+                update(data.x, data.y);
             }
         })
-        window.addEventListener("v-connectend", function(event) {
+        note.on("connect:end connect:cancel", function() {
             if (note.tool === note.tools.CONNECT && drawing) {
                 end();
             }

@@ -38,6 +38,7 @@
         <ScatterPlot :n="count"/>
         <SmallMultiples :rows="rows"/>
       </div>
+      <VextPointerMenu/>
       <VextGlobalToolTip/>
     </section>
   </div>
@@ -48,6 +49,7 @@
     import VextNoteCanvas from '@/components/VextNoteCanvas.vue'
     import VextGlobalToolTip from '@/components/VextGlobalToolTip.vue';
     import VextNoteDrawer from '@/components/VextNoteDrawer.vue';
+    import VextPointerMenu from '@/components/VextPointerMenu.vue';
 
     import { ref, reactive, computed, onMounted } from 'vue'
     import { useElementSize } from '@vueuse/core'

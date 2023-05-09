@@ -5,6 +5,7 @@ import { toRaw } from 'vue';
 import { v4 as uuidv4 } from 'uuid';
 import { useExportPDF } from "@/use/export-pdf";
 import { useExportZIP } from "@/use/export-zip";
+import EventHandler from "@/use/event-handler";
 
 const TOOLS = Object.freeze({
     BRUSH: "brush",
@@ -100,6 +101,8 @@ function jsonToConn(json, annotation) {
     }
 }
 
+const EVENTS = new EventHandler();
+
 const vextNoteStore = {
 
     state: () => {
@@ -177,6 +180,18 @@ const vextNoteStore = {
 
         disable() {
             this.enabled = false;
+        },
+
+        emit(name, data) {
+            EVENTS.emit(name, data);
+        },
+
+        on(name, handler) {
+            return EVENTS.on(name, handler);
+        },
+
+        off(name, handler) {
+            return EVENTS.off(name, handler);
         },
 
         isUniqueID(id) {
@@ -628,6 +643,8 @@ const vextNoteStore = {
                 );
             }
 
+            this.emit("annotation:created", obj)
+
             return obj.uuid;
         },
 
@@ -884,14 +901,17 @@ const vextNoteStore = {
                 .on("selection:created", () => {
                     this.activeObject = parseObject(_CANVAS.getActiveObject(), this.currentLayer);
                     this.activeObjectUUID = this.activeObject.uuid;
+                    this.emit("selection:created")
                 })
                 .on("selection:updated", () => {
                     this.activeObject = parseObject(_CANVAS.getActiveObject(), this.currentLayer);
                     this.activeObjectUUID = this.activeObject.uuid;
+                    this.emit("selection:updated")
                 })
                 .on("selection:cleared", () => {
                     this.activeObject = null;
                     this.activeObjectUUID = null;
+                    this.emit("selection:cleared")
                 })
                 .on("object:modified", ({ target }) => {
                     if (target.get("uuid") === this.activeObjectUUID) {
@@ -1013,6 +1033,8 @@ const vextNoteStore = {
             } else {
                 this.currentLayer.connections[uuid] = [obj];
             }
+
+            this.emit("connect:created", obj);
         },
 
         startConnect(element, x, y) {
@@ -1022,13 +1044,11 @@ const vextNoteStore = {
             const coords = getCanvasCoords(x, y)
             this.connectObject = element;
             this.connectLocation = coords;
-            const connectEvent = new CustomEvent("v-connectstart", { detail: {
+            this.emit("connect:start", {
                 x: coords[0], y: coords[1], source: element
-            } });
+            });
 
             setCanvasPointerEvents(true);
-
-            window.dispatchEvent(connectEvent)
         },
 
         moveConnect(x, y) {
@@ -1036,11 +1056,7 @@ const vextNoteStore = {
                 this.currentLayer.group.length === 0) return;
 
             const coords = getCanvasCoords(x, y)
-            const connectEvent = new CustomEvent("v-connectmove", { detail: {
-                x: coords[0], y: coords[1],
-            } });
-
-            window.dispatchEvent(connectEvent, coords[0], coords[1])
+            this.emit("connect:move", { x: coords[0], y: coords[1] });
         },
 
         endConnect(x, y) {
@@ -1054,15 +1070,12 @@ const vextNoteStore = {
             const coords = getCanvasCoords(x, y)
             const point = new fabric.Point(coords[0], coords[1]);
             const annotation = this.currentLayer.group.find(d => d.containsPoint(point));
-            if (!annotation) return;
-
-            const connectEvent = new CustomEvent("v-connectend", { detail: {
-                x: coords[0], y: coords[1], target: annotation
-            } });
-
-            window.dispatchEvent(connectEvent)
-
-            this.addConnection(annotation);
+            if (!annotation) {
+                this.emit("connect:cancel");
+            } else {
+                this.emit("connect:end", { x: coords[0], y: coords[1], target: annotation });
+                this.addConnection(annotation);
+            }
         },
 
         async importLayer(file) {

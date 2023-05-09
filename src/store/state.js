@@ -1,3 +1,4 @@
+import EventHandler from '@/use/event-handler';
 import hash from 'object-hash'
 import { defineStore } from "pinia"
 import { toRaw } from 'vue';
@@ -13,10 +14,7 @@ const vextStateStore = {
             historySize: 25,
             dataChange: false,
             dataChangeTime: null,
-            callbacks: {
-                change: [],
-                load: []
-            },
+            events: new EventHandler()
         };
     },
 
@@ -47,29 +45,17 @@ const vextStateStore = {
         },
 
         on(event, func) {
-            if (!this.callbacks[event]) {
-                return null;
-            }
-            const id = EID++;
-            this.callbacks[event].push({
-                id: id,
-                func: func
-            })
-            return id;
+            return this.events.on(event, func);
         },
 
         off(event, id) {
-            if (!this.callbacks[event]) return null;
-            const idx = this.callbacks[event].findIndex(d => d.id === id);
-            if (idx >= 0) {
-                this.callbacks[event].splice(idx, 1);
-            }
+            return this.events.off(event, id);
         },
 
         setData(data, check=true) {
             this.data = data;
             if (check && this.checkChanges()) {
-                this.callbacks.change.forEach(f => f.func(toRaw(data)));
+                this.events.emit("change", toRaw(data))
             }
 
         },
@@ -77,7 +63,7 @@ const vextStateStore = {
         loadState(state) {
             const stateObj = JSON.parse(state)
             this.setData(stateObj, false);
-            this.callbacks.load.forEach(f => f.func(toRaw(this.data)))
+            this.events.emit("load", toRaw(this.data))
         },
 
         resetDataChange() {

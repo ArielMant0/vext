@@ -12,6 +12,14 @@ function getCoordinates(x, y, element) {
     return [left, top]
 }
 
+const ACTIONS = Object.freeze({
+    ACCEPT: "accept",
+    ACCEPT_IGNORE: "accept_ignore",
+    CANCEL: "cancel",
+    CANCEL_IGNORE: "cancel_ignore",
+    MODE: "mode",
+});
+
 const vextInputStore = {
 
     state: () => {
@@ -39,6 +47,10 @@ const vextInputStore = {
             },
             keyTime: null,
         };
+    },
+
+    getters: {
+        ACTIONS: () => ACTIONS,
     },
 
     actions: {

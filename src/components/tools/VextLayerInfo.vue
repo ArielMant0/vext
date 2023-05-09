@@ -17,7 +17,7 @@
             <slot name="title" :item="data">
                 <v-tooltip text="click to toggle layer info panel" location="top" :open-delay="tooltipDelay">
                     <template v-slot:activator="{ props }">
-                        <span v-bind="props" class="vext-layer-selector" @click="toggleLayerOpen()">{{ data.id }}</span>
+                        <span v-bind="props" class="vext-layer-selector" @click="toggleLayerOpen()">{{ data.id.length < 10 ? data.id : data.id.slice(0, 8)+".." }}</span>
                     </template>
                 </v-tooltip>
             </slot>
@@ -25,6 +25,7 @@
             <slot name="title-append" :item="data">
                 <span>
                     <v-chip v-if="annotations" label size="small" prepend-icon="mdi-pencil" class="mr-2">{{ data.group.length }}</v-chip>
+                    <v-chip v-if="connections" label size="small" prepend-icon="mdi-connection" class="mr-2">{{ numConnections }}</v-chip>
                     <v-tooltip text="click to toggle layer visibility" location="top" :open-delay="tooltipDelay">
                         <template v-slot:activator="{ props }">
                             <v-chip v-bind="props" size="small" label @click="toggleVisibility()">
@@ -43,6 +44,7 @@
                 <v-text-field
                     v-model="name"
                     hide-details
+                    @keyup="nameOnKeyUp"
                     density="compact"
                     append-icon="mdi-sync"
                     @click:append="setLayerName()"/>
@@ -138,7 +140,7 @@
 <script setup>
 
     import { useVextNote } from '@/store/note';
-    import { ref } from 'vue';
+    import { ref, computed } from 'vue';
 
     const props = defineProps({
         data: {
@@ -154,6 +156,10 @@
             default: true
         },
         annotations: {
+            type: Boolean,
+            default: true
+        },
+        connections: {
             type: Boolean,
             default: true
         },
@@ -200,6 +206,14 @@
     const mergeDialog = ref(false);
     const delDialog = ref(false);
 
+    const numConnections = computed(() => {
+        const vals = Object.values(props.data.connections);
+        if (vals) {
+            return vals.reduce((sum, d) => sum + d.length, 0);
+        }
+        return 0;
+    });
+
     function mergeLayers() { mergeDialog.value = true; }
     function executeMergeLayers() {
         note.mergeLayers(props.data.id);
@@ -208,6 +222,11 @@
 
     function setLayerName() { note.renameLayer(props.data.id, name.value); }
 
+    function nameOnKeyUp(event) {
+        if (event.code === "Enter") {
+            setLayerName();
+        }
+    }
     function commentOnKeyUp(event) {
         if (event.code === "Enter") {
             addLayerComment();
@@ -227,7 +246,7 @@
     function selectLayer() { note.setActiveLayer(props.data.id) }
     function onNodeClick(node) { emit("node-click", node); }
 
-    function changeOpacity() { note.setLayerOpacity(opacityValue.value) }
+    function changeOpacity() { note.setLayerOpacity(opacityValue.value, props.data.id) }
 
     function removeLayer() {
         delDialog.value = false;
