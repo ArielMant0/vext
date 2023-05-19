@@ -1,28 +1,28 @@
 <template>
-    <div v-if="open" class="menu" :style="{ 'left': (x-30)+'px', 'top': (y-30)+'px' }">
-        <!-- <input :checked="isOpen" class="menu-toggler" type="checkbox" @click="isOpen = !isOpen"> -->
-        <!-- <label for="menu-toggler"></label> -->
-        <v-btn icon="mdi-close-thick" rounded color="primary" variant="text" @click="close"/>
-        <ul style="border-radius: 50%" class="bg-primary">
-            <li v-for="(item, i) in items" :key="item.id" class="menu-item" :style="{ 'transform': `translate(-15px) rotate(${i*degree}deg) translate(80px)` }">
-                <v-btn :style="{ 'transform': `rotate(${-i*degree}deg)` }"
-                    :icon="item.icon" rounded :color="item.color"
-                    size="small" @click="action(item)"/>
-            </li>
-        </ul>
+    <div v-if="open" class="wrapper" @click="close">
+        <div class="menu" :style="{ 'left': (x-30)+'px', 'top': (y-25)+'px' }">
+            <v-btn icon="mdi-close-thick" rounded color="primary" variant="text" @click="close"/>
+            <ul style="border-radius: 50%" class="bg-primary">
+                <li v-for="(item, i) in items" :key="item.id" class="menu-item" :style="{ 'transform': `rotate(${i*degree}deg) translate(60px)` }">
+                    <v-btn :style="{ 'transform': `rotate(${-i*degree}deg)` }"
+                        :icon="item.icon" rounded :color="item.color"
+                        size="small" @click="action(item)"/>
+                </li>
+            </ul>
+        </div>
     </div>
 </template>
 
 <script setup>
-    import { ref, computed, watch } from 'vue';
+    import { computed } from 'vue';
 
-    const emit = defineEmits(["click", "close"])
+    const emit = defineEmits(["click", "update:modelValue"])
     const props = defineProps({
         items: {
             type: Array,
             required: true
         },
-        open: {
+        modelValue: {
             type: Boolean,
             default: true
         },
@@ -36,54 +36,50 @@
         },
     })
 
-    const isOpen = ref(props.open);
+    const open = computed({
+        get() {
+            return props.modelValue
+        },
+        set(value) {
+            emit("update:modelValue", value)
+        }
+    })
     const degree = computed(() => 360 / props.items.length)
 
-    function action(item) { emit("click", item) }
-    function close() {
-        isOpen.value = false;
-        emit("close");
+    function action(item) {
+        emit("click", item)
+        close();
     }
+    function close() { open.value = false; }
 
 </script>
 
 <style scoped>
+.wrapper {
+    width: 100vw;
+    height: 100vh;
+    position: fixed;
+    z-index: 3004;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
 .menu {
     position: fixed;
+    display: flex;
+    justify-content: center;
     margin: 0;
     padding: 0;
-    z-index: 3004;
-}
-.menu-toggler {
-  position: absolute;
-  display: block;
-  top:0;
-  bottom:0;
-  right:0;
-  left:0;
-  margin:auto;
-  width:40px;
-  height:40px;
-  opacity:0;
-  cursor:pointer;
-}
-ul .menu-item {
-  opacity: 1;
-}
-ul .menu-item a {
-  pointer-events:auto;
+    z-index: 3006;
 }
 .menu-item {
-  position: absolute;
-  display: block;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  margin: auto;
-  width: 80px;
-  height: 80px;
-  opacity: 0;
-  transition: 0.5s;
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
 }
 </style>

@@ -127,7 +127,8 @@
         const canvas = new fabric.Canvas(canvasNode.value, {
             isDrawingMode: note.tool === note.tools.BRUSH,
             renderOnAddRemove: true,
-            backgroundColor: props.backgroundColor
+            backgroundColor: props.backgroundColor,
+            enablePointerEvents: true
         });
         note.setCanvas(canvas);
 

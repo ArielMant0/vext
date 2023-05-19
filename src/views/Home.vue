@@ -1,6 +1,6 @@
 <template>
   <div class="d-flex" style="height: 96%">
-    <VextNoteDrawer :auto-tool-switch="false"/>
+    <VextNoteDrawer v-model="open" :auto-tool-switch="false"/>
     <section ref="el" class="ma-2" style="width: 100%; height: 100%;">
         <div class="d-flex">
             <v-btn class="ma-1" size="small" variant="outlined" @click="setHeight(500)">500</v-btn>
@@ -38,8 +38,6 @@
         <ScatterPlot :n="count"/>
         <SmallMultiples :rows="rows"/>
       </div>
-      <VextPointerMenu/>
-      <VextGlobalToolTip/>
     </section>
   </div>
 </template>
@@ -47,9 +45,7 @@
 <script setup>
 
     import VextNoteCanvas from '@/components/VextNoteCanvas.vue'
-    import VextGlobalToolTip from '@/components/VextGlobalToolTip.vue';
     import VextNoteDrawer from '@/components/VextNoteDrawer.vue';
-    import VextPointerMenu from '@/components/VextPointerMenu.vue';
 
     import { ref, reactive, computed, onMounted } from 'vue'
     import { useElementSize } from '@vueuse/core'
@@ -61,6 +57,7 @@
     import { storeToRefs } from 'pinia';
 
     const el = ref(null);
+    const open = ref(false);
     const visAreaWidth = computed(() => size.width);
     const visAreaHeight = computed(() => size.height);
     const size = reactive(useElementSize(el));

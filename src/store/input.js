@@ -19,6 +19,8 @@ const ACTIONS = Object.freeze({
     CANCEL: "cancel",
     CANCEL_IGNORE: "cancel_ignore",
     MODE: "mode",
+    UNDO: "undo",
+    REDO: "redo"
 });
 
 const EVENTS = new EventHandler();

@@ -63,6 +63,7 @@
         note.on("connect:end connect:cancel", function() {
             if (note.tool === note.tools.CONNECT && drawing) {
                 end();
+                note.emit("pointer-menu");
             }
         })
     }

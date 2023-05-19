@@ -33,31 +33,35 @@ const vextHistoryStore = {
             });
         },
 
-        undo() {
+        undo(remember=true) {
             if (this.hasUndo) {
                 const action = this.undoStack.pop();
                 action.undo()
-                this.redoStack.push({
-                    description: "undo " + action.description,
-                    do: action.undo,
-                    undo: action.do,
-                    time: action.time,
-                });
+                if (remember) {
+                    this.redoStack.push({
+                        description: "undo " + action.description,
+                        do: action.undo,
+                        undo: action.do,
+                        time: action.time,
+                    });
+                }
             }
         },
 
-        redo() {
+        redo(remember=true) {
             if (this.hasRedo) {
                 const action = this.redoStack.pop();
                 action.undo()
                 const desc = action.description.startsWith("undo ") ?
                     action.description.slice(5) : action.description;
-                this.undoStack.push({
-                    description: desc,
-                    do: action.undo,
-                    undo: action.do,
-                    time: action.time,
-                });
+                if (remember) {
+                    this.undoStack.push({
+                        description: desc,
+                        do: action.undo,
+                        undo: action.do,
+                        time: action.time,
+                    });
+                }
             }
         },
 

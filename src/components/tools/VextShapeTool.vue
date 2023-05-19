@@ -48,18 +48,7 @@
     const note = useVextNote();
     const app = useVextApp();
     const shape = ref("text");
-
-    const emit = defineEmits([
-        /**
-         * This event is emitted when a text object is selected with the
-         * object itself as the event payload.
-         */
-        "select",
-        /**
-         * This event is emitted when a text object is deselected.
-         */
-        "deselect"
-    ]);
+    const mode = ref("create");
 
     const strokeWidth = ref(note.brushSize)
 
@@ -96,9 +85,12 @@
                 brushShape.obj = new fabric.Triangle(getShapeOptions());
                 break;
             case "text":
-                brushShape.obj = new fabric.Text("new text", getShapeOptions());
+                brushShape.obj = new fabric.Text("text", getShapeOptions());
                 break;
         }
+
+        brushShape.obj.set("selectable", false);
+        brushShape.obj.set("hoverCursor", "default");
 
         note.canvas.add(toRaw(brushShape.obj))
     }
@@ -131,16 +123,15 @@
                     newObj = new fabric.Triangle(getShapeOptions());
                     break;
                 case "text":
-                    newObj = new fabric.Text("", getShapeOptions());
-                    newObj.onSelect = () => emit("select", newObj);
-                    newObj.onDeselect = () => emit("deselect")
+                    newObj = new fabric.IText("", getShapeOptions());
                     break;
             }
 
             const uuid = note.addObject(newObj)
 
+            note.setActiveObject(uuid);
             if (shape.value === "text") {
-                note.setActiveObject(uuid);
+                newObj.enterEditing();
             }
 
             initBrushShape();
@@ -196,18 +187,33 @@
         initBrushShape();
 
         note.canvas
-        .on("mouse:up", function() {
-            if (note.tool === note.tools.SHAPE) {
-                addShape();
-            }
-        })
-        .on("mouse:move", function(event) {
-            if (note.tool === note.tools.SHAPE) {
+            .on("mouse:up", function() {
+                if (note.tool === note.tools.SHAPE) {
+                    if (mode.value === "create") {
+                        addShape();
+                        brushShape.obj.set("visible", false)
+                        brushShape.obj.set("dirty", true)
+                        note.canvas.requestRenderAll();
+                        mode.value = "modify";
+                    } else if (mode.value === "wait") {
+                        mode.value = "create";
+                    }
+                }
+            })
+            .on("mouse:move", function(event) {
                 brushShape.x = event.pointer.x;
                 brushShape.y = event.pointer.y;
-                updateShape();
-            }
-        })
+                if (note.tool === note.tools.SHAPE && mode.value !== "modify") {
+                    updateShape();
+                }
+            })
+            .on("selection:cleared", function() {
+                if (note.tool === note.tools.SHAPE && mode.value === "modify") {
+                    brushShape.obj.set("visible", true)
+                    updateShape();
+                    mode.value = "wait";
+                }
+            })
 
     })
 
@@ -219,7 +225,6 @@
                 note.canvas.remove(toRaw(brushShape.obj));
             }
             brushShape.obj = null;
-            note.canvas.renderAll();
         }
     }
 

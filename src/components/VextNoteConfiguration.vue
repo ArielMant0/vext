@@ -1,40 +1,42 @@
 <template>
-    <div :style="{ 'min-width': width+'px' }">
-        <v-tabs v-model="tmpTool" density="compact" mandatory @update:modelValue="setTool">
-            <v-tab :color="selectColor" style="min-width: 50px;padding: 0 4px 0 16px;" :prepend-icon="props.layerIcon" :value="tools.LAYER"></v-tab>
-            <v-tab :color="selectColor" style="min-width: 50px;padding: 0 4px 0 16px;" :prepend-icon="props.brushIcon" :value="tools.BRUSH"></v-tab>
-            <v-tab :color="selectColor" style="min-width: 50px;padding: 0 4px 0 16px;" :prepend-icon="props.shapeIcon" :value="tools.SHAPE"></v-tab>
-            <v-tab :color="selectColor" style="min-width: 50px;padding: 0 4px 0 16px;" :prepend-icon="props.connectIcon" :value="tools.CONNECT"></v-tab>
-            <v-tab :color="selectColor" style="min-width: 50px;padding: 0 4px 0 16px;" :prepend-icon="props.editIcon" :value="tools.EDIT"></v-tab>
-        </v-tabs>
+    <div>
+        <div :style="{ 'min-width': width+'px' }">
+            <v-tabs v-model="tmpTool" density="compact" mandatory @update:modelValue="setTool">
+                <v-tab :color="selectColor" style="min-width: 50px;padding: 0 4px 0 16px;" :prepend-icon="icons.layer" :value="tools.LAYER"></v-tab>
+                <v-tab :color="selectColor" style="min-width: 50px;padding: 0 4px 0 16px;" :prepend-icon="icons.brush" :value="tools.BRUSH"></v-tab>
+                <v-tab :color="selectColor" style="min-width: 50px;padding: 0 4px 0 16px;" :prepend-icon="icons.shape" :value="tools.SHAPE"></v-tab>
+                <v-tab :color="selectColor" style="min-width: 50px;padding: 0 4px 0 16px;" :prepend-icon="icons.connect" :value="tools.CONNECT"></v-tab>
+                <v-tab :color="selectColor" style="min-width: 50px;padding: 0 4px 0 16px;" :prepend-icon="icons.edit" :value="tools.EDIT"></v-tab>
+            </v-tabs>
 
-        <v-window v-model="tool">
-            <v-window-item :value="tools.LAYER">
-                <KeepAlive>
-                    <VextLayersTool :tooltip-delay="tooltipDelay"/>
-                </KeepAlive>
-            </v-window-item>
-            <v-window-item :value="tools.BRUSH">
-                <KeepAlive>
-                    <VextBrushTool/>
-                </KeepAlive>
-            </v-window-item>
-            <v-window-item :value="tools.SHAPE">
-                <KeepAlive>
-                    <VextShapeTool @select="onTextSelect" @deselect="onTextDeselect"/>
-                </KeepAlive>
-            </v-window-item>
-            <v-window-item :value="tools.CONNECT">
-                <KeepAlive>
-                    <VextConnectTool/>
-                </KeepAlive>
-            </v-window-item>
-            <v-window-item :value="tools.EDIT">
-                <KeepAlive>
-                    <VextEditTool/>
-                </KeepAlive>
-            </v-window-item>
-        </v-window>
+            <v-window v-model="tool">
+                <v-window-item :value="tools.LAYER">
+                    <KeepAlive>
+                        <VextLayersTool :tooltip-delay="tooltipDelay"/>
+                    </KeepAlive>
+                </v-window-item>
+                <v-window-item :value="tools.BRUSH">
+                    <KeepAlive>
+                        <VextBrushTool/>
+                    </KeepAlive>
+                </v-window-item>
+                <v-window-item :value="tools.SHAPE">
+                    <KeepAlive>
+                        <VextShapeTool/>
+                    </KeepAlive>
+                </v-window-item>
+                <v-window-item :value="tools.CONNECT">
+                    <KeepAlive>
+                        <VextConnectTool/>
+                    </KeepAlive>
+                </v-window-item>
+                <v-window-item :value="tools.EDIT">
+                    <KeepAlive>
+                        <VextEditTool/>
+                    </KeepAlive>
+                </v-window-item>
+            </v-window>
+        </div>
     </div>
 </template>
 
@@ -54,6 +56,7 @@
     import { useVextNote } from '@/store/note'
     import { useVextState } from '@/store/state';
     import { useVextInput } from '@/store/input';
+    import { toRaw } from 'vue';
 
     const props = defineProps({
         /**
@@ -64,39 +67,32 @@
             default: 280
         },
         /**
-         * Vuetify icon for the layers tool
+         * Object of icons to use for tools/modes etc.
+         *
+         * Default is:
+         * {
+         *     open: "mdi-backburger",
+         *     closed: "mdi-forwardburger",
+         *     layer: "mdi-layers",
+         *     brush: "mdi-draw",
+         *     shape: "mdi-shape",
+         *     connect: "mdi-connection",
+         *     edit: "mdi-cursor-pointer",
+         * }
          */
-        layerIcon: {
-            type: String,
-            default: "mdi-layers"
-        },
-        /**
-         * Vuetify icon for the edit tool
-         */
-        editIcon: {
-            type: String,
-            default: "mdi-cursor-pointer"
-        },
-        /**
-         * Vuetify icon for the shape tool
-         */
-        shapeIcon: {
-            type: String,
-            default: "mdi-shape"
-        },
-        /**
-         * Vuetify icon for the brush tool
-         */
-        brushIcon: {
-            type: String,
-            default: "mdi-draw"
-        },
-        /**
-         * Vuetify icon for the connection tool
-         */
-        connectIcon: {
-            type: String,
-            default: "mdi-connection"
+        icons: {
+            type: Object,
+            default() {
+                return {
+                    open: "mdi-backburger",
+                    closed: "mdi-forwardburger",
+                    layer: "mdi-layers",
+                    brush: "mdi-draw",
+                    shape: "mdi-shape",
+                    connect: "mdi-connection",
+                    edit: "mdi-cursor-pointer",
+                }
+            }
         },
         /**
          * How to color the icons in the small nav bar when they are selected.
@@ -155,9 +151,8 @@
     const state = useVextState();
     const note = useVextNote();
     const { tool, tools, enabled } = storeToRefs(note);
-    const tmpTool = ref(tool.value);
 
-    const activeText = ref(null);
+    const tmpTool = ref(tool.value);
     const lastTool = ref(tool.value);
 
     function setTool() {
@@ -169,32 +164,10 @@
         }
     }
 
-    function updateTextNode(key) {
-        const text = activeText.value.text;
-
-        switch(key) {
-            case "Backspace":
-                activeText.value.set("text", text.slice(0, text.length-1));
-                break;
-            case "Enter":
-                activeText.value.set("text", text + "\n");
-                break;
-            case "Delete": case "Control": case "Shift": case "CapsLock":
-            case "Escape": case "PrintScreen": case "ScrollLock": case "Pause":
-            case "NumLock": case "ArrowUp": case "ArrowDown": case "ArrowLeft":
-            case "ArrowRight": case "Clear": case "Home": case "PageUp":
-            case "PageDown": case "Insert": case "ContextMenu": case "Meta":
-            case "F1": case "F2": case "F3": case "F4":
-            case "F5": case "F6": case "F7": case "F8": case "F9":
-                break;
-            default:
-                activeText.value.set("text", text + key)
-        }
-        note.canvas.requestRenderAll();
-    }
-
     function init() {
         input.init();
+        input.on("pointerdown", onPointerDown)
+        input.on("keydown", onKeyDown)
         state.on("change", saveState);
     }
 
@@ -212,15 +185,16 @@
 
     function onKeyDown() {
         const focus = document.activeElement;
-        if (!enabled.value || (focus !== null && focus.tagName === "INPUT")) return;
+        const active = note.getActiveObject();
+
+        if (!enabled.value || (focus !== null && focus.tagName === "INPUT") ||
+            (active && active.isEditing)) return;
 
         if (focus !== null) focus.blur()
 
         const event = input.getKey(true);
 
-        if (activeText.value !== null && event.key !== "Delete") {
-            updateTextNode(event.key)
-        } else if (event.key === "Delete" || event.key === "Backspace") {
+        if (event.key === "Delete" || event.key === "Backspace") {
             note.deleteActiveObject();
         } else {
             const which = props.hotkeyMap[event.key];
@@ -246,9 +220,6 @@
             }
         }
     }
-
-    function onTextSelect(obj) { activeText.value = obj; }
-    function onTextDeselect() { activeText.value = null; }
 
     function saveState() {
         if (note.layerMode === note.layerModeEnum.STATE) {
@@ -285,8 +256,5 @@
 
     watch(() => note.tool, loadTool);
     watch(() => note.activeLayer, loadState)
-
-    watch(() => input.pointerDown, onPointerDown);
-    watch(() => input.keyTime, onKeyDown);
 
 </script>

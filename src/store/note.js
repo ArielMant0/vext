@@ -28,17 +28,7 @@ function setCanvasPointerEvents(enable) {
     _CANVAS.upperCanvasEl.style.pointerEvents = enable ? null : "none";
     _CANVAS.lowerCanvasEl.style.pointerEvents = enable ? null : "none";
 }
-function canSelect(tool) {
-    switch (tool) {
-        case TOOLS.BRUSH:
-        case TOOLS.LAYER:
-        case TOOLS.CONNECT:
-        case TOOLS.SHAPE:
-            return false;
-        default:
-            return true;
-    }
-}
+
 function parseObject(obj, layer) {
     return {
         layer: layer.id,
@@ -309,7 +299,7 @@ const vextNoteStore = {
 
         },
 
-        addLayer(state, record=false, id=null, color=null, width=null, height=null, items=[], comments=[], connections={}) {
+        addLayer(state, record=true, id=null, color=null, width=null, height=null, items=[], comments=[], connections={}) {
             if (!this.enabled) return;
 
             id = id === null ? this.nextID : id;
@@ -497,7 +487,7 @@ const vextNoteStore = {
             }
         },
 
-        setTool(tool, record=false) {
+        setTool(tool, record=true) {
             if (tool !== this.tool) {
                 if (record) {
                     const history = useVextHistory();
@@ -507,10 +497,7 @@ const vextNoteStore = {
                     );
                 }
 
-                const prev = canSelect(this.tool)
-                const next = canSelect(tool);
-
-                if (prev !== next && _CANVAS.getActiveObject() !== null) {
+                if (_CANVAS.getActiveObject() !== null) {
                     _CANVAS.discardActiveObject();
                     _CANVAS.requestRenderAll();
                 }
@@ -548,7 +535,7 @@ const vextNoteStore = {
             this.brushSize = newVal;
         },
 
-        setBrushDecimation(value, record=false) {
+        setBrushDecimation(value, record=true) {
             const newVal = Math.max(value, 0);
             if (record) {
                 const history = useVextHistory();
@@ -679,6 +666,8 @@ const vextNoteStore = {
                 );
             }
 
+            this.emit("annotation:created", objs)
+
             return objs.map(d => d.uuid);
         },
 
@@ -704,6 +693,8 @@ const vextNoteStore = {
                     this.removeLastObject.bind(this, layer, false),
                 );
             }
+
+            this.emit("annotation:created", obj)
 
             return obj.uuid;
         },
@@ -736,6 +727,8 @@ const vextNoteStore = {
                 );
             }
 
+            this.emit("annotation:created", objs)
+
             return objs.map(d => d.uuid);
         },
 
@@ -749,6 +742,10 @@ const vextNoteStore = {
 
                 const obj = this.layers[layerIdx].group.splice(idx, 1)[0];
                 const objJson = obj.toJSON(["uuid"]);
+                // discard
+                if (this.activeObjectUUID === obj.uuid) {
+                    _CANVAS.discardActiveObject();
+                }
                 _CANVAS.remove(toRaw(obj));
 
                 if (this.layers[layerIdx].connections[uuid]) {
@@ -782,6 +779,10 @@ const vextNoteStore = {
                 }
             });
             objs.forEach(d => {
+                // discard
+                if (this.activeObjectUUID === d.uuid) {
+                    _CANVAS.discardActiveObject();
+                }
                 _CANVAS.remove(toRaw(d))
                 if (this.layers[layerIdx].connections[d.uuid]) {
                     this.layers[layerIdx].connections[d.uuid].forEach(dd => {
@@ -809,6 +810,10 @@ const vextNoteStore = {
 
                 const obj = this.layers[index].group.pop()
                 const objJson = obj.toJSON(["uuid"]);
+                // discard
+                if (this.activeObjectUUID === obj.uuid) {
+                    _CANVAS.discardActiveObject();
+                }
                 _CANVAS.remove(toRaw(obj));
 
                 if (this.layers[index].connections[obj.uuid]) {
@@ -845,13 +850,25 @@ const vextNoteStore = {
         },
 
         getActiveObject() {
-            return this.activeObject;
+            return _CANVAS.getActiveObject();
+        },
+
+        discardActiveObject() {
+            _CANVAS.discardActiveObject();
         },
 
         deleteActiveObject(record=true) {
             if (!this.enabled) return;
             const obj = _CANVAS.getActiveObject();
             if (obj) {
+                // remove highlight
+                if (obj.isHover) {
+                    obj.set({
+                        backgroundColor: obj.prevBackground,
+                        isHover: false,
+                        dirty: true
+                    });
+                }
                 _CANVAS.discardActiveObject();
                 // group selection
                 if (obj.type === "activeSelection") {
@@ -896,6 +913,7 @@ const vextNoteStore = {
                     if (this.enabled && this.tool === TOOLS.BRUSH) {
                         // obj already part of the canvas
                         this.addObject(obj.path, false)
+                        this.emit("pointer-menu")
                     }
                 })
                 .on("selection:created", () => {
@@ -934,12 +952,13 @@ const vextNoteStore = {
                         }
                     }
                 })
-                .on("mouse:over", ({ target }) => {
+                .on("pointer:over", ({ target }) => {
                     if (target && target.selectable) {
                         switch (this.tool) {
                             case TOOLS.CONNECT:
                             case TOOLS.EDIT:
                                 target.set({
+                                    isHover: true,
                                     prevBackground: target.backgroundColor,
                                     backgroundColor: "rgba(200,200,200,0.5)",
                                     dirty: true
@@ -949,12 +968,13 @@ const vextNoteStore = {
                         }
                     }
                 })
-                .on("mouse:out", ({ target }) => {
+                .on("pointer:out", ({ target }) => {
                     if (target && target.selectable) {
                         switch (this.tool) {
                             case TOOLS.CONNECT:
                             case TOOLS.EDIT:
                                 target.set({
+                                    isHover: false,
                                     backgroundColor: target.prevBackground,
                                     dirty: true
                                 });
