@@ -7,21 +7,11 @@
         <v-divider></v-divider>
 
         <v-list nav density="compact" :selected="tmpTool" mandatory @update:selected="setTool" :disabled="!enabled">
-            <v-list-item :active-color="selectColor" :prepend-icon="layerIcon" :value="tools.LAYER">
-                <v-tooltip activator="parent" text="interact with your visualizations and modify|inspect|select layers" :open-delay="tooltipDelay"/>
-            </v-list-item>
-            <v-list-item :active-color="selectColor" :prepend-icon="brushIcon" :value="tools.BRUSH">
-                <v-tooltip activator="parent" text="choose brush settings for drawing on the VEXT canvas" :open-delay="tooltipDelay"/>
-            </v-list-item>
-            <v-list-item :active-color="selectColor" :prepend-icon="shapeIcon" :value="tools.SHAPE">
-                <v-tooltip activator="parent" text="add shapes or text to your VEXT canvas" :open-delay="tooltipDelay"/>
-            </v-list-item>
-            <v-list-item :active-color="selectColor" :prepend-icon="connectIcon" :value="tools.CONNECT">
-                <v-tooltip activator="parent" text="connect data points to annotations" :open-delay="tooltipDelay"/>
-            </v-list-item>
-            <v-list-item :active-color="selectColor" :prepend-icon="editIcon" :value="tools.EDIT">
-                <v-tooltip activator="parent" text="select items on the VEXT canvas to inspect or modify" :open-delay="tooltipDelay"/>
-            </v-list-item>
+            <v-list-item :active-color="selectColor" :prepend-icon="layerIcon" :value="tools.LAYER"/>
+            <v-list-item :active-color="selectColor" :prepend-icon="brushIcon" :value="tools.BRUSH"/>
+            <v-list-item :active-color="selectColor" :prepend-icon="shapeIcon" :value="tools.SHAPE"/>
+            <v-list-item :active-color="selectColor" :prepend-icon="connectIcon" :value="tools.CONNECT"/>
+            <v-list-item :active-color="selectColor" :prepend-icon="editIcon" :value="tools.EDIT"/>
         </v-list>
     </v-navigation-drawer>
 

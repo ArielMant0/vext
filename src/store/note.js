@@ -963,6 +963,8 @@ const vextNoteStore = {
                         }
                     }
                 })
+
+            this.emit("canvas:created", this.canvas);
         },
 
         hasStateHash(hash) {
