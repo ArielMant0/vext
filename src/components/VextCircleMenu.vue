@@ -4,9 +4,11 @@
             <v-btn icon="mdi-close-thick" rounded color="primary" variant="text" @click="close"/>
             <ul style="border-radius: 50%" class="bg-primary">
                 <li v-for="(item, i) in items" :key="item.id" class="menu-item" :style="{ 'transform': `rotate(${i*degree}deg) translate(60px)` }">
-                    <v-btn :style="{ 'transform': `rotate(${-i*degree}deg)` }"
-                        :icon="item.icon" rounded :color="item.color"
-                        size="small" @click="action(item)"/>
+                    <slot :item="item">
+                        <v-btn :style="{ 'transform': `rotate(${-i*degree}deg)` }"
+                            :icon="item.icon" rounded :color="item.color"
+                            size="small" @click="action(item)"/>
+                    </slot>
                 </li>
             </ul>
         </div>
@@ -16,7 +18,7 @@
 <script setup>
     import { computed } from 'vue';
 
-    const emit = defineEmits(["click", "update:modelValue"])
+    const emit = defineEmits(["click", "close", "update:modelValue"])
     const props = defineProps({
         items: {
             type: Array,
@@ -50,7 +52,10 @@
         emit("click", item)
         close();
     }
-    function close() { open.value = false; }
+    function close() {
+        emit("close")
+        open.value = false;
+    }
 
 </script>
 

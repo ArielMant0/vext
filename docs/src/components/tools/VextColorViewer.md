@@ -7,4 +7,10 @@
 | colorPrimary   | Initial color of the primary color   | string | -      | "#ff0000" |
 | colorSecondary | Initial color of the secondary color | string | -      | "#000000" |
 
+## Events
+
+| Event name   | Properties | Description |
+| ------------ | ---------- | ----------- |
+| color-change |            |
+
 ---

@@ -43,14 +43,19 @@
     import { fabric } from 'fabric';
     import { useVextNote } from '@/store/note';
     import { useVextApp } from '@/store/app';
+    import { useVextNoteSettings } from '@/store/note-settings';
+    import { storeToRefs } from 'pinia';
+    import { MODES } from '@/use/enums';
     import VextColorViewer from './VextColorViewer.vue';
 
     const note = useVextNote();
     const app = useVextApp();
-    const shape = ref("text");
+    const settings = useVextNoteSettings();
     const mode = ref("create");
 
-    const strokeWidth = ref(note.brushSize)
+    const { shape } = storeToRefs(settings);
+
+    const strokeWidth = ref(settings.shapeDim0)
 
     const stroke = ref("primary color")
     const fill = ref("none")
@@ -65,7 +70,7 @@
 
     function readColor(value) {
         return value === "none" ? null :
-            (value === "primary color" ? note.color0 : note.color1)
+            (value === "primary color" ? settings.color0 : settings.color1)
     }
 
     function initBrushShape() {
@@ -188,7 +193,7 @@
 
         note.canvas
             .on("mouse:up", function() {
-                if (note.tool === note.tools.SHAPE) {
+                if (note.mode === MODES.SHAPE && !settings.pointerMenu) {
                     if (mode.value === "create") {
                         addShape();
                         brushShape.obj.set("visible", false)
@@ -203,22 +208,22 @@
             .on("mouse:move", function(event) {
                 brushShape.x = event.pointer.x;
                 brushShape.y = event.pointer.y;
-                if (note.tool === note.tools.SHAPE && mode.value !== "modify") {
+                if (note.mode === MODES.SHAPE && mode.value !== "modify" && !settings.pointerMenu) {
                     updateShape();
                 }
             })
-            .on("selection:cleared", function() {
-                if (note.tool === note.tools.SHAPE && mode.value === "modify") {
+            .on("selection:cleared", function(event) {
+                if (note.mode === MODES.SHAPE && mode.value === "modify" && !settings.pointerMenu) {
                     brushShape.obj.set("visible", true)
                     updateShape();
-                    mode.value = "wait";
+                    mode.value = event.e ? "wait" : "create";
                 }
             })
 
     })
 
     function createOrDestroyShape() {
-        if (note.tool === note.tools.SHAPE) {
+        if (note.mode === MODES.SHAPE) {
             initBrushShape();
         } else {
             if (brushShape.obj) {
@@ -229,6 +234,6 @@
     }
 
     watch(shape, initBrushShape);
-    watch(() => note.tool, createOrDestroyShape)
+    watch(() => note.mode, createOrDestroyShape)
 
 </script>

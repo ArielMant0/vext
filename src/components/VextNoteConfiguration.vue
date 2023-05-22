@@ -1,36 +1,36 @@
 <template>
     <div>
         <div :style="{ 'min-width': width+'px' }">
-            <v-tabs v-model="tmpTool" density="compact" mandatory @update:modelValue="setTool">
-                <v-tab :color="selectColor" style="min-width: 50px;padding: 0 4px 0 16px;" :prepend-icon="icons.layer" :value="tools.LAYER"></v-tab>
-                <v-tab :color="selectColor" style="min-width: 50px;padding: 0 4px 0 16px;" :prepend-icon="icons.brush" :value="tools.BRUSH"></v-tab>
-                <v-tab :color="selectColor" style="min-width: 50px;padding: 0 4px 0 16px;" :prepend-icon="icons.shape" :value="tools.SHAPE"></v-tab>
-                <v-tab :color="selectColor" style="min-width: 50px;padding: 0 4px 0 16px;" :prepend-icon="icons.connect" :value="tools.CONNECT"></v-tab>
-                <v-tab :color="selectColor" style="min-width: 50px;padding: 0 4px 0 16px;" :prepend-icon="icons.edit" :value="tools.EDIT"></v-tab>
+            <v-tabs v-model="tmpMode" density="compact" mandatory @update:modelValue="setMode">
+                <v-tab :color="selectColor" style="min-width: 50px;padding: 0 4px 0 16px;" :prepend-icon="icons.layer" :value="MODES.LAYER"></v-tab>
+                <v-tab :color="selectColor" style="min-width: 50px;padding: 0 4px 0 16px;" :prepend-icon="icons.brush" :value="MODES.BRUSH"></v-tab>
+                <v-tab :color="selectColor" style="min-width: 50px;padding: 0 4px 0 16px;" :prepend-icon="icons.shape" :value="MODES.SHAPE"></v-tab>
+                <v-tab :color="selectColor" style="min-width: 50px;padding: 0 4px 0 16px;" :prepend-icon="icons.connect" :value="MODES.CONNECT"></v-tab>
+                <v-tab :color="selectColor" style="min-width: 50px;padding: 0 4px 0 16px;" :prepend-icon="icons.edit" :value="MODES.EDIT"></v-tab>
             </v-tabs>
 
-            <v-window v-model="tool">
-                <v-window-item :value="tools.LAYER">
+            <v-window v-model="mode">
+                <v-window-item :value="MODES.LAYER">
                     <KeepAlive>
                         <VextLayersTool :tooltip-delay="tooltipDelay"/>
                     </KeepAlive>
                 </v-window-item>
-                <v-window-item :value="tools.BRUSH">
+                <v-window-item :value="MODES.BRUSH">
                     <KeepAlive>
                         <VextBrushTool/>
                     </KeepAlive>
                 </v-window-item>
-                <v-window-item :value="tools.SHAPE">
+                <v-window-item :value="MODES.SHAPE">
                     <KeepAlive>
                         <VextShapeTool/>
                     </KeepAlive>
                 </v-window-item>
-                <v-window-item :value="tools.CONNECT">
+                <v-window-item :value="MODES.CONNECT">
                     <KeepAlive>
                         <VextConnectTool/>
                     </KeepAlive>
                 </v-window-item>
-                <v-window-item :value="tools.EDIT">
+                <v-window-item :value="MODES.EDIT">
                     <KeepAlive>
                         <VextEditTool/>
                     </KeepAlive>
@@ -56,7 +56,7 @@
     import { useVextNote } from '@/store/note'
     import { useVextState } from '@/store/state';
     import { useVextInput } from '@/store/input';
-    import { toRaw } from 'vue';
+    import { LAYER_MODES, MODES } from '@/use/enums';
 
     const props = defineProps({
         /**
@@ -141,7 +141,7 @@
          * Whether to switch between brush and other modes automatically, depending
          * on whether the pen is used to interact (or the mouse/touch).
          */
-        autoToolSwitch: {
+        autoModeSwitch: {
             type: Boolean,
             default: true,
         }
@@ -150,17 +150,17 @@
     const input = useVextInput();
     const state = useVextState();
     const note = useVextNote();
-    const { tool, tools, enabled } = storeToRefs(note);
+    const { mode, enabled } = storeToRefs(note);
 
-    const tmpTool = ref(tool.value);
-    const lastTool = ref(tool.value);
+    const tmpMode = ref(mode.value);
+    const lastMode = ref(mode.value);
 
-    function setTool() {
-        note.setTool(tmpTool.value);
+    function setMode() {
+        note.setMode(tmpMode.value);
     }
-    function loadTool() {
-        if (tool.value !== tmpTool.value) {
-            tmpTool.value = tool.value;
+    function loadMode() {
+        if (mode.value !== tmpMode.value) {
+            tmpMode.value = mode.value;
         }
     }
 
@@ -173,12 +173,12 @@
 
     function onPointerDown() {
         const type = input.pointerDownType;
-        if (props.autoToolSwitch) {
-            if (type === 'pen' && tool.value !== tools.value.BRUSH) {
-                lastTool.value = tool.value;
-                note.setTool(tools.value.BRUSH, false);
-            } else if (type !== 'pen' && tool.value === tools.value.BRUSH) {
-                note.setTool(lastTool.value, false);
+        if (props.autoModeSwitch) {
+            if (type === 'pen' && mode.value !== MODES.BRUSH) {
+                lastMode.value = mode.value;
+                note.setMode(MODES.BRUSH, false);
+            } else if (type !== 'pen' && mode.value === MODES.BRUSH) {
+                note.setMode(lastMode.value, false);
             }
         }
     }
@@ -201,19 +201,19 @@
             if (which) {
                 switch (typeof which) {
                     case 'string':
-                        note.setTool(which, false);
+                        note.setMode(which, false);
                         break;
                     case 'object':
                         if ((which.shift && event.shift) ||
                             (which.alt && event.alt) ||
                             (which.ctrl && event.ctrl) ||
                             (which.meta && event.meta)) {
-                            note.setTool(which.mode, false);
+                            note.setMode(which.mode, false);
                         }
                         break;
                     case 'function':
                         if (which.validator(event)) {
-                            note.setTool(which.mode, false);
+                            note.setMode(which.mode, false);
                         }
                         break;
                 }
@@ -222,7 +222,7 @@
     }
 
     function saveState() {
-        if (note.layerMode === note.layerModeEnum.STATE) {
+        if (note.layerMode === LAYER_MODES.STATE) {
             const layer = note.layerFromStateHash(state.hash);
             if (layer) {
                 note.setActiveLayer(layer.id);
@@ -239,7 +239,7 @@
             } else {
                 // set state and hide current layer
                 note.setState(state.exportState(false));
-                if (note.layerMode === note.layerModeEnum.ANNOTATE) {
+                if (note.layerMode === LAYER_MODES.ANNOTATE) {
                     note.selectPreviewLayer();
                 }
             }
@@ -254,7 +254,7 @@
 
     onMounted(init);
 
-    watch(() => note.tool, loadTool);
+    watch(mode, loadMode);
     watch(() => note.activeLayer, loadState)
 
 </script>

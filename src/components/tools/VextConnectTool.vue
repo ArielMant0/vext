@@ -11,6 +11,7 @@
     import { useVextNote } from '@/store/note';
     import { fabric } from 'fabric';
     import { useVextInput } from '@/store/input';
+    import { MODES } from '@/use/enums';
 
     const note = useVextNote();
     const input = useVextInput()
@@ -50,20 +51,19 @@
 
     function init() {
         note.on("connect:start", function(data) {
-            if (note.tool === note.tools.CONNECT) {
+            if (note.mode === MODES.CONNECT) {
                 datapoint.value = data.source;
                 start(data.x, data.y);
             }
         })
         note.on("connect:move", function(data) {
-            if (note.tool === note.tools.CONNECT && drawing) {
+            if (note.mode === MODES.CONNECT && drawing) {
                 update(data.x, data.y);
             }
         })
         note.on("connect:end connect:cancel", function() {
-            if (note.tool === note.tools.CONNECT && drawing) {
+            if (note.mode === MODES.CONNECT && drawing) {
                 end();
-                note.emit("pointer-menu");
             }
         })
     }
@@ -71,13 +71,13 @@
     onMounted(init);
 
     watch(() => input.pointerDown, function() {
-        if (note.tool === note.tools.CONNECT && drawing) {
+        if (note.mode === MODES.CONNECT && drawing) {
             note.endConnect(input.dx, input.dy);
         }
     })
 
     watch(() => input.pointerMove, function() {
-        if (note.tool === note.tools.CONNECT && drawing) {
+        if (note.mode === MODES.CONNECT && drawing) {
             note.moveConnect(input.mx, input.my);
         }
     })

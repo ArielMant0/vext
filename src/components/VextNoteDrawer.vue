@@ -6,12 +6,12 @@
 
         <v-divider></v-divider>
 
-        <v-list nav density="compact" :selected="tmpTool" mandatory @update:selected="setTool" :disabled="!enabled">
-            <v-list-item :active-color="selectColor" :prepend-icon="icons.layer" :value="tools.LAYER"/>
-            <v-list-item :active-color="selectColor" :prepend-icon="icons.brush" :value="tools.BRUSH"/>
-            <v-list-item :active-color="selectColor" :prepend-icon="icons.shape" :value="tools.SHAPE"/>
-            <v-list-item :active-color="selectColor" :prepend-icon="icons.connect" :value="tools.CONNECT"/>
-            <v-list-item :active-color="selectColor" :prepend-icon="icons.edit" :value="tools.EDIT"/>
+        <v-list nav density="compact" :selected="tmpMode" mandatory @update:selected="setMode" :disabled="!enabled">
+            <v-list-item :active-color="selectColor" :prepend-icon="icons.layer" :value="MODES.LAYER"/>
+            <v-list-item :active-color="selectColor" :prepend-icon="icons.brush" :value="MODES.BRUSH"/>
+            <v-list-item :active-color="selectColor" :prepend-icon="icons.shape" :value="MODES.SHAPE"/>
+            <v-list-item :active-color="selectColor" :prepend-icon="icons.connect" :value="MODES.CONNECT"/>
+            <v-list-item :active-color="selectColor" :prepend-icon="icons.edit" :value="MODES.EDIT"/>
         </v-list>
     </v-navigation-drawer>
 
@@ -21,11 +21,11 @@
             :hotkeys="hotkeys"
             :hotkeyMap="hotkeyMap"
             :tooltip-delay="tooltipDelay"
-            :auto-tool-switch="autoToolSwitch"
+            :auto-mode-switch="autoModeSwitch"
             :width="width-30"/>
     </v-navigation-drawer>
 
-    <VextPointerMenu :options="pointerMenuOptions"/>
+    <VextPointerMenu/>
     <VextGlobalToolTip/>
 </template>
 
@@ -37,6 +37,7 @@
     import VextNoteConfiguration from './VextNoteConfiguration.vue';
     import VextGlobalToolTip from '@/components/VextGlobalToolTip.vue';
     import VextPointerMenu from '@/components/VextPointerMenu.vue';
+import { MODES } from '@/use/enums';
 
     const props = defineProps({
         modelValue: {
@@ -135,7 +136,7 @@
          * Whether to switch between brush and other modes automatically, depending
          * on whether the pen is used to interact (or the mouse/touch).
          */
-        autoToolSwitch: {
+        autoModeSwitch: {
             type: Boolean,
             default: true,
         }
@@ -144,9 +145,9 @@
     const emit = defineEmits(["update:modelValue"])
 
     const note = useVextNote();
-    const { tool, tools, enabled } = storeToRefs(note);
+    const { mode, enabled } = storeToRefs(note);
 
-    const tmpTool = ref([tool.value]);
+    const tmpMode = ref([mode.value]);
     const open = computed({
         get() {
             return props.modelValue
@@ -156,74 +157,20 @@
         }
     });
 
-    const pointerMenuOptions = [
-        {
-            id: "undo",
-            icon: "mdi-undo",
-            action: "undo",
-            color: "default",
-        },{
-            id: "redo",
-            icon: "mdi-redo",
-            action: "redo",
-            color: "default",
-        },{
-            id: "accept",
-            icon: "mdi-check",
-            action: "accept",
-            color: "success",
-        },{
-            id: "accept_ignore",
-            icon: "mdi-check-all",
-            action: "accept_ignore",
-            color: "success",
-        },{
-            id: "cancel",
-            icon: "mdi-close-circle-outline",
-            action: "cancel",
-            color: "error",
-        },{
-            id: "cancel_ignore",
-            icon: "mdi-close-circle-multiple-outline",
-            action: "cancel_ignore",
-            color: "error",
-        },{
-            id: "brush",
-            icon: "mdi-draw",
-            action: "mode"
-        },{
-            id: "shape",
-            icon: "mdi-shape",
-            action: "mode"
-        },{
-            id: "edit",
-            icon: "mdi-cursor-pointer",
-            action: "mode"
-        },{
-            id: "layer",
-            icon: "mdi-layers",
-            action: "mode"
-        },{
-            id: "connect",
-            icon: "mdi-connection",
-            action: "mode"
-        }
-    ];
-
-    function setTool(toolValue) {
-        tmpTool.value[0] = toolValue[0];
-        if (tmpTool.value[0] !== tool.value) {
-            note.setTool(tmpTool.value[0]);
+    function setMode(modeValue) {
+        tmpMode.value[0] = modeValue[0];
+        if (tmpMode.value[0] !== mode.value) {
+            note.setMode(tmpMode.value[0]);
         } else {
             open.value = !open.value;
         }
     }
-    function loadTool() {
-        if (tool.value !== tmpTool.value[0]) {
-            tmpTool.value = [tool.value];
+    function loadMode() {
+        if (mode.value !== tmpMode.value[0]) {
+            tmpMode.value = [mode.value];
         }
     }
 
-    watch(() => note.tool, loadTool);
+    watch(mode, loadMode);
 
 </script>

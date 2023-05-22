@@ -8,6 +8,8 @@ import VextToolTip from './VextToolTip'
 import VextGlobalToolTip from './VextGlobalToolTip'
 import VextAlertBox from './VextAlertBox'
 import VextPointerMenu from './VextPointerMenu'
+import VextCircleMenu from './VextCircleMenu'
+import VextCircleSettingsMenu from './VextCircleSettingsMenu'
 
 import VextBrushTool from './tools/VextBrushTool'
 import VextEditTool from './tools/VextEditTool'
@@ -26,7 +28,10 @@ export {
     VextToolTip,
     VextGlobalToolTip,
     VextAlertBox,
+
     VextPointerMenu,
+    VextCircleMenu,
+    VextCircleSettingsMenu,
 
     VextBrushTool,
     VextEditTool,

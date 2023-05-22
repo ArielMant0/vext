@@ -2,8 +2,10 @@
     <div>
         <VextCircleMenu v-model="open"
             :items="visibleOptions" :x="x" :y="y"
-            @click="o => performAction(o.action, o.id)"/>
+            @click="o => performAction(o.action, o.id)"
+            @close="pointerMenu = false"/>
 
+        <VextCircleSettingsMenu v-model="openSettings" :x="x" :y="y" @close="pointerMenu = false"/>
 
         <div v-if="indicator && radius > 0" class="menu-indicator" :style="{ 'left': indicatorX+'px', 'top': indicatorY+'px', }">
 
@@ -26,19 +28,22 @@
 
 <script setup>
     import VextCircleMenu from './VextCircleMenu.vue';
+    import VextCircleSettingsMenu from './VextCircleSettingsMenu.vue';
     import { useVextInput } from '@/store/input';
     import { useVextNote } from '@/store/note';
     import { useVextHistory } from '@/store/history';
     import { storeToRefs } from 'pinia';
     import { ref, watch, computed, onMounted } from 'vue';
+    import { pointerMenuOptions } from '@/use/util';
+    import { useVextNoteSettings } from '@/store/note-settings';
+    import { ACTIONS } from '@/use/enums';
 
     const input = useVextInput();
     const note = useVextNote();
     const history = useVextHistory();
 
-    const { tool } = storeToRefs(note);
-    const { ACTIONS } = storeToRefs(input);
-
+    const { mode } = storeToRefs(note);
+    const { pointerMenu } = storeToRefs(useVextNoteSettings())
 
     const props = defineProps({
         onAction: {
@@ -76,38 +81,11 @@
         timeThresholdMax: {
             type: Number,
             default: 1000
-        },
-        options: {
-            type: Array,
-            default() {
-                return [
-                    {
-                        id: "accept",
-                        icon: "mdi-check",
-                        action: "accept",
-                        color: "success",
-                    },{
-                        id: "accept_ignore",
-                        icon: "mdi-check-all",
-                        action: "accept_ignore",
-                        color: "success",
-                    },{
-                        id: "cancel",
-                        icon: "mdi-close-circle-outline",
-                        action: "cancel",
-                        color: "error",
-                    },{
-                        id: "cancel_ignore",
-                        icon: "mdi-close-circle-multiple-outline",
-                        action: "cancel_ignore",
-                        color: "error",
-                    },
-                ]
-            }
         }
     });
 
     const open = ref(false)
+    const openSettings = ref(false)
 
     const ignore = ref(false);
     const x = ref(10);
@@ -125,41 +103,53 @@
 
     let trigger = ref("click");
 
+    const options = pointerMenuOptions();
+
     const visibleOptions = computed(() => {
-        return props.options.filter(d => {
+        return options.filter(d => {
             switch(d.action) {
-                case ACTIONS.value.ACCEPT:
-                case ACTIONS.value.ACCEPT_IGNORE:
-                case ACTIONS.value.CANCEL:
-                case ACTIONS.value.CANCEL_IGNORE:
+                case ACTIONS.ACCEPT:
+                case ACTIONS.ACCEPT_IGNORE:
+                case ACTIONS.CANCEL:
+                case ACTIONS.CANCEL_IGNORE:
                     return trigger.value !== "click"
-                case ACTIONS.value.UNDO:
-                case ACTIONS.value.REDO:
+                case ACTIONS.UNDO:
+                case ACTIONS.REDO:
                     return trigger.value === "click"
-                case ACTIONS.value.MODE:
-                    return d.id !== note.tool;
+                case ACTIONS.MODE:
+                    return d.id !== mode.value;
+                default:
+                    return true;
             }
         })
     });
 
     function performAction(action, id) {
         switch(action) {
-            case ACTIONS.value.ACCEPT_IGNORE:
+            case ACTIONS.ACCEPT_IGNORE:
                 ignore.value = true;
+                pointerMenu.value = false;
                 break;
-            case ACTIONS.value.CANCEL_IGNORE:
+            case ACTIONS.CANCEL_IGNORE:
                 ignore.value = true;
-            case ACTIONS.value.CANCEL:
+            case ACTIONS.CANCEL:
                 history.undo(false);
+                pointerMenu.value = false;
                 break;
-            case ACTIONS.value.UNDO:
+            case ACTIONS.UNDO:
                 history.undo();
+                pointerMenu.value = false;
                 break;
-            case ACTIONS.value.REDO:
+            case ACTIONS.REDO:
                 history.redo();
+                pointerMenu.value = false;
                 break;
-            case ACTIONS.value.MODE:
-                note.setTool(id);
+            case ACTIONS.MODE:
+                note.setMode(id);
+                pointerMenu.value = false;
+                break;
+            case ACTIONS.SETTINGS:
+                openSettings.value = true;
                 break;
         }
     }
@@ -173,7 +163,8 @@
 
     function onPointerDown(event) {
 
-        if (!props.onGesture || open.value) return;
+        if (!props.onGesture || open.value ||  pointerMenu.value ||
+            lastPointerDown !== null) return;
 
         lastPointerDown = performance.now();
         lastX = event.pageX;
@@ -195,12 +186,7 @@
                     x.value = lastX + 10;
                     y.value = lastY + 5;
                     open.value = true;
-
-                    // remove last path
-                    if (note.tool === note.tools.BRUSH) {
-                        note.removeLastObject();
-                    }
-
+                    pointerMenu.value = true;
                     return;
                 }
                 // if we reached the minimum time
@@ -215,39 +201,41 @@
                 window.cancelAnimationFrame(handle);
                 lastPointerDown = null;
                 radius.value = 0;
-                open.value = false;
             }
         }
 
         let handle = window.requestAnimationFrame(indicator);
     }
     function onPointerUp(event) {
-        if (!props.onGesture) return;
-        if (lastPointerDown !== null){
-            const duration = performance.now() - lastPointerDown;
-            if (Math.abs(lastX - event.pageX) > 10 || Math.abs(lastY - event.pageY) > 10 ||
-                duration < props.timeThresholdMax
-            ) {
-                lastPointerDown = null;
-                radius.value = 0;
-                open.value = false;
-            }
+        if (!props.onGesture || open.value || pointerMenu.value ||
+            lastPointerDown === null) return;
+
+        const duration = performance.now() - lastPointerDown;
+        if (Math.abs(lastX - event.pageX) > 10 || Math.abs(lastY - event.pageY) > 10 ||
+            duration < props.timeThresholdMax
+        ) {
+            lastPointerDown = null;
+            radius.value = 0;
+            open.value = false;
+            pointerMenu.value = false;
         }
     }
 
     function onModeChange() {
         open.value = false;
         ignore.value = false;
+        pointerMenu.value = false;
     }
 
-    function showFromEvent() {
-        if (!ignore.value && props.onAction) {
+    function showFromEvent(event) {
+        if (!ignore.value && props.onAction && !open.value) {
             trigger.value = "event";
             radius.value = 0;
             lastPointerDown = null;
             x.value = input.mx + 10;
             y.value = input.my + 5;
             open.value = true;
+            pointerMenu.value = true;
         }
     }
 
@@ -257,7 +245,7 @@
         input.on("pointerup", onPointerUp)
     });
 
-    watch(tool, onModeChange);
+    watch(mode, onModeChange);
 
 </script>
 

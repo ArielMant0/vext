@@ -51,7 +51,9 @@
     import { ref, watch, onMounted } from 'vue';
     import { useVextNote } from '@/store/note'
     import { useVextInput } from '@/store/input';
+    import { useVextNoteSettings } from '@/store/note-settings';
     import { fabric } from 'fabric';
+    import { MODES } from '@/use/enums';
 
     import VextColorViewer from '@/components/tools/VextColorViewer';
 
@@ -70,8 +72,10 @@
 
     const note = useVextNote();
     const input = useVextInput();
+    const settings = useVextNoteSettings();
+
     const size = ref(props.initialSize);
-    const decimation = ref(note.brushDecimation);
+    const decimation = ref(settings.brushDecimation);
 
     const preview = new fabric.Circle({
         top: 10,
@@ -83,8 +87,8 @@
     })
 
     function readBrushSize() {
-        if (note.brushSize !== size.value) {
-            size.value = note.brushSize;
+        if (settings.brushSize !== size.value) {
+            size.value = settings.brushSize;
             preview.set({
                 radius: size.value*0.5,
                 dirty: true
@@ -93,8 +97,8 @@
         }
     }
     function readBrushDecimation() {
-        if (note.brushDecimation !== decimation.value) {
-            decimation.value = note.brushDecimation;
+        if (settings.brushDecimation !== decimation.value) {
+            decimation.value = settings.brushDecimation;
         }
     }
 
@@ -128,7 +132,7 @@
     }
 
     function onSwitch() {
-        preview.visible = note.tool === note.tools.BRUSH;
+        preview.visible = note.mode === MODES.BRUSH;
     }
 
     function readColor(color) {
@@ -145,11 +149,11 @@
         note.canvas.add(preview);
     });
 
-    watch(() => note.tool, onSwitch);
+    watch(() => note.mode, onSwitch);
     watch(() => input.pointerMove, movePreview)
 
-    watch(() => note.brushSize, readBrushSize)
-    watch(() => note.brushDecimation, readBrushDecimation)
+    watch(() => settings.brushSize, readBrushSize)
+    watch(() => settings.brushDecimation, readBrushDecimation)
 
 </script>
 

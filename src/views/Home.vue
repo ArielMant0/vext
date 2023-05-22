@@ -1,6 +1,6 @@
 <template>
   <div class="d-flex" style="height: 96%">
-    <VextNoteDrawer v-model="open" :auto-tool-switch="false"/>
+    <VextNoteDrawer v-model="open" :auto-mode-switch="false"/>
     <section ref="el" class="ma-2" style="width: 100%; height: 100%;">
         <div class="d-flex">
             <v-btn class="ma-1" size="small" variant="outlined" @click="setHeight(500)">500</v-btn>
