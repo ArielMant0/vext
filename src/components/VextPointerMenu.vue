@@ -141,6 +141,7 @@
         switch(action) {
             case ACTIONS.ACCEPT_IGNORE:
                 ignore.value = true;
+            case ACTIONS.ACCEPT:
                 pointerMenu.value = false;
                 open.value = false;
                 break;

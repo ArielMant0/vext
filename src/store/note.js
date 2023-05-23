@@ -1,6 +1,6 @@
 import { defineStore } from "pinia"
 import { useVextHistory } from "@/store/history";
-import { createFabricObject } from '@/use/util';
+import { isFabric, createFabricObject } from '@/use/util';
 import { toRaw } from 'vue';
 import { v4 as uuidv4 } from 'uuid';
 import { useExportPDF } from "@/use/export-pdf";
@@ -8,16 +8,10 @@ import { useExportZIP } from "@/use/export-zip";
 import EventHandler from "@/use/event-handler";
 import { useVextNoteSettings } from "./note-settings";
 import { MODES, LAYER_MODES } from "@/use/enums";
+import AnnotationLayer from "@/use/annotation-layer";
 
 // https://stackoverflow.com/questions/69881048/cannot-resize-edit-objects-until-i-group-ungroup-them-alpinejs-fabricjs/70564680#70564680
-let _CANVAS = null;
 let _CONTENT = null;
-
-function setCanvasPointerEvents(enable) {
-    _CANVAS.wrapperEl.style.pointerEvents = enable ? null : "none";
-    _CANVAS.upperCanvasEl.style.pointerEvents = enable ? null : "none";
-    _CANVAS.lowerCanvasEl.style.pointerEvents = enable ? null : "none";
-}
 
 function parseObject(obj, layer) {
     return {
@@ -34,51 +28,12 @@ function parseObject(obj, layer) {
         visible: obj.visible
     }
 }
-function isFabric(d) {
-    return typeof d === "object" && d.set !== undefined && d.get !== undefined
-}
-function getCanvasCoords(x, y) {
-    const rect = _CANVAS.wrapperEl.getBoundingClientRect();
+
+function getCanvasCoords(canvas, x, y) {
+    const rect = canvas.wrapperEl.getBoundingClientRect();
     const left = x < rect.x ? 0 : (x > rect.x+rect.width ? rect.width : x - rect.x)
     const top = y < rect.y ? 0 : (y > rect.y+rect.height ? rect.height : y - rect.y)
     return [left, top]
-}
-function getClosestMidpoint(x, y, rect) {
-    const left = Math.sqrt(Math.pow(x - rect.left, 2) + Math.pow(y - (rect.top+rect.height*0.5), 2));
-    const top = Math.sqrt(Math.pow(x - (rect.left+rect.width*0.5), 2) + Math.pow(y - rect.top, 2));
-    const right = Math.sqrt(Math.pow(x - (rect.left+rect.width), 2) + Math.pow(y - (rect.top+rect.height*0.5), 2));
-    const bot = Math.sqrt(Math.pow(x - (rect.left+rect.width*0.5), 2) + Math.pow(y - (rect.top+rect.height), 2));
-
-    if (left <= right && left <= top && left <= bot) return [rect.left, rect.top + rect.height * 0.5];
-    if (right <= left && right <= top && right <= bot) return [rect.left + rect.width, rect.top + rect.height * 0.5];
-    if (top <= left && top <= right && top <= bot) return [rect.left + rect.width * 0.5, rect.top];
-    return [rect.left+rect.width*0.5, rect.top+rect.height]
-}
-function connToJSON(connection) {
-    return {
-        location: connection.location,
-        path: connection.path.toJSON(["uuid"]),
-        data: connection.data,
-    }
-}
-function jsonToConn(json, annotation) {
-    const corner = getClosestMidpoint(
-        json.location[0], json.location[1],
-        annotation.getBoundingRect(true)
-    );
-    const line =  new fabric.Line([
-        json.location[0], json.location[1],
-        corner[0], corner[1]
-    ], json.path);
-    line.set({
-        selectable: false,
-        hoverCursor: "default",
-    });
-    return {
-        location: json.location,
-        path: line,
-        data: json.data,
-    }
 }
 
 const EVENTS = new EventHandler();
@@ -88,6 +43,7 @@ const vextNoteStore = {
     state: () => {
         return {
             enabled: true,
+            canvas: null,
 
             mode: MODES.LAYER,
 
@@ -108,7 +64,6 @@ const vextNoteStore = {
     },
 
     getters: {
-        canvas: () => _CANVAS,
         currentLayer: state => {
             if (state.activeLayer === null) return null;
             return state.getLayer(state.activeLayer);
@@ -146,7 +101,9 @@ const vextNoteStore = {
         },
 
         enablePointerEvents(value)  {
-            setCanvasPointerEvents(value === true);
+            this.canvas.wrapperEl.style.pointerEvents = value ? null : "none";
+            this.canvas.upperCanvasEl.style.pointerEvents = value ? null : "none";
+            this.canvas.lowerCanvasEl.style.pointerEvents = value ? null : "none";
         },
 
         emit(name, data) {
@@ -178,8 +135,8 @@ const vextNoteStore = {
             const layer = this.currentLayer;
             if (layer) {
                 layer.state = state;
-                layer.width = _CANVAS.getWidth();
-                layer.height = _CANVAS.getHeight();
+                layer.width = this.canvas.getWidth();
+                layer.height = this.canvas.getHeight();
             } else {
                 this.addLayer(state, true)
             }
@@ -221,7 +178,7 @@ const vextNoteStore = {
 
             id = id === null ? this.activeLayer : id;
             const idx = this.getLayerIndex(id);
-            if (idx >= 0 && index >= 0 && index <= this.layers[idx].comments.length) {
+            if (idx >= 0 && index >= 0 && index < this.layers[idx].comments.length) {
                 this.layers[idx].comments[index] = comment;
                 return true;
             }
@@ -233,7 +190,7 @@ const vextNoteStore = {
 
             id = id === null ? this.activeLayer : id;
             const idx = this.getLayerIndex(id);
-            if (idx >= 0 && index >= 0 && index <= this.layers[idx].comments.length) {
+            if (idx >= 0 && index >= 0 && index < this.layers[idx].comments.length) {
                 this.layers[idx].comments.splice(index, 1);
                 return true;
             }
@@ -259,16 +216,16 @@ const vextNoteStore = {
             const i0 = this.getLayerIndex(idFrom);
             const i1 = this.getLayerIndex(idInto);
             if (i0 >= 0 && i1 >= 0) {
-                this.layers[i0].group.forEach(d => this.layers[i1].group.push(toRaw(d)));
+                this.layers[i0].items.forEach(d => this.layers[i1].items.push(toRaw(d)));
                 this.layers[i0].comments.forEach(d => this.layers[i1].comments.push(d));
                 this.layers.splice(i0, 1);
 
                 if (idInto == this.activeLayer) {
-                    this.layers[i1].group.forEach(d => d.set({
+                    this.layers[i1].items.forEach(d => d.set({
                         visible: true,
                         dirty: true
                     }));
-                    _CANVAS.requestRenderAll();
+                    this.canvas.requestRenderAll();
                 }
             } else {
                 throw Error("one of the merge layers does not exist")
@@ -281,8 +238,21 @@ const vextNoteStore = {
 
             id = id === null ? this.nextID : id;
             color = color === null ? this.nextColor : color;
-            width = width === null ? _CANVAS.getWidth() : width;
-            height = height === null ? _CANVAS.getHeight() : height
+            width = width === null ? this.canvas.getWidth() : width;
+            height = height === null ? this.canvas.getHeight() : height
+
+            const layer = new AnnotationLayer(
+                this.canvas,
+                id,
+                state,
+                color,
+                width,
+                height,
+                items,
+                comments,
+                connections
+            );
+            this.layers.splice(0, 0, layer);
 
             if (record) {
                 const history = useVextHistory();
@@ -291,52 +261,6 @@ const vextNoteStore = {
                     this.addLayer.bind(this, state, false, id, color, width, height, json, comments, connections),
                     this.removeLayer.bind(this, id, false)
                 );
-            }
-
-            this.layers.splice(0, 0, {
-                id: id,
-                color: color,
-                visible: true,
-                opacity: 1,
-                group: [],
-                comments: comments,
-                connections: [],
-                width: width,
-                height: height,
-                time: new Date(Date.now()),
-                state: state
-            });
-
-            // add items
-            if (items.length > 0) {
-                items.forEach(item => {
-                    // fabric object
-                    if (isFabric(item)) {
-                        item.set("opacity", 1);
-                        item.set("visible", true)
-                        item.set("uuid", uuidv4())
-                        _CANVAS.add(toRaw(item))
-                        this.layers[0].group.push(item);
-                    } else {
-                        const obj = createFabricObject(item.type, item);
-                        obj.set("opacity", 1);
-                        obj.set("visible", true)
-                        obj.set("uuid", item.uuid ? item.uuid : uuidv4())
-                        _CANVAS.add(obj)
-                        this.layers[0].group.push(obj);
-                    }
-                })
-            }
-
-            // load connections
-            for (const uuid in connections) {
-                const anno = this.layers[0].group.find(d => d.uuid === uuid);
-                if (!anno) continue;
-                this.layers[0].connections[uuid] = connections[uuid].map(item => {
-                    const obj = jsonToConn(item, anno)
-                    _CANVAS.add(obj.path)
-                    return obj;
-                })
             }
 
             this.LAYER_ID_IDX++;
@@ -350,22 +274,20 @@ const vextNoteStore = {
             let idx = this.getLayerIndex(id)
             if (idx >= 0) {
 
-                const item = this.layers.splice(idx, 1)[0];
+                const layer = this.layers.splice(idx, 1)[0];
+                const repr = layer.remove(this.canvas, record);
 
                 if (record) {
                     const history = useVextHistory();
-                    const items = item.group.map(d => d.toJSON(["uuid"]))
                     history.do("remove layer "+id,
                         this.removeLayer.bind(this, id, false),
                         this.addLayer.bind(this,
-                            item.state, false, item.id,
-                            item.color, item.width, item.height,
-                            items, toRaw(item.comments), toRaw(item.connections)
+                            repr.state, false, repr.id,
+                            repr.color, repr.width, repr.height,
+                            repr.items, repr.comments, repr.connections
                         )
                     )
                 }
-
-                item.group.forEach(d => _CANVAS.remove(toRaw(d)));
 
                 const index = this.getLayerIndex(this.activeLayer);
                 if (index < 0) {
@@ -376,11 +298,30 @@ const vextNoteStore = {
             }
         },
 
-        removeEmptyLayers() {
+        removeEmptyLayers(record=true) {
             if (!this.enabled) return;
 
-            this.layers = this.layers.filter(d => d.group.length > 0);
+            if (record) {
+                const toRemove = this.layers
+                    .filter(d => d.empty())
+                    .map(d => d.remove(this.canvas, record))
+
+                const history = useVextHistory();
+                history.do("remove empty layers (no annotations)",
+                    this.removeEmptyLayers.bind(this, false),
+                    () => {
+                        toRemove.forEach(d => this.addLayer(
+                            d.state, false, d.id,
+                            d.color, d.width, d.height,
+                            d.items, d.comments, d.connections
+                        ));
+                    }
+                )
+            }
+
+            this.layers = this.layers.filter(d => !d.empty());
             const index = this.getLayerIndex(this.activeLayer);
+
             if (index < 0) {
                 this.setActiveLayer(this.layers.length === 0 ? null : this.layers[0].id, false);
             }
@@ -410,7 +351,7 @@ const vextNoteStore = {
                     this.layers[newIndex].width,
                     this.layers[newIndex].height
                 );
-                _CANVAS.requestRenderAll();
+                this.canvas.requestRenderAll();
             } else {
                 throw new Error(`layer ${id} does not exist`)
             }
@@ -425,12 +366,9 @@ const vextNoteStore = {
             if (layer && layer.opacity !== value) {
                 const prevValue = layer.opacity;
                 layer.opacity = value;
-                layer.group.forEach(d => d.set("opacity", value))
-                for (const uuid in layer.connections) {
-                    layer.connections[uuid].forEach(d => d.path.set("opacity", value))
-                }
+                layer.updateObjects("opacity", value)
 
-                if (render) _CANVAS.requestRenderAll();
+                if (render) this.canvas.requestRenderAll();
 
                 if (record) {
                     const history = useVextHistory();
@@ -449,14 +387,10 @@ const vextNoteStore = {
 
             const layer = this.layers.find(d => d.id === id);
             if (layer && layer.visible !== visible) {
-                layer.visible = visible;
-                layer.group.forEach(d => d.set("visible", visible))
-                for (const uuid in layer.connections) {
-                    layer.connections[uuid].forEach(d => d.path.set("visible", visible))
-                }
+                layer.setVisibility(visible)
 
-                if (id === this.activeLayer && !visible) _CANVAS.discardActiveObject();
-                if (render) _CANVAS.requestRenderAll();
+                if (id === this.activeLayer && !visible) this.canvas.discardActiveObject();
+                if (render) this.canvas.requestRenderAll();
 
                 if (record) {
                     const history = useVextHistory();
@@ -478,24 +412,24 @@ const vextNoteStore = {
                     );
                 }
 
-                if (_CANVAS.getActiveObject() !== null) {
-                    _CANVAS.discardActiveObject();
-                    _CANVAS.requestRenderAll();
+                if (this.canvas.getActiveObject() !== null) {
+                    this.canvas.discardActiveObject();
+                    this.canvas.requestRenderAll();
                 }
 
                 switch (mode) {
                     case MODES.BRUSH:
-                        _CANVAS.isDrawingMode = true;
-                        setCanvasPointerEvents(true);
+                        this.canvas.isDrawingMode = true;
+                        this.enablePointerEvents(true);
                         break;
                     case MODES.LAYER:
                     case MODES.CONNECT:
-                        _CANVAS.isDrawingMode = false;
-                        setCanvasPointerEvents(false);
+                        this.canvas.isDrawingMode = false;
+                        this.enablePointerEvents(false);
                         break;
                     default:
-                        _CANVAS.isDrawingMode = false;
-                        setCanvasPointerEvents(true);
+                        this.canvas.isDrawingMode = false;
+                        this.enablePointerEvents(true);
                         break;
                 }
 
@@ -539,14 +473,14 @@ const vextNoteStore = {
             settings.setShape(shape, record);
         },
 
-        addObject(obj, addToCanvas=true, record=true) {
+        addObject(obj, layer=null, addToCanvas=true, record=true) {
             if (!this.enabled) return null;
 
             if (this.layerMode === LAYER_MODES.ANNOTATE) {
                 // no state available
                 if (this.currentState === null) {
                     if (!addToCanvas) {
-                        _CANVAS.remove(obj);
+                        this.canvas.remove(obj);
                     }
                     return null;
                 }
@@ -557,20 +491,14 @@ const vextNoteStore = {
                 }
             }
 
-            const index = this.getLayerIndex(this.activeLayer)
-            obj.set("opacity", this.layers[index].opacity)
-            obj.set("visible", this.layers[index].visible)
-            obj.set("uuid", uuidv4())
-
-            this.layers[index].group.push(obj);
-            if (addToCanvas) {
-                _CANVAS.add(obj);
-            }
+            layer = layer === null ? this.activeLayer : layer;
+            const index = this.getLayerIndex(layer)
+            const repr = this.layers[index].addObject(obj, addToCanvas ? this.canvas : null, record)
 
             if (record) {
                 const history = useVextHistory();
                 history.do("add object of type "+obj.type,
-                    this.addObjectFromJSON.bind(this, obj.toJSON(["uuid"]), this.activeLayer, false),
+                    this.addObjectFromJSON.bind(this, repr, this.activeLayer, false),
                     this.removeLastObject.bind(this, this.activeLayer, false),
                 );
             }
@@ -580,7 +508,7 @@ const vextNoteStore = {
             return obj.uuid;
         },
 
-        addObjects(objs, addToCanvas=true, record=true) {
+        addObjects(objs, layer=null, addToCanvas=true, record=true) {
             if (!this.enabled) return null;
 
             if (this.layerMode === LAYER_MODES.ANNOTATE && this.currentState !== null) {
@@ -590,23 +518,14 @@ const vextNoteStore = {
                 }
             }
 
-            const index = this.getLayerIndex(this.activeLayer)
-            objs.forEach(d => {
-                d.set("opacity", this.layers[index].opacity)
-                d.set("visible", this.layers[index].visible)
-                d.set("uuid", uuidv4())
-
-                this.layers[index].group.push(d);
-                if (addToCanvas) {
-                    _CANVAS.add(d);
-                }
-            });
+            layer = layer === null ? this.activeLayer : layer;
+            const index = this.getLayerIndex(layer)
+            const repr = this.layers[index].addObjects(objs, addToCanvas ? this.canvas : null, record)
 
             if (record) {
                 const history = useVextHistory();
-                const objJsons = objs.map(d => d.toJSON(["uuid"]));
                 history.do(`add ${objs.length} objects`,
-                    this.addObjectsFromJSON.bind(this, objJsons, this.activeLayer, false),
+                    this.addObjectsFromJSON.bind(this, repr, this.activeLayer, false),
                     this.removeLastObject.bind(this, this.activeLayer, false),
                 );
             }
@@ -622,18 +541,11 @@ const vextNoteStore = {
 
             layer = layer === null ? this.activeLayer : layer;
             const index = this.getLayerIndex(layer)
-            const obj = createFabricObject(json.type, json);
-            this.layers[index].group.push(obj);
-            _CANVAS.add(obj);
-
-            if (json.connections) {
-                this.layers[index].connections[json.uuid] = json.connections.map(d => jsonToConn(d, obj));
-                this.layers[index].connections[json.uuid].forEach(d => _CANVAS.add(d.path));
-            }
+            this.layers[index].addObjectFromJSON(json, this.canvas, false)
 
             if (record) {
                 const history = useVextHistory();
-                history.do("add object of type "+obj.type,
+                history.do("add object of type "+json.type,
                     this.addObjectFromJSON.bind(this, json, layer, false),
                     this.removeLastObject.bind(this, layer, false),
                 );
@@ -650,25 +562,13 @@ const vextNoteStore = {
 
             layer = layer === null ? this.activeLayer : layer;
             const index = this.getLayerIndex(layer)
-            const objs = json.map(d => createFabricObject(d.type, d));
-            objs.forEach(d => {
-                this.layers[index].group.push(d)
-                _CANVAS.add(d);
-            });
-
-            json.forEach((d, i) => {
-                if (d.connections) {
-                    this.layers[index].connections[d.uuid] = json.connections.map(dd => jsonToConn(dd, objs[i]));
-                    this.layers[index].connections[d.uuid].forEach(dd => _CANVAS.add(dd.path));
-                }
-            })
+            const repr = this.layers[index].addObjectsFromJSON(json, this.canvas, record)
 
             if (record) {
-                const uuids = json.map(d => d.uuid);
                 const history = useVextHistory();
-                history.do(`add ${objs.length} objects`,
+                history.do(`add ${json.length} objects`,
                     this.addObjectsFromJSON.bind(this, json, layer, false),
-                    this.removeObjects.bind(this, uuids, layer, false),
+                    this.removeObjects.bind(this, repr, layer, false),
                 );
             }
 
@@ -681,33 +581,15 @@ const vextNoteStore = {
 
             if (!this.enabled) return null;
 
-            const layerIdx = this.getLayerIndex(layer === null ? this.activeLayer : layer);
-            const idx = this.layers[layerIdx].group.findIndex(obj => obj.get("uuid") === uuid);
-            if (idx >= 0) {
+            const index = this.getLayerIndex(layer === null ? this.activeLayer : layer);
+            const repr = this.layers[index].removeObject(uuid, this.canvas, record);
 
-                const obj = this.layers[layerIdx].group.splice(idx, 1)[0];
-                const objJson = obj.toJSON(["uuid"]);
-                // discard
-                if (this.activeObjectUUID === obj.uuid) {
-                    _CANVAS.discardActiveObject();
-                }
-                _CANVAS.remove(toRaw(obj));
-
-                if (this.layers[layerIdx].connections[uuid]) {
-                    objJson.connections = this.layers[layerIdx].connections[uuid].map(d => connToJSON(d))
-                    this.layers[layerIdx].connections[uuid].forEach(d => {
-                        _CANVAS.remove(toRaw(d.path));
-                    });
-                    delete this.layers[layerIdx].connections[uuid]
-                }
-
-                if (record) {
-                    const history = useVextHistory();
-                    history.do("remove object of type "+obj.type,
-                        this.removeLastObject.bind(this, layer, false),
-                        this.addObjectFromJSON.bind(this, objJson, layer, false),
-                    );
-                }
+            if (record && repr) {
+                const history = useVextHistory();
+                history.do("remove object of type "+repr.type,
+                    this.removeLastObject.bind(this, layer, false),
+                    this.addObjectFromJSON.bind(this, repr, layer, false),
+                );
             }
         },
 
@@ -715,33 +597,14 @@ const vextNoteStore = {
 
             if (!this.enabled) return null;
 
-            const layerIdx = this.getLayerIndex(layer === null ? this.activeLayer : layer);
-            const objs = this.layers[layerIdx].group.filter(d => uuids.includes(d.get("uuid")));
-            const objsJson = objs.map(d => {
-                const json = d.toJSON(["uuid"])
-                if (this.layers[layerIdx].connections[d.uuid]) {
-                    json.connections = this.layers[layerIdx].connections[d.uuid].map(dd => connToJSON(dd))
-                }
-            });
-            objs.forEach(d => {
-                // discard
-                if (this.activeObjectUUID === d.uuid) {
-                    _CANVAS.discardActiveObject();
-                }
-                _CANVAS.remove(toRaw(d))
-                if (this.layers[layerIdx].connections[d.uuid]) {
-                    this.layers[layerIdx].connections[d.uuid].forEach(dd => {
-                        _CANVAS.remove(toRaw(dd.path));
-                    });
-                    delete this.layers[layerIdx].connections[d.uuid]
-                }
-            });
+            const index = this.getLayerIndex(layer === null ? this.activeLayer : layer);
+            const repr = this.layers[index].removeObjects(uuids, this.canvas, record);
 
-            if (record) {
+            if (record && repr) {
                 const history = useVextHistory();
                 history.do(`remove ${uuids.length} objects`,
                     this.removeObjects.bind(this, uuids, layer, false),
-                    this.addObjectsFromJSON.bind(this, objsJson, layer, false),
+                    this.addObjectsFromJSON.bind(this, repr, layer, false),
                 );
             }
         },
@@ -751,60 +614,38 @@ const vextNoteStore = {
             if (!this.enabled) return null;
 
             const index = this.getLayerIndex(layer === null ? this.activeLayer : layer);
-            if (this.layers[index].group.length > 0) {
+            const repr = this.layers[index].removeLastObject(this.canvas, record);
 
-                const obj = this.layers[index].group.pop()
-                const objJson = obj.toJSON(["uuid"]);
-                // discard
-                if (this.activeObjectUUID === obj.uuid) {
-                    _CANVAS.discardActiveObject();
-                }
-                _CANVAS.remove(toRaw(obj));
-
-                if (this.layers[index].connections[obj.uuid]) {
-                    objJson.connections = this.layers[index].connections[obj.uuid].map(d => connToJSON(d))
-                    this.layers[index].connections[obj.uuid].forEach(d => {
-                        _CANVAS.remove(toRaw(d.path));
-                    });
-                    delete this.layers[index].connections[obj.uuid]
-                }
-
-                if (record) {
-                    const history = useVextHistory();
-                    history.do("remove object of type "+obj.type,
-                        this.removeLastObject.bind(this, layer, false),
-                        this.addObjectFromJSON.bind(this, objJson, layer, false),
-                    );
-                }
+            if (record && repr) {
+                const history = useVextHistory();
+                history.do("remove object of type "+repr.type,
+                    this.removeLastObject.bind(this, layer, false),
+                    this.addObjectFromJSON.bind(this, repr, layer, false),
+                );
             }
         },
 
         setActiveObject(uuid, layer=null) {
 
-            const layerIdx = this.getLayerIndex(layer === null ? this.activeLayer : layer);
-            if (layerIdx >= 0) {
-
-                const obj = this.layers[layerIdx].group.find(d => d.uuid === uuid);
-                if (obj) {
-                    _CANVAS.setActiveObject(obj);
-                    return true;
-                }
+            const index = this.getLayerIndex(layer === null ? this.activeLayer : layer);
+            if (index >= 0) {
+                return this.layers[index].setActiveObject(uuid, this.canvas);
             }
 
             return false;
         },
 
         getActiveObject() {
-            return _CANVAS.getActiveObject();
+            return this.canvas.getActiveObject();
         },
 
         discardActiveObject() {
-            _CANVAS.discardActiveObject();
+            this.canvas.discardActiveObject();
         },
 
         deleteActiveObject(record=true) {
             if (!this.enabled) return;
-            const obj = _CANVAS.getActiveObject();
+            const obj = this.canvas.getActiveObject();
             if (obj) {
                 // remove highlight
                 if (obj.isHover) {
@@ -814,34 +655,34 @@ const vextNoteStore = {
                         dirty: true
                     });
                 }
-                _CANVAS.discardActiveObject();
+                this.canvas.discardActiveObject();
                 // group selection
                 if (obj.type === "activeSelection") {
-                    const uuids = obj._objects.map(d => d.get("uuid"))
+                    const uuids = obj._objects.map(d => d.uuid)
                     this.removeObjects(uuids, this.activeLayer, record);
                 } else {
-                    this.removeObject(obj.get("uuid"), this.activeLayer, record);
+                    this.removeObject(obj.uuid, this.activeLayer, record);
                 }
 
             }
         },
 
         layerFromItem(item) {
-            return this.layers.find(d => d.group.some(o => o.get("uuid") === item.get("uuid")));
+            return this.layers.find(d => d.hasItem(item.uuid));
         },
 
         resizeCanvas(width, height) {
-            if (_CANVAS) {
-                _CANVAS.setWidth(width);
-                _CANVAS.setHeight(height);
+            if (this.canvas) {
+                this.canvas.setWidth(width);
+                this.canvas.setHeight(height);
             }
         },
 
         setCanvasZIndex(value) {
-            if (_CANVAS) {
-                _CANVAS.wrapperEl.style.zIndex = value;
-                _CANVAS.upperCanvasEl.style.zIndex = value;
-                _CANVAS.lowerCanvasEl.style.zIndex = value
+            if (this.canvas) {
+                this.canvas.wrapperEl.style.zIndex = value;
+                this.canvas.upperCanvasEl.style.zIndex = value;
+                this.canvas.lowerCanvasEl.style.zIndex = value
             }
         },
 
@@ -850,8 +691,8 @@ const vextNoteStore = {
         },
 
         setCanvas(canvas) {
-            _CANVAS = canvas;
-            setCanvasPointerEvents(false);
+            this.canvas = canvas;
+            this.enablePointerEvents(false);
             const settings = useVextNoteSettings();
             settings.setCanvas(canvas);
 
@@ -861,22 +702,22 @@ const vextNoteStore = {
                         const settings = useVextNoteSettings();
                         if (!settings.pointerMenu) {
                             // obj already part of the canvas
-                            this.addObject(obj.path, false)
+                            this.addObject(obj.path, null, false)
                             this.emit("pointer-menu", "drawing")
                         } else {
-                            _CANVAS.remove(obj.path)
+                            this.canvas.remove(obj.path)
                         }
                     } else {
-                        _CANVAS.remove(obj.path)
+                        this.canvas.remove(obj.path)
                     }
                 })
                 .on("selection:created", () => {
-                    this.activeObject = parseObject(_CANVAS.getActiveObject(), this.currentLayer);
+                    this.activeObject = parseObject(this.canvas.getActiveObject(), this.currentLayer);
                     this.activeObjectUUID = this.activeObject.uuid;
                     this.emit("selection:created")
                 })
                 .on("selection:updated", () => {
-                    this.activeObject = parseObject(_CANVAS.getActiveObject(), this.currentLayer);
+                    this.activeObject = parseObject(this.canvas.getActiveObject(), this.currentLayer);
                     this.activeObjectUUID = this.activeObject.uuid;
                     this.emit("selection:updated")
                 })
@@ -888,21 +729,8 @@ const vextNoteStore = {
                 .on("object:modified", ({ target }) => {
                     if (target.get("uuid") === this.activeObjectUUID) {
                         this.activeObject = parseObject(target, this.currentLayer);
-                        if (this.currentLayer.connections[this.activeObjectUUID]) {
-                            this.currentLayer.connections[this.activeObjectUUID].forEach(d => {
-                                const corner = getClosestMidpoint(
-                                    d.location[0],
-                                    d.location[1],
-                                    target.getBoundingRect(true)
-                                );
-                                d.path.set({
-                                    x2: corner[0],
-                                    y2: corner[1],
-                                    dirty: true
-                                });
-                                d.path.setCoords();
-                            })
-                            _CANVAS.renderAll();
+                        if (this.currentLayer.updateConnections(this.activeObjectUUID)) {
+                            this.canvas.renderAll();
                         }
                     }
                 })
@@ -917,7 +745,7 @@ const vextNoteStore = {
                                     backgroundColor: "rgba(200,200,200,0.5)",
                                     dirty: true
                                 });
-                                _CANVAS.requestRenderAll();
+                                this.canvas.requestRenderAll();
                                 break;
                         }
                     }
@@ -932,7 +760,7 @@ const vextNoteStore = {
                                     backgroundColor: target.prevBackground,
                                     dirty: true
                                 });
-                                _CANVAS.requestRenderAll();
+                                this.canvas.requestRenderAll();
                                 break;
                         }
                     }
@@ -946,7 +774,7 @@ const vextNoteStore = {
         },
 
         layerFromStateHash(hash) {
-            return this.layers.find(t => t.state.hash === hash && t.id !== this.previewLayerID)
+            return this.layers.find(l => l.matchesStateHash(hash) && l.id !== this.previewLayerID)
         },
 
         setState(state) {
@@ -956,11 +784,8 @@ const vextNoteStore = {
                 this.previewLayerID = this.activeLayer;
             } else {
                 const layer = this.getLayer(this.previewLayerID);
-                if (layer !== null) {
-                    layer.state = state;
-                    layer.width = _CANVAS.getWidth();
-                    layer.height = _CANVAS.getHeight();
-                    layer.time = new Date(Date.now());
+                if (layer) {
+                    layer.updateState(state, this.canvas.getWidth(), this.canvas.getHeight());
                 }
             }
         },
@@ -982,72 +807,41 @@ const vextNoteStore = {
 
             id = id === null ? this.activeLayer : id;
             const layer = this.getLayer(id);
-            if (layer === null || layer.group.length === 0) return;
+            if (layer === null || !layer.hasItems()) return;
 
-            const annotation = layer.group.find(d => d.uuid === uuid);
-            if (!annotation) return;
-
-            const [x, y] = getClosestMidpoint(
-                this.connectLocation[0],
-                this.connectLocation[1],
-                annotation.getBoundingRect(true)
+            const repr = layer.addConnection(
+                this.canvas, uuid,
+                this.connectLocation,
+                toRaw(this.connectObject),
+                record
             );
-
-            const obj = {
-                data: Object.assign({}, toRaw(this.connectObject)),
-                location: this.connectLocation.slice(),
-                path: new fabric.Line([this.connectLocation[0], this.connectLocation[1], x, y], {
-                    stroke: this.color,
-                    strokeWidth: 1,
-                    strokeUniform: true,
-                    opacity: 1,
-                    selectable: false,
-                    hoverCursor: "default"
-                }),
-            };
-            _CANVAS.add(obj.path);
 
             this.connectObject = null;
 
-            if (layer.connections[uuid]) {
-                layer.connections[uuid].push(obj);
-            } else {
-                layer.connections[uuid] = [obj];
-            }
-
-            if (record) {
+            if (record && repr) {
                 const history = useVextHistory();
-                const json = connToJSON(obj);
                 history.do(
                     "add a connection",
-                    this.addConnectionFromJSON.bind(this, uuid, json, id, false),
+                    this.addConnectionFromJSON.bind(this, uuid, repr, id, false),
                     this.removeLastConnection.bind(this, uuid, id, false),
                 );
             }
 
-            this.emit("connect:created", obj);
+            this.emit("connect:created", repr);
             if (record) this.emit("pointer-menu", "connection")
         },
 
         addConnectionFromJSON(uuid, json, id=null, record=true) {
             id = id === null ? this.activeLayer : id;
             const layer = this.getLayer(id);
-            if (layer === null || layer.group.length === 0) return;
+            if (layer === null || !layer.hasItems()) return;
 
-            const annotation = layer.group.find(d => d.uuid === uuid);
-            if (!annotation) return;
+            const repr = layer.addConnectionFromJSON(
+                this.canvas, uuid,
+                json, record
+            );
 
-
-            const obj = jsonToConn(json, annotation)
-            _CANVAS.add(obj.path);
-
-            if (layer.connections[uuid]) {
-                layer.connections[uuid].push(obj);
-            } else {
-                layer.connections[uuid] = [obj];
-            }
-
-            if (record) {
+            if (record && repr) {
                 const history = useVextHistory();
                 history.do(
                     "add a connection",
@@ -1056,93 +850,67 @@ const vextNoteStore = {
                 );
             }
 
-            this.emit("connect:created", obj);
+            this.emit("connect:created", repr);
             if (record) this.emit("pointer-menu", "connection")
         },
 
         removeLastConnection(uuid, id=null, record=true) {
-            id = id === null ? this.activeLayer : id;
-            const layer = this.getLayer(id);
-            if (layer === null || layer.group.length === 0) return;
-
-            const annotation = layer.group.find(d => d.uuid === uuid);
-            if (!annotation || layer.connections[uuid].length === 0) return;
-
-            const obj = layer.connections[uuid].pop();
-            _CANVAS.remove(toRaw(obj.path))
-
-            if (record) {
-                const history = useVextHistory();
-                const json = connToJSON(obj)
-                history.do(
-                    "remove latest connection",
-                    this.removeLastConnection.bind(this, uuid, id, false),
-                    this.addConnectionFromJSON.bind(this, uuid, json, id, false),
-                );
-            }
-
-            this.emit("connect:removed", obj);
+            this.removeConnectionAtIndex(uuid, null, id, record);
         },
 
         removeConnectionAtIndex(uuid, index, id=null, record=true) {
             id = id === null ? this.activeLayer : id;
             const layer = this.getLayer(id);
-            if (layer === null || layer.group.length === 0) return;
+            if (layer === null || layer.items.length === 0) return;
 
-            const annotation = layer.group.find(d => d.uuid === uuid);
-            if (!annotation || layer.connections[uuid].length === 0) return;
+            const repr = layer.removeConnection(this.canvas, uuid, index, record);
 
-            if (index >= layer.connections[uuid].length) return;
-
-            const obj = layer.connections[uuid].splice(index, 1)[0];
-            _CANVAS.remove(toRaw(obj.path))
-
-            if (record) {
+            if (record && repr) {
                 const history = useVextHistory();
-                const json = connToJSON(obj)
                 history.do(
                     "remove latest connection",
                     this.removeConnectionAtIndex.bind(this, uuid, index, id, false),
-                    this.addConnectionFromJSON.bind(this, uuid, json, id, false),
+                    this.addConnectionFromJSON.bind(this, uuid, repr, id, false),
                 );
             }
 
-            this.emit("connect:removed", obj);
+            this.emit("connect:removed", repr);
         },
 
         startConnect(element, x, y) {
             if (this.currentLayer === null || this.mode !== MODES.CONNECT ||
-                this.currentLayer.group.length === 0) return;
+                this.currentLayer.items.length === 0) return;
 
-            const coords = getCanvasCoords(x, y)
+            const coords = getCanvasCoords(this.canvas, x, y)
             this.connectObject = element;
             this.connectLocation = coords;
             this.emit("connect:start", {
                 x: coords[0], y: coords[1], source: element
             });
 
-            setCanvasPointerEvents(true);
+            this.enablePointerEvents(true);
         },
 
         moveConnect(x, y) {
             if (this.currentLayer === null || this.mode !== MODES.CONNECT ||
-                this.currentLayer.group.length === 0) return;
+                this.currentLayer.items.length === 0) return;
 
-            const coords = getCanvasCoords(x, y)
+            const coords = getCanvasCoords(this.canvas, x, y)
             this.emit("connect:move", { x: coords[0], y: coords[1] });
         },
 
         endConnect(x, y) {
-            setCanvasPointerEvents(false);
+            this.enablePointerEvents(false);
 
             if (this.currentLayer === null || this.mode !== MODES.CONNECT ||
-                this.currentLayer.group.length === 0) return;
+                this.currentLayer.items.length === 0) return;
 
-            _CANVAS.discardActiveObject();
+            this.canvas.discardActiveObject();
 
-            const coords = getCanvasCoords(x, y)
+            const coords = getCanvasCoords(this.canvas, x, y)
             const point = new fabric.Point(coords[0], coords[1]);
-            const annotation = this.currentLayer.group.find(d => d.containsPoint(point));
+            const annotation = this.currentLayer.findItem(d => d.containsPoint(point));
+
             if (!annotation) {
                 this.emit("connect:cancel");
             } else {
@@ -1178,20 +946,7 @@ const vextNoteStore = {
             if (!this.enabled) return;
             const layer = this.currentLayer;
             if (layer) {
-                const connections = {};
-                for (const uuid in layer.connections) {
-                    connections[uuid] = layer.connections[uuid].map(connToJSON);
-                }
-                return {
-                    id: layer.id,
-                    width: layer.width,
-                    height: layer.height,
-                    color: layer.color,
-                    state: layer.state,
-                    items: layer.group.map(d => d.toJSON(["uuid"])),
-                    comments: layer.comments,
-                    connections: connections
-                }
+                return layer.toJSON()
             } else {
                 throw new ("no layer to export")
             }
@@ -1207,18 +962,18 @@ const vextNoteStore = {
                 expPDF.addVerticalSpace(pdf, 5);
                 expPDF.addText(pdf, ""+this.activeLayer, 20)
 
-                if (canvasOnly && _CANVAS !== null) {
-                    const bg = _CANVAS.backgroundColor;
-                    _CANVAS.setBackgroundColor("rgba(255,255,255,1)")
-                    _CANVAS.requestRenderAll();
-                    expPDF.addImage(pdf, _CANVAS.toDataURL({
+                if (canvasOnly && this.canvas !== null) {
+                    const bg = this.canvas.backgroundColor;
+                    this.canvas.setBackgroundColor("rgba(255,255,255,1)")
+                    this.canvas.requestRenderAll();
+                    expPDF.addImage(pdf, this.canvas.toDataURL({
                         format: 'jpeg',
                         quality: 0.9
                     }));
-                    _CANVAS.setBackgroundColor(bg)
-                    _CANVAS.requestRenderAll();
+                    this.canvas.setBackgroundColor(bg)
+                    this.canvas.requestRenderAll();
                 } else {
-                    const node = _CONTENT !== null ? _CONTENT : _CANVAS.wrapperEl.parentNode.parentNode;
+                    const node = _CONTENT !== null ? _CONTENT : this.canvas.wrapperEl.parentNode.parentNode;
                     const rect = node.getBoundingClientRect();
                     await expPDF.addImageFromHTML(
                         pdf,
@@ -1227,22 +982,22 @@ const vextNoteStore = {
                         rect.height
                     );
                 }
-                if (this.currentLayer.comments.length > 0) {
+                if (this.currentLayer.hasComments()) {
                     expPDF.addText(pdf, "Comments", 16)
-                    this.currentLayer.comments.forEach(c => expPDF.addText(pdf, c));
+                    this.currentLayer.forComment(c => expPDF.addText(pdf, c));
                 }
 
                 const expZIP = useExportZIP();
                 const zip = expZIP.createZIP();
                 expZIP.addFile(zip, "report.pdf", expPDF.outputPDF(pdf))
-                expZIP.addObjectAsFile(zip, "layer.json", this.exportLayer())
-                expZIP.addObjectAsFile(zip, "state.json", this.currentLayer.state)
+                expZIP.addObjectAsFile(zip, `layer_${this.activeLayer}.json`, this.exportLayer())
+                expZIP.addObjectAsFile(zip, `state_${this.activeLayer}.json`, this.currentLayer.state)
                 const now = new Date();
                 const datetime = now.getFullYear()+'-'+now.getMonth()+'-'+now.getDate()+'-'+
                     now.getHours()+'-'+now.getMinutes()+'-'+now.getSeconds();
-                expZIP.downloadZIP(zip, name !== null ? name : `vext_${datetime}_${this.activeLayer}`);
+                expZIP.downloadZIP(zip, name !== null ? name : `VEXT_${datetime}_${this.activeLayer}`);
             } else {
-                throw new Error(`no layer to include in archive`)
+                throw new Error("no layer to include in archive")
             }
         }
     },

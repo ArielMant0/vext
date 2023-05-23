@@ -1,5 +1,9 @@
 import { fabric } from 'fabric';
 
+function isFabric(d) {
+    return typeof d === "object" && d.set !== undefined && d.get !== undefined
+}
+
 function parseAccessor(item) {
     switch (typeof item) {
         case 'string':
@@ -89,4 +93,4 @@ function pointerMenuOptions () {
     ];
 }
 
-export { parseAccessor, createFabricObject, pointerMenuOptions };
+export { isFabric, parseAccessor, createFabricObject, pointerMenuOptions };

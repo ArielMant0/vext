@@ -202,6 +202,7 @@
                         mode.value = "modify";
                     } else if (mode.value === "wait") {
                         mode.value = "create";
+                        note.emit("pointer-menu", "shape")
                     }
                 }
             })
@@ -217,6 +218,9 @@
                     brushShape.obj.set("visible", true)
                     updateShape();
                     mode.value = event.e ? "wait" : "create";
+                    if (mode.value === "create") {
+                        note.emit("pointer-menu", "shape")
+                    }
                 }
             })
 

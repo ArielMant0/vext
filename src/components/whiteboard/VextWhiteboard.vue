@@ -1,19 +1,18 @@
 <template>
-    <div ref="wrapper" style="position: relative;">
+    <div v-if="wb.visible" ref="wrapper" style="position: relative;">
         <canvas ref="canvasNode" :width="width" :height="height"></canvas>
     </div>
 </template>
 
 <script setup>
+
     /**
-     * Component that creates the fabric.js canvas.
+     * Component that creates the fabric.js canvas for the whiteboard.
      */
     import { fabric } from 'fabric';
     import { onMounted, ref, watch } from 'vue';
     import { useVextNote } from '@/store/note';
-    import { useVextNoteSettings } from '@/store/note-settings';
-    import { MODES } from '@/use/enums';
-import { toRaw } from 'vue';
+    import { useVextWhiteboard } from '@/store/whiteboard';
 
     const props = defineProps({
         /**
@@ -113,17 +112,16 @@ import { toRaw } from 'vue';
 
     const wrapper = ref(null);
     const canvasNode = ref(null);
-    const note = useVextNote();
-    const settings = useVextNoteSettings();
+    const wb = useVextWhiteboard();
 
     function init() {
         const canvas = new fabric.Canvas(canvasNode.value, {
-            isDrawingMode: note.mode === MODES.BRUSH,
+            isDrawingMode: false,
             renderOnAddRemove: true,
             backgroundColor: props.backgroundColor,
             enablePointerEvents: true
         });
-        note.setCanvas(canvas);
+        wb.setCanvas(canvas);
 
         const el = canvas.wrapperEl;
         el.style.position = "absolute";
@@ -132,15 +130,11 @@ import { toRaw } from 'vue';
         el.style.zIndex = props.zIndex;
         setBorderStyle();
 
-        const brush = new fabric.PencilBrush(canvas);
-        brush.decimate = settings.brushDecimation;
-        brush.color = settings.color0;
-        brush.width = settings.brushSize;
-        canvas.freeDrawingBrush = brush;
+        // TODO: set note whiteboard
     }
 
     function setBorderStyle() {
-        const el = document.querySelector(`.${note.canvas.containerClass}`)
+        const el = document.querySelector(`.${wb.canvas.containerClass}`)
         if (props.showBorder) {
             const size = props.borderSize + (typeof props.borderSize === "string" ? "" : "px")
             el.style.border = `${size} ${props.borderStyle} ${props.borderColor}`;
@@ -158,8 +152,7 @@ import { toRaw } from 'vue';
 
     watch(() => {
         return [props.width, props.height]
-    }, () => note.resizeCanvas(props.width, props.height), { deep: true })
+    }, () => wb.resizeCanvas(props.width, props.height), { deep: true })
 
-    watch(() => props.zIndex, () => note.setCanvasZIndex(props.zIndex));
 
 </script>

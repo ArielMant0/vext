@@ -24,7 +24,7 @@
 
             <slot name="title-append" :item="data">
                 <span>
-                    <v-chip v-if="annotations" label size="small" prepend-icon="mdi-pencil" class="mr-2">{{ data.group.length }}</v-chip>
+                    <v-chip v-if="annotations" label size="small" prepend-icon="mdi-pencil" class="mr-2">{{ data.items.length }}</v-chip>
                     <v-chip v-if="connections" label size="small" prepend-icon="mdi-connection" class="mr-2">{{ numConnections }}</v-chip>
                     <v-tooltip text="click to toggle layer visibility" location="top" :open-delay="tooltipDelay">
                         <template v-slot:activator="{ props }">
