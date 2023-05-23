@@ -8,7 +8,7 @@ primarily to visual analytics systems implemented with Vue.
 The [VextNoteCanvas](/src/components/VextNoteCanvas) component holds a fabric.js canvas that can be used to create annotations, i. e. drawings, shapes or text.
 
 The [VextNoteConfiguration](/src/components/VextNoteConfiguration) component is basically a sidebar that lets you use and control the NoteCanvas and all related externalization capabilites.
-It lets you select the tool you want to use and handles state changes.
+It lets you select the mode you want to use and handles state changes.
 
 The [VextHistoryControls](/src/components/VextHistoryControls) component can be added to a navigation bar, they let the user undo or redo operations tracked with the history store.
 

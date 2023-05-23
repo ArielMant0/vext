@@ -12,6 +12,13 @@
     justify-content: space-between;
     font-size: small;
 }
+.vext-preview-layer {
+  display: flex;
+  font-size: small;
+}
+.vext-preview-layer > * {
+  margin-right: 5px;
+}
 .vext-layer-selector {
     cursor: pointer;
     font-size: small;

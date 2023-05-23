@@ -10,9 +10,12 @@
      * store and a button to show/hide the HistoryDrawer.
      */
     import { storeToRefs } from 'pinia';
+    import { onMounted } from 'vue';
     import { useVextHistory } from '@/store/history';
+    import { useVextInput } from '@/store/input';
 
     const history = useVextHistory();
+    const input = useVextInput();
     const { menu, hasUndo, hasRedo } = storeToRefs(history);
 
     const props = defineProps({
@@ -48,7 +51,15 @@
 
     function backward() { history.undo(); }
     function forward() { history.redo(); }
-    function toggleMenu() {
-        history.setMenu(!menu.value);
-    }
+    function toggleMenu() { history.setMenu(!menu.value); }
+
+    onMounted(function() {
+        input.on("keydown", function() {
+            if (input.key.key === "z" && input.key.ctrl) {
+                history.undo();
+            } else if (input.key.key === "y" && input.key.ctrl) {
+                history.redo();
+            }
+        })
+    })
 </script>

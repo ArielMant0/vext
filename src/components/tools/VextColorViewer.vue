@@ -28,6 +28,7 @@
     import { ref, watch } from 'vue';
     import { useVextNote } from '@/store/note'
     import { storeToRefs } from 'pinia';
+    import { useVextNoteSettings } from '@/store/note-settings';
 
     const props = defineProps({
         /**
@@ -58,7 +59,9 @@
     note.setColorPrimary(props.colorPrimary)
     note.setColorSecondary(props.colorSecondary)
 
-    const { activeColor, color0, color1 } = storeToRefs(note);
+    const settings = useVextNoteSettings();
+
+    const { activeColor, color0, color1, color } = storeToRefs(settings);
 
     const tmpColor = ref(props.colorPrimary)
     const tmpActive = ref(0);
@@ -80,7 +83,7 @@
         tmpActive.value = activeColor.value;
     }
 
-    watch(() => activeColor.value, readColor);
-    watch(() => note.color, readColor);
+    watch(activeColor, readColor);
+    watch(color, readColor);
 
 </script>

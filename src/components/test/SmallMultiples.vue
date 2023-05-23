@@ -65,6 +65,12 @@
                 .attr("width", x.bandwidth())
                 .attr("height", d => y(0)-y(d.y))
                 .attr("fill", "steelblue")
+                .on("mouseenter", function() {
+                    d3.select(this).attr("stroke", "black")
+                })
+                .on("mouseleave", function() {
+                    d3.select(this).attr("stroke", null)
+                })
                 .on("click", function(event, d) {
                     note.startConnect(d, event.pageX, event.pageY);
                 })

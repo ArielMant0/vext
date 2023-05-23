@@ -1,101 +1,86 @@
 <template>
     <v-navigation-drawer permanent rail>
-    <v-list nav density="compact" :disabled="!enabled">
-        <v-list-item :prepend-icon="open && enabled ? openIcon : closedIcon" @click="open = !open"/>
-    </v-list>
+        <v-list nav density="compact" :disabled="!enabled">
+            <v-list-item :prepend-icon="open ? icons.open : icons.closed" @click="open = !open"/>
+        </v-list>
 
         <v-divider></v-divider>
 
-        <v-list nav density="compact" :selected="tmpTool" mandatory @update:selected="setTool" :disabled="!enabled">
-            <v-list-item :active-color="selectColor" :prepend-icon="layerIcon" :value="tools.LAYER">
-                <v-tooltip activator="parent" text="interact with your visualizations and modify|inspect|select layers" :open-delay="tooltipDelay"/>
-            </v-list-item>
-            <v-list-item :active-color="selectColor" :prepend-icon="brushIcon" :value="tools.BRUSH">
-                <v-tooltip activator="parent" text="choose brush settings for drawing on the VEXT canvas" :open-delay="tooltipDelay"/>
-            </v-list-item>
-            <v-list-item :active-color="selectColor" :prepend-icon="shapeIcon" :value="tools.SHAPE">
-                <v-tooltip activator="parent" text="add shapes or text to your VEXT canvas" :open-delay="tooltipDelay"/>
-            </v-list-item>
-            <v-list-item :active-color="selectColor" :prepend-icon="connectIcon" :value="tools.CONNECT">
-                <v-tooltip activator="parent" text="connect data points to annotations" :open-delay="tooltipDelay"/>
-            </v-list-item>
-            <v-list-item :active-color="selectColor" :prepend-icon="editIcon" :value="tools.EDIT">
-                <v-tooltip activator="parent" text="select items on the VEXT canvas to inspect or modify" :open-delay="tooltipDelay"/>
-            </v-list-item>
+        <v-list nav density="compact" :selected="tmpMode" mandatory @update:selected="setMode" :disabled="!enabled">
+            <v-list-item :active-color="selectColor" :prepend-icon="icons.layer" :value="MODES.LAYER"/>
+            <v-list-item :active-color="selectColor" :prepend-icon="icons.brush" :value="MODES.BRUSH"/>
+            <v-list-item :active-color="selectColor" :prepend-icon="icons.shape" :value="MODES.SHAPE"/>
+            <v-list-item :active-color="selectColor" :prepend-icon="icons.connect" :value="MODES.CONNECT"/>
+            <v-list-item :active-color="selectColor" :prepend-icon="icons.edit" :value="MODES.EDIT"/>
         </v-list>
     </v-navigation-drawer>
 
-    <v-navigation-drawer :model-value="open && enabled" :temporary="floating" :width="width" class="pl-2 pr-2" @update:model-value="val => open = val">
+    <v-navigation-drawer v-model="open" :temporary="floating" :width="width" class="pl-2 pr-2">
         <VextNoteConfiguration
-            :layer-icon="layerIcon"
-            :brush-icon="brushIcon"
-            :edit-icon="editIcon"
-            :shape-icon="shapeIcon"
-            :select-color="selectColor"
-            :connect-icon="connectIcon"
+            :icons="icons"
             :hotkeys="hotkeys"
             :hotkeyMap="hotkeyMap"
             :tooltip-delay="tooltipDelay"
-            :auto-tool-switch="autoToolSwitch"
+            :auto-mode-switch="autoModeSwitch"
             :width="width-30"/>
     </v-navigation-drawer>
+
+    <VextPointerMenu/>
+    <VextGlobalToolTip/>
 </template>
 
 <script setup>
     import { storeToRefs } from 'pinia'
-    import { ref, watch } from 'vue';
+    import { ref, watch, computed } from 'vue';
     import { useVextNote } from '@/store/note'
+
     import VextNoteConfiguration from './VextNoteConfiguration.vue';
+    import VextGlobalToolTip from '@/components/VextGlobalToolTip.vue';
+    import VextPointerMenu from '@/components/VextPointerMenu.vue';
+import { MODES } from '@/use/enums';
 
     const props = defineProps({
-        /**
-         * Vuetify icon to show when the drawer is open.
-         */
-        openIcon: {
-            type: String,
-            default: "mdi-backburger"
+        modelValue: {
+            type: Boolean,
+            required: true
         },
         /**
-         * Vuetify icon to show when the drawer is closed.
+         * Object of icons to use for tools/modes etc.
+         *
+         * Default is:
+         * {
+         *     open: "mdi-backburger",
+         *     closed: "mdi-forwardburger",
+         *     layer: "mdi-layers",
+         *     brush: "mdi-draw",
+         *     shape: "mdi-shape",
+         *     connect: "mdi-connection",
+         *     edit: "mdi-cursor-pointer",
+         * }
          */
-        closedIcon: {
-            type: String,
-            default: "mdi-forwardburger"
+        icons: {
+            type: Object,
+            default() {
+                return {
+                    open: "mdi-backburger",
+                    closed: "mdi-forwardburger",
+                    layer: "mdi-layers",
+                    brush: "mdi-draw",
+                    shape: "mdi-shape",
+                    connect: "mdi-connection",
+                    edit: "mdi-cursor-pointer",
+                }
+            }
         },
         /**
-         * Vuetify icon for the layers tool.
+         * The width of the drawer (when opened).
          */
-        layerIcon: {
-            type: String,
-            default: "mdi-layers"
-        },
-        /**
-         * Vuetify icon for the edit tool.
-         */
-        editIcon: {
-            type: String,
-            default: "mdi-cursor-pointer"
-        },
-        /**
-         * Vuetify icon for the shape tool.
-         */
-        shapeIcon: {
-            type: String,
-            default: "mdi-shape"
-        },
-        /**
-         * Vuetify icon for the brush tool.
-         */
-        brushIcon: {
-            type: String,
-            default: "mdi-draw"
-        },
-        /**
-         * Vuetify icon for the connection tool.
-         */
-        connectIcon: {
-            type: String,
-            default: "mdi-connection"
+         width: {
+            type: [Number, String],
+            default: 320,
+            validator(value) {
+                return +value >= 0;
+            }
         },
         /**
          * How to color the icons in the small nav bar when they are selected.
@@ -105,28 +90,11 @@
             default: "default"
         },
         /**
-         * The width of the drawer (when opened).
-         */
-        width: {
-            type: [Number, String],
-            default: 320,
-            validator(value) {
-                return +value >= 0;
-            }
-        },
-        /**
          * Whether this component should take up space or float.
          */
         floating: {
             type: Boolean,
             default: true,
-        },
-        /**
-         * Whether to have the drawer open at the start.
-         */
-        open: {
-            type: Boolean,
-            default: false,
         },
         /**
          * Whether to use keyboard shortcuts (hotkeys) for tool switching.
@@ -168,32 +136,41 @@
          * Whether to switch between brush and other modes automatically, depending
          * on whether the pen is used to interact (or the mouse/touch).
          */
-        autoToolSwitch: {
+        autoModeSwitch: {
             type: Boolean,
             default: true,
         }
     });
 
+    const emit = defineEmits(["update:modelValue"])
+
     const note = useVextNote();
-    const { tool, tools, enabled } = storeToRefs(note);
+    const { mode, enabled } = storeToRefs(note);
 
-    const tmpTool = ref([tool.value]);
-    const open = ref(props.open);
+    const tmpMode = ref([mode.value]);
+    const open = computed({
+        get() {
+            return props.modelValue
+        },
+        set(value) {
+            emit("update:modelValue", value && enabled.value)
+        }
+    });
 
-    function setTool(toolValue) {
-        tmpTool.value[0] = toolValue[0];
-        if (tmpTool.value[0] !== tool.value) {
-            note.setTool(tmpTool.value[0]);
+    function setMode(modeValue) {
+        tmpMode.value[0] = modeValue[0];
+        if (tmpMode.value[0] !== mode.value) {
+            note.setMode(tmpMode.value[0]);
         } else {
             open.value = !open.value;
         }
     }
-    function loadTool() {
-        if (tool.value !== tmpTool.value[0]) {
-            tmpTool.value = [tool.value];
+    function loadMode() {
+        if (mode.value !== tmpMode.value[0]) {
+            tmpMode.value = [mode.value];
         }
     }
 
-    watch(() => note.tool, loadTool);
+    watch(mode, loadMode);
 
 </script>

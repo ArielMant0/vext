@@ -1,9 +1,11 @@
 import * as components from './components'
 
 import { useVextNote } from './store/note.js'
+import { useVextNoteSettings } from './store/note-settings'
 import { useVextState } from './store/state.js'
 import { useVextHistory } from './store/history.js'
 import { useVextApp } from './store/app.js'
+import { useVextInput } from './store/input'
 
 function createVextPlugin() {
     const plugin = {
@@ -20,7 +22,9 @@ function createVextPlugin() {
 export {
     createVextPlugin,
     useVextNote,
+    useVextNoteSettings,
     useVextState,
     useVextHistory,
-    useVextApp
+    useVextApp,
+    useVextInput,
 }

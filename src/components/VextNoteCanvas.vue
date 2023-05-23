@@ -11,6 +11,8 @@
     import { fabric } from 'fabric';
     import { onMounted, ref, watch } from 'vue';
     import { useVextNote } from '@/store/note';
+    import { useVextNoteSettings } from '@/store/note-settings';
+import { MODES } from '@/use/enums';
 
     const props = defineProps({
         /**
@@ -29,17 +31,6 @@
         height: {
             type: Number,
             default: 120,
-            validator(value) {
-                return value >= 0
-            }
-        },
-        /**
-         * Value for the fabric.js decimate option. Larger values result in
-         * more simplified lines when drawing.
-         */
-        decimate: {
-            type: Number,
-            default: 5,
             validator(value) {
                 return value >= 0
             }
@@ -122,12 +113,14 @@
     const wrapper = ref(null);
     const canvasNode = ref(null);
     const note = useVextNote();
+    const settings = useVextNoteSettings();
 
     function init() {
         const canvas = new fabric.Canvas(canvasNode.value, {
-            isDrawingMode: note.tool === note.tools.BRUSH,
+            isDrawingMode: note.mode === MODES.BRUSH,
             renderOnAddRemove: true,
-            backgroundColor: props.backgroundColor
+            backgroundColor: props.backgroundColor,
+            enablePointerEvents: true
         });
         note.setCanvas(canvas);
 
@@ -140,9 +133,9 @@
         setBorderStyle();
 
         const brush = new fabric.PencilBrush(canvas);
-        brush.decimate = props.decimate;
-        brush.color = note.color0;
-        brush.width = note.brushSize;
+        brush.decimate = settings.brushDecimation;
+        brush.color = settings.color0;
+        brush.width = settings.brushSize;
         canvas.freeDrawingBrush = brush;
     }
 
@@ -167,7 +160,6 @@
         return [props.width, props.height]
     }, () => note.resizeCanvas(props.width, props.height), { deep: true })
 
-    watch(() => props.decimate, () => note.setBrushDecimation(props.decimate))
     watch(() => props.zIndex, () => note.setCanvasZIndex(props.zIndex));
 
 </script>

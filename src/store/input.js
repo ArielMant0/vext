@@ -1,3 +1,4 @@
+import EventHandler from "@/use/event-handler";
 import { defineStore } from "pinia"
 
 function getCoordinates(x, y, element) {
@@ -11,6 +12,19 @@ function getCoordinates(x, y, element) {
         (y > rect.y+rect.height ? rect.height : y - rect.y)
     return [left, top]
 }
+
+const ACTIONS = Object.freeze({
+    ACCEPT: "accept",
+    ACCEPT_IGNORE: "accept_ignore",
+    CANCEL: "cancel",
+    CANCEL_IGNORE: "cancel_ignore",
+    MODE: "mode",
+    UNDO: "undo",
+    REDO: "redo",
+    SETTINGS: "settings"
+});
+
+const EVENTS = new EventHandler();
 
 const vextInputStore = {
 
@@ -41,6 +55,10 @@ const vextInputStore = {
         };
     },
 
+    getters: {
+        ACTIONS: () => ACTIONS,
+    },
+
     actions: {
 
         /**
@@ -52,18 +70,21 @@ const vextInputStore = {
                 this.my = event.pageY;
                 this.pointerMoveType = event.pointerType;
                 this.pointerMove = Date.now();
+                this.emit("pointermove", event);
             });
             window.addEventListener("pointerdown", event => {
                 this.dx = event.pageX;
                 this.dy = event.pageY;
                 this.pointerDownType = event.pointerType;
                 this.pointerDown = Date.now();
+                this.emit("pointerdown", event);
             });
             window.addEventListener("pointerup", event => {
                 this.ux = event.pageX;
                 this.uy = event.pageY;
                 this.pointerUpType = event.pointerType;
                 this.pointerUp = Date.now();
+                this.emit("pointerup", event);
             });
             window.addEventListener("keydown", event => {
                 this.key.key = event.key;
@@ -72,7 +93,20 @@ const vextInputStore = {
                 this.key.alt = event.altKey;
                 this.key.meta = event.metaKey;
                 this.keyTime = Date.now();
+                this.emit("keydown", event);
             });
+        },
+
+        emit(name, data) {
+            EVENTS.emit(name, data);
+        },
+
+        on(name, handler) {
+            return EVENTS.on(name, handler);
+        },
+
+        off(name, handler) {
+            return EVENTS.off(name, handler);
         },
 
         /**

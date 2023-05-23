@@ -43,25 +43,19 @@
     import { fabric } from 'fabric';
     import { useVextNote } from '@/store/note';
     import { useVextApp } from '@/store/app';
+    import { useVextNoteSettings } from '@/store/note-settings';
+    import { storeToRefs } from 'pinia';
+    import { MODES } from '@/use/enums';
     import VextColorViewer from './VextColorViewer.vue';
 
     const note = useVextNote();
     const app = useVextApp();
-    const shape = ref("text");
+    const settings = useVextNoteSettings();
+    const mode = ref("create");
 
-    const emit = defineEmits([
-        /**
-         * This event is emitted when a text object is selected with the
-         * object itself as the event payload.
-         */
-        "select",
-        /**
-         * This event is emitted when a text object is deselected.
-         */
-        "deselect"
-    ]);
+    const { shape } = storeToRefs(settings);
 
-    const strokeWidth = ref(note.brushSize)
+    const strokeWidth = ref(settings.shapeDim0)
 
     const stroke = ref("primary color")
     const fill = ref("none")
@@ -76,7 +70,7 @@
 
     function readColor(value) {
         return value === "none" ? null :
-            (value === "primary color" ? note.color0 : note.color1)
+            (value === "primary color" ? settings.color0 : settings.color1)
     }
 
     function initBrushShape() {
@@ -96,9 +90,12 @@
                 brushShape.obj = new fabric.Triangle(getShapeOptions());
                 break;
             case "text":
-                brushShape.obj = new fabric.Text("new text", getShapeOptions());
+                brushShape.obj = new fabric.Text("text", getShapeOptions());
                 break;
         }
+
+        brushShape.obj.set("selectable", false);
+        brushShape.obj.set("hoverCursor", "default");
 
         note.canvas.add(toRaw(brushShape.obj))
     }
@@ -131,16 +128,15 @@
                     newObj = new fabric.Triangle(getShapeOptions());
                     break;
                 case "text":
-                    newObj = new fabric.Text("", getShapeOptions());
-                    newObj.onSelect = () => emit("select", newObj);
-                    newObj.onDeselect = () => emit("deselect")
+                    newObj = new fabric.IText("", getShapeOptions());
                     break;
             }
 
             const uuid = note.addObject(newObj)
 
+            note.setActiveObject(uuid);
             if (shape.value === "text") {
-                note.setActiveObject(uuid);
+                newObj.enterEditing();
             }
 
             initBrushShape();
@@ -196,34 +192,48 @@
         initBrushShape();
 
         note.canvas
-        .on("mouse:up", function() {
-            if (note.tool === note.tools.SHAPE) {
-                addShape();
-            }
-        })
-        .on("mouse:move", function(event) {
-            if (note.tool === note.tools.SHAPE) {
+            .on("mouse:up", function() {
+                if (note.mode === MODES.SHAPE && !settings.pointerMenu) {
+                    if (mode.value === "create") {
+                        addShape();
+                        brushShape.obj.set("visible", false)
+                        brushShape.obj.set("dirty", true)
+                        note.canvas.requestRenderAll();
+                        mode.value = "modify";
+                    } else if (mode.value === "wait") {
+                        mode.value = "create";
+                    }
+                }
+            })
+            .on("mouse:move", function(event) {
                 brushShape.x = event.pointer.x;
                 brushShape.y = event.pointer.y;
-                updateShape();
-            }
-        })
+                if (note.mode === MODES.SHAPE && mode.value !== "modify" && !settings.pointerMenu) {
+                    updateShape();
+                }
+            })
+            .on("selection:cleared", function(event) {
+                if (note.mode === MODES.SHAPE && mode.value === "modify" && !settings.pointerMenu) {
+                    brushShape.obj.set("visible", true)
+                    updateShape();
+                    mode.value = event.e ? "wait" : "create";
+                }
+            })
 
     })
 
     function createOrDestroyShape() {
-        if (note.tool === note.tools.SHAPE) {
+        if (note.mode === MODES.SHAPE) {
             initBrushShape();
         } else {
             if (brushShape.obj) {
                 note.canvas.remove(toRaw(brushShape.obj));
             }
             brushShape.obj = null;
-            note.canvas.renderAll();
         }
     }
 
     watch(shape, initBrushShape);
-    watch(() => note.tool, createOrDestroyShape)
+    watch(() => note.mode, createOrDestroyShape)
 
 </script>
