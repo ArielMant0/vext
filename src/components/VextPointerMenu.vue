@@ -2,10 +2,21 @@
     <div>
         <VextCircleMenu v-model="open"
             :items="visibleOptions" :x="x" :y="y"
+            :close-on-click="false"
             @click="o => performAction(o.action, o.id)"
-            @close="pointerMenu = false"/>
+            @close="pointerMenu = false">
 
-        <VextCircleSettingsMenu v-model="openSettings" :x="x" :y="y" @close="pointerMenu = false"/>
+            <template #button="{ item, degree }">
+                <v-btn :style="{ 'transform': `rotate(${degree}deg)` }"
+                    :icon="item.icon" rounded :color="item.color"
+                    :disabled="isDisabled(item.action)"
+                    size="small"/>
+            </template>
+        </VextCircleMenu>
+
+        <VextCircleSettingsMenu v-model="openSettings"
+            :x="x" :y="y"
+            @close="pointerMenu = false"/>
 
         <div v-if="indicator && radius > 0" class="menu-indicator" :style="{ 'left': indicatorX+'px', 'top': indicatorY+'px', }">
 
@@ -36,7 +47,7 @@
     import { ref, watch, computed, onMounted } from 'vue';
     import { pointerMenuOptions } from '@/use/util';
     import { useVextNoteSettings } from '@/store/note-settings';
-    import { ACTIONS } from '@/use/enums';
+    import { ACTIONS, MODES } from '@/use/enums';
 
     const input = useVextInput();
     const note = useVextNote();
@@ -118,6 +129,8 @@
                     return trigger.value === "click"
                 case ACTIONS.MODE:
                     return d.id !== mode.value;
+                case ACTIONS.SETTINGS:
+                    return mode.value === MODES.BRUSH || mode.value === MODES.SHAPE;
                 default:
                     return true;
             }
@@ -129,28 +142,41 @@
             case ACTIONS.ACCEPT_IGNORE:
                 ignore.value = true;
                 pointerMenu.value = false;
+                open.value = false;
                 break;
             case ACTIONS.CANCEL_IGNORE:
                 ignore.value = true;
             case ACTIONS.CANCEL:
                 history.undo(false);
                 pointerMenu.value = false;
+                open.value = false;
                 break;
             case ACTIONS.UNDO:
                 history.undo();
-                pointerMenu.value = false;
                 break;
             case ACTIONS.REDO:
                 history.redo();
-                pointerMenu.value = false;
                 break;
             case ACTIONS.MODE:
                 note.setMode(id);
                 pointerMenu.value = false;
+                open.value = false;
                 break;
             case ACTIONS.SETTINGS:
                 openSettings.value = true;
+                open.value = false;
                 break;
+        }
+    }
+
+    function isDisabled(action) {
+        switch(action) {
+            case ACTIONS.UNDO:
+                return !history.hasUndo;
+            case ACTIONS.REDO:
+                return !history.hasRedo;
+            default:
+                return false;
         }
     }
 

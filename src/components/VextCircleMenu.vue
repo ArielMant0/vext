@@ -1,13 +1,13 @@
 <template>
     <div v-if="open" class="wrapper" @click="close">
         <div class="menu" :style="{ 'left': (x-30)+'px', 'top': (y-25)+'px' }">
-            <v-btn icon="mdi-close-thick" rounded color="primary" variant="text" @click="close"/>
+            <v-btn icon="mdi-close-thick" rounded color="primary" variant="text" @click.stop="close"/>
             <ul style="border-radius: 50%" class="bg-primary">
-                <li v-for="(item, i) in items" :key="item.id" class="menu-item" :style="{ 'transform': `rotate(${i*degree}deg) translate(60px)` }">
-                    <slot :item="item">
+                <li v-for="(item, i) in items" :key="item.id" class="menu-item" :style="{ 'transform': `rotate(${i*degree}deg) translate(60px)` }" @click.stop="action(item)">
+                    <slot name="button" :item="item" :degree="-i*degree">
                         <v-btn :style="{ 'transform': `rotate(${-i*degree}deg)` }"
                             :icon="item.icon" rounded :color="item.color"
-                            size="small" @click="action(item)"/>
+                            size="small"/>
                     </slot>
                 </li>
             </ul>
@@ -23,6 +23,10 @@
         items: {
             type: Array,
             required: true
+        },
+        closeOnClick: {
+            type: Boolean,
+            default: true
         },
         modelValue: {
             type: Boolean,
@@ -50,11 +54,18 @@
 
     function action(item) {
         emit("click", item)
-        close();
+        if (props.closeOnClick) {
+            close();
+        }
     }
     function close() {
-        emit("close")
+        if (!open.value) {
+            console.debug("circle menu: already closed");
+            return;
+        }
+
         open.value = false;
+        emit("close")
     }
 
 </script>
