@@ -6,7 +6,7 @@ export default class AnnotationConnection {
     constructor(location, annotation, data, color="#000000") {
         this.data = data;
         this.location = location.slice();
-        const [x, y] = AnnotationConnection.getClosestMidpoint(
+        const [x, y] = AnnotationConnection.getClosestPoint(
             location[0],
             location[1],
             annotation.getBoundingRect(true)
@@ -31,7 +31,8 @@ export default class AnnotationConnection {
         )
     }
 
-    static getClosestMidpoint(x, y, rect) {
+    // TODO: also consider corners
+    static getClosestPoint(x, y, rect) {
         const left = Math.sqrt(Math.pow(x - rect.left, 2) + Math.pow(y - (rect.top+rect.height*0.5), 2));
         const top = Math.sqrt(Math.pow(x - (rect.left+rect.width*0.5), 2) + Math.pow(y - rect.top, 2));
         const right = Math.sqrt(Math.pow(x - (rect.left+rect.width), 2) + Math.pow(y - (rect.top+rect.height*0.5), 2));
@@ -61,10 +62,10 @@ export default class AnnotationConnection {
     }
 
     updateLocation(annotation) {
-        const [x, y] = AnnotationConnection.getClosestMidpoint(
+        const [x, y] = AnnotationConnection.getClosestPoint(
             this.location[0],
             this.location[1],
-            annotation.getBoundingRect(true)
+            annotation.getBoundingRect(true, true)
         );
         this.line.set({ x2: x, y2: y, dirty: true });
         this.line.setCoords();

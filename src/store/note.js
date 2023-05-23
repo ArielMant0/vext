@@ -29,6 +29,17 @@ function parseObject(obj, layer) {
     }
 }
 
+function getObjTransform(obj) {
+    return {
+        scaleX: obj.scaleX,
+        scaleY: obj.scaleY,
+        originX: obj.originX,
+        originY: obj.originY,
+        top: obj.top,
+        left: obj.left,
+    }
+}
+
 function getCanvasCoords(canvas, x, y) {
     const rect = canvas.wrapperEl.getBoundingClientRect();
     const left = x < rect.x ? 0 : (x > rect.x+rect.width ? rect.width : x - rect.x)
@@ -487,7 +498,7 @@ const vextNoteStore = {
 
                 const l = this.layerFromStateHash(this.currentState.hash);
                 if (!l) {
-                    this.addLayer(this.currentState, record)
+                    this.addLayer(this.currentState, false)
                 }
             }
 
@@ -514,7 +525,7 @@ const vextNoteStore = {
             if (this.layerMode === LAYER_MODES.ANNOTATE && this.currentState !== null) {
                 const l = this.layerFromStateHash(this.currentState.hash);
                 if (!l) {
-                    this.addLayer(this.currentState, record)
+                    this.addLayer(this.currentState, false)
                 }
             }
 
@@ -541,19 +552,19 @@ const vextNoteStore = {
 
             layer = layer === null ? this.activeLayer : layer;
             const index = this.getLayerIndex(layer)
-            this.layers[index].addObjectFromJSON(json, this.canvas, false)
+            const repr = this.layers[index].addObjectFromJSON(json, this.canvas, false)
 
             if (record) {
                 const history = useVextHistory();
                 history.do("add object of type "+json.type,
-                    this.addObjectFromJSON.bind(this, json, layer, false),
+                    this.addObjectFromJSON.bind(this, repr, layer, false),
                     this.removeLastObject.bind(this, layer, false),
                 );
             }
 
-            this.emit("annotation:created", obj)
+            this.emit("annotation:created", repr)
 
-            return obj.uuid;
+            return record ? repr.annotation.uuid : json.uuid;
         },
 
         addObjectsFromJSON(json, layer=null, record=true) {
@@ -572,9 +583,9 @@ const vextNoteStore = {
                 );
             }
 
-            this.emit("annotation:created", objs)
+            this.emit("annotation:created", repr)
 
-            return objs.map(d => d.uuid);
+            return record ? repr.map(d => d.annotation.uuid) : json.map(d => d.uuid);
         },
 
         removeObject(uuid, layer=null, record=true) {
@@ -622,6 +633,34 @@ const vextNoteStore = {
                     this.removeLastObject.bind(this, layer, false),
                     this.addObjectFromJSON.bind(this, repr, layer, false),
                 );
+            }
+        },
+
+        modifyObject(uuid, transform, id=null, record=true) {
+
+            id === null ? this.activeLayer : id
+            const index = this.getLayerIndex(id === null ? this.activeLayer : id);
+            if (index >= 0) {
+                const obj = this.layers[index].item(uuid);
+                if (obj) {
+
+                    if (record) {
+                        const history = useVextHistory();
+                        const original = getObjTransform(obj);
+                        history.do("modify annotation",
+                            this.modifyObject.bind(this, uuid, transform, id, false),
+                            this.modifyObject.bind(this, uuid, original, id, false),
+                        );
+                    }
+
+                    obj.set(transform);
+                    obj.set("dirty", true);
+
+                    this.layers[index].updateConnections(uuid)
+
+                    this.canvas.requestRenderAll();
+
+                }
             }
         },
 
@@ -726,9 +765,16 @@ const vextNoteStore = {
                     this.activeObjectUUID = null;
                     this.emit("selection:cleared")
                 })
-                .on("object:modified", ({ target }) => {
+                .on("object:modified", ({ target, transform }) => {
                     if (target.get("uuid") === this.activeObjectUUID) {
                         this.activeObject = parseObject(target, this.currentLayer);
+                        if (this.mode === MODES.EDIT) {
+                            const history = useVextHistory();
+                            history.do("modify annotation",
+                                this.modifyObject.bind(this, this.activeObjectUUID, getObjTransform(transform), this.activeLayer, false),
+                                this.modifyObject.bind(this, this.activeObjectUUID, getObjTransform(transform.original), this.activeLayer, false)
+                            )
+                        }
                         if (this.currentLayer.updateConnections(this.activeObjectUUID)) {
                             this.canvas.renderAll();
                         }
@@ -800,7 +846,7 @@ const vextNoteStore = {
                     return;
                 }
             }
-            this.setActiveLayer(this.previewLayerID);
+            this.setActiveLayer(this.previewLayerID, false);
         },
 
         addConnection(uuid, id=null, record=true) {

@@ -56,8 +56,8 @@
     const emits = defineEmits(["color-change"]);
 
     const note = useVextNote();
-    note.setColorPrimary(props.colorPrimary)
-    note.setColorSecondary(props.colorSecondary)
+    note.setColorPrimary(props.colorPrimary, false)
+    note.setColorSecondary(props.colorSecondary, false)
 
     const settings = useVextNoteSettings();
 

@@ -170,7 +170,7 @@ export default class AnnotationLayer {
         if (canvas) canvas.add(obj);
         this.items.push(obj);
         this.setModified();
-        return return_record ? obj.uuid : undefined;
+        return return_record ? { annotation: obj.toJSON(["uuid"]) } : undefined;
     }
 
     addObjects(objs, canvas=null, return_record=false) {
@@ -182,7 +182,11 @@ export default class AnnotationLayer {
             this.items.push(d);
         });
         this.setModified();
-        return return_record ? objs.map(d => d.uuid) : undefined;
+        return return_record ? {
+            annotation: objs.map(d => {
+                return { annotation: d.toJSON(["uuid"]) }
+            }),
+        }  : undefined;
     }
 
     updateObject(uuid, attr, value) {
@@ -214,7 +218,7 @@ export default class AnnotationLayer {
     }
 
     addObjectFromJSON(json, canvas, return_record=false) {
-        const obj = createFabricObject(json.type, json);
+        const obj = createFabricObject(json.annotation.type, json.annotation);
         if (canvas) canvas.add(obj);
         this.items.push(obj);
 
@@ -226,12 +230,12 @@ export default class AnnotationLayer {
         }
 
         this.setModified();
-        return return_record ? json.uuid : undefined;
+        return return_record ? json : undefined;
     }
 
     addObjectsFromJSON(json, canvas=null, return_record=false) {
         const objs = json.map(d => {
-            const o = createFabricObject(d.type, d)
+            const o = createFabricObject(d.annotation.type, d.annotation)
             if (canvas) canvas.add(o);
             this.items.push(o);
             return o;
@@ -247,7 +251,7 @@ export default class AnnotationLayer {
         });
 
         this.setModified();
-        return return_record ? json.map(d => d.uuid) : undefined;
+        return return_record ? json : undefined;
     }
 
     removeLastObject(canvas=null, return_record=false) {
