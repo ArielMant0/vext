@@ -12,6 +12,7 @@
             <v-list-item :active-color="selectColor" :prepend-icon="icons.shape" :value="MODES.SHAPE"/>
             <v-list-item :active-color="selectColor" :prepend-icon="icons.connect" :value="MODES.CONNECT"/>
             <v-list-item :active-color="selectColor" :prepend-icon="icons.edit" :value="MODES.EDIT"/>
+            <v-list-item :active-color="selectColor" :prepend-icon="icons.whiteboard" :value="MODES.WHITEBOARD"/>
         </v-list>
     </v-navigation-drawer>
 
@@ -27,6 +28,7 @@
 
     <VextPointerMenu/>
     <VextGlobalToolTip/>
+    <VextWhiteBoard :z-index="9999"/>
 </template>
 
 <script setup>
@@ -36,8 +38,9 @@
 
     import VextNoteConfiguration from './VextNoteConfiguration.vue';
     import VextGlobalToolTip from '@/components/VextGlobalToolTip.vue';
+    import VextWhiteBoard from '@/components/whiteboard/VextWhiteBoard.vue';
     import VextPointerMenu from '@/components/VextPointerMenu.vue';
-import { MODES } from '@/use/enums';
+    import { MODES } from '@/use/enums';
 
     const props = defineProps({
         modelValue: {
@@ -69,6 +72,7 @@ import { MODES } from '@/use/enums';
                     shape: "mdi-shape",
                     connect: "mdi-connection",
                     edit: "mdi-cursor-pointer",
+                    whiteboard: "mdi-human-male-board",
                 }
             }
         },

@@ -13,7 +13,6 @@
     import { useVextNote } from '@/store/note';
     import { useVextNoteSettings } from '@/store/note-settings';
     import { MODES } from '@/use/enums';
-import { toRaw } from 'vue';
 
     const props = defineProps({
         /**
@@ -119,8 +118,8 @@ import { toRaw } from 'vue';
     function init() {
         const canvas = new fabric.Canvas(canvasNode.value, {
             isDrawingMode: note.mode === MODES.BRUSH,
-            renderOnAddRemove: true,
             backgroundColor: props.backgroundColor,
+            renderOnAddRemove: true,
             enablePointerEvents: true
         });
         note.setCanvas(canvas);

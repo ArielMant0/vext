@@ -7,6 +7,7 @@
                 <v-tab :color="selectColor" style="min-width: 50px;padding: 0 4px 0 16px;" :prepend-icon="icons.shape" :value="MODES.SHAPE"></v-tab>
                 <v-tab :color="selectColor" style="min-width: 50px;padding: 0 4px 0 16px;" :prepend-icon="icons.connect" :value="MODES.CONNECT"></v-tab>
                 <v-tab :color="selectColor" style="min-width: 50px;padding: 0 4px 0 16px;" :prepend-icon="icons.edit" :value="MODES.EDIT"></v-tab>
+                <v-tab :color="selectColor" style="min-width: 50px;padding: 0 4px 0 16px;" :prepend-icon="icons.whiteboard" :value="MODES.WHITEBOARD"></v-tab>
             </v-tabs>
 
             <v-window v-model="mode">
@@ -35,6 +36,11 @@
                         <VextEditTool/>
                     </KeepAlive>
                 </v-window-item>
+                <v-window-item :value="MODES.WHITEBOARD">
+                    <KeepAlive>
+                        <VextWhiteBoardTool/>
+                    </KeepAlive>
+                </v-window-item>
             </v-window>
         </div>
     </div>
@@ -49,7 +55,8 @@
     import VextBrushTool from '@/components/tools/VextBrushTool.vue';
     import VextShapeTool from '@/components/tools/VextShapeTool.vue';
     import VextLayersTool from '@/components/tools/VextLayersTool.vue';
-    import VextConnectTool from './tools/VextConnectTool.vue';
+    import VextConnectTool from '@/components/tools/VextConnectTool.vue';
+    import VextWhiteBoardTool from './tools/VextWhiteBoardTool.vue';
 
     import { storeToRefs } from 'pinia'
     import { ref, onMounted, watch } from 'vue';
@@ -91,6 +98,7 @@
                     shape: "mdi-shape",
                     connect: "mdi-connection",
                     edit: "mdi-cursor-pointer",
+                    whiteboard: "mdi-human-male-board",
                 }
             }
         },

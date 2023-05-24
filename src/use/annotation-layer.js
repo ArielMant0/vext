@@ -23,6 +23,7 @@ export default class AnnotationLayer {
         this.comments = comments;
         this.created = Date.now();
         this.modified = Date.now();
+        this.isPreview = false;
 
         this.items = [];
         items.forEach(d => {
@@ -54,6 +55,10 @@ export default class AnnotationLayer {
                 return obj;
             })
         }
+    }
+
+    setPreview(value) {
+        this.isPreview = value === true;
     }
 
     toJSON() {

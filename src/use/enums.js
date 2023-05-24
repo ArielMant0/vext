@@ -3,7 +3,8 @@ const MODES = Object.freeze({
     EDIT: "edit",
     SHAPE: "shape",
     LAYER: "layer",
-    CONNECT: "connect"
+    CONNECT: "connect",
+    WHITEBOARD: "whiteboard",
 })
 const MODES_VALUES = Object.values(MODES);
 

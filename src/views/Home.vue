@@ -84,8 +84,4 @@
 body {
   margin:0;
 }
-
-.no-input-details .v-input__details {
-  display: none;
-}
 </style>

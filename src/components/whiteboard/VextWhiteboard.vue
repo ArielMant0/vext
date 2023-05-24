@@ -1,6 +1,13 @@
 <template>
-    <div v-if="wb.visible" ref="wrapper" style="position: relative;">
-        <canvas ref="canvasNode" :width="width" :height="height"></canvas>
+    <div v-show="wb.visible" id="wrapper" :style="{ 'z-index': props.zIndex }">
+        <div class="ma-6 pa-2">
+            <div style="height: 50px">
+                <v-btn icon="mdi-close" color="error" @click="close" style="float: right" variant="text" rounded="0"/>
+            </div>
+            <div ref="parent" style="min-height: 95%; border: thin solid grey; border-radius: 5px;" class="ma-2">
+                <canvas ref="canvasNode" :width="size.width-20" :height="size.height-10"></canvas>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -10,37 +17,19 @@
      * Component that creates the fabric.js canvas for the whiteboard.
      */
     import { fabric } from 'fabric';
-    import { onMounted, ref, watch } from 'vue';
+    import { onMounted, ref, reactive, watch, computed } from 'vue';
     import { useVextNote } from '@/store/note';
     import { useVextWhiteboard } from '@/store/whiteboard';
+    import { MODES } from '@/use/enums';
+    import { useElementSize } from '@vueuse/core';
 
     const props = defineProps({
-        /**
-         * Width of the canvas
-         */
-        width: {
-            type: Number,
-            default: 300,
-            validator(value) {
-                return value >= 0
-            }
-        },
-        /**
-         * Height of the canvas
-         */
-        height: {
-            type: Number,
-            default: 120,
-            validator(value) {
-                return value >= 0
-            }
-        },
         /**
          * Background color of the canvas.
          */
         backgroundColor: {
             type: String,
-            default: 'rgba(255, 255, 255, 0)',
+            default: 'white',
             validator(value) {
                 return CSS.supports("color", value)
             }
@@ -50,109 +39,60 @@
          */
         zIndex: {
             type: [String, Number],
-            default: 100,
+            default: 200,
             validator(value) {
                 const num = Number.parseFloat(value);
                 return !Number.isNaN(num) && num >= 0;
-            }
-        },
-        /**
-         * Whether to draw a border around the canvas.
-         */
-        showBorder: {
-            type: Boolean,
-            default: true
-        },
-        /**
-         * Color of the canvas border, if one should be shown.
-         */
-        borderColor: {
-            type: String,
-            default: "lightgray",
-            validator(value) {
-                return CSS.supports("color", value)
-            }
-        },
-        /**
-         * Size of the canvas border, if one should be shown.
-         */
-        borderSize: {
-            type: [String, Number],
-            default: 1,
-            validator(value) {
-                const num = Number.parseFloat(value);
-                return !Number.isNaN(num) && num >= 0;
-            }
-        },
-        /**
-         * Style of the canvas border, if one should be shown.
-         */
-        borderStyle: {
-            type: String,
-            default: "solid",
-            validator(value) {
-                return [
-                    "solid", "dashed", "dotted", "double",
-                    "groove", "ridge", "inset", "outset"
-                ].includes(value)
-            }
-        },
-        /**
-         * Radius of the canvas border corners, if one should be shown.
-         */
-        borderRadius: {
-            type: [String, Number],
-            default: 5,
-            validator(value) {
-                const num = Number.parseFloat(value);
-                return !Number.isNaN(num) && num >= 0
             }
         },
     });
 
-    const wrapper = ref(null);
+    const parent = ref(null);
     const canvasNode = ref(null);
     const wb = useVextWhiteboard();
+    const note = useVextNote();
+
+    const size = reactive(useElementSize(parent))
 
     function init() {
         const canvas = new fabric.Canvas(canvasNode.value, {
+            backgroundColor: props.backgroundColor,
             isDrawingMode: false,
             renderOnAddRemove: true,
-            backgroundColor: props.backgroundColor,
-            enablePointerEvents: true
+            enablePointerEvents: true,
+            borderColor: null
         });
         wb.setCanvas(canvas);
 
         const el = canvas.wrapperEl;
-        el.style.position = "absolute";
-        el.style.top = 0;
-        el.style.left = 0;
         el.style.zIndex = props.zIndex;
-        setBorderStyle();
-
-        // TODO: set note whiteboard
     }
 
-    function setBorderStyle() {
-        const el = document.querySelector(`.${wb.canvas.containerClass}`)
-        if (props.showBorder) {
-            const size = props.borderSize + (typeof props.borderSize === "string" ? "" : "px")
-            el.style.border = `${size} ${props.borderStyle} ${props.borderColor}`;
-            el.style.borderRadius = props.borderRadius + (typeof props.borderRadius === "string" ? "" : "px")
-        } else {
-            el.style.border = "none";
-        }
+    function close() {
+        note.setMode(MODES.LAYER, false)
     }
 
     onMounted(init);
 
-    watch(() => {
-        return [props.showBorder, props.borderColor, props.borderSize, props.borderStyle, props.borderRadius]
-    }, setBorderStyle, { deep: true })
-
-    watch(() => {
-        return [props.width, props.height]
-    }, () => wb.resizeCanvas(props.width, props.height), { deep: true })
-
+    watch(() => props.zIndex, () => wb.setCanvasZIndex(props.zIndex))
+    watch(size, () => wb.resizeCanvas(size.width-20, size.height-10), { deep: true })
 
 </script>
+
+<style scoped>
+#wrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: flex;
+    width: 100%;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+#wrapper > * {
+    width: 100%;
+    background-color: white;
+}
+</style>

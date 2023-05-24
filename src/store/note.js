@@ -85,7 +85,7 @@ const vextNoteStore = {
         },
         userLayers: state => {
             if (state.previewLayerID === null) return state.layers;
-            return state.layers.filter(d => d.id !== state.previewLayerID);
+            return state.layers.filter(d => !d.isPreview);
         },
 
         color: () => {
@@ -820,7 +820,7 @@ const vextNoteStore = {
         },
 
         layerFromStateHash(hash) {
-            return this.layers.find(l => l.matchesStateHash(hash) && l.id !== this.previewLayerID)
+            return this.layers.find(l => !l.isPreview && l.matchesStateHash(hash))
         },
 
         setState(state) {
@@ -828,6 +828,7 @@ const vextNoteStore = {
             if (this.previewLayerID === null) {
                 this.addLayer(state, false);
                 this.previewLayerID = this.activeLayer;
+                this.currentLayer.setPreview(true);
             } else {
                 const layer = this.getLayer(this.previewLayerID);
                 if (layer) {
@@ -841,6 +842,7 @@ const vextNoteStore = {
                 if (this.currentState !== null) {
                     this.addLayer(this.currentState, false);
                     this.previewLayerID = this.activeLayer
+                    this.currentLayer.setPreview(true);
                 } else {
                     // TODO: do sth!?
                     return;
