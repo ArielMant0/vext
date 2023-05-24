@@ -32,7 +32,7 @@ export default class AnnotationLayer {
                 d.set("opacity", 1);
                 d.set("visible", true)
                 d.set("uuid", uuidv4())
-                canvas.add(toRaw(d))
+                canvas.add(d)
                 this.items.push(d);
             } else {
                 const obj = createFabricObject(d.type, d);

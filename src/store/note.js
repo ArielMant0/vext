@@ -1,8 +1,7 @@
 import { defineStore } from "pinia"
 import { useVextHistory } from "@/store/history";
-import { isFabric, createFabricObject } from '@/use/util';
+import { isFabric } from '@/use/util';
 import { toRaw } from 'vue';
-import { v4 as uuidv4 } from 'uuid';
 import { useExportPDF } from "@/use/export-pdf";
 import { useExportZIP } from "@/use/export-zip";
 import EventHandler from "@/use/event-handler";
@@ -178,7 +177,7 @@ const vextNoteStore = {
             id = id === null ? this.activeLayer : id;
             const idx = this.getLayerIndex(id);
             if (idx >= 0) {
-                this.layers[idx].comments.push(comment);
+                this.layers[idx].addComment(comment);
                 return true;
             }
             return false;
@@ -189,8 +188,8 @@ const vextNoteStore = {
 
             id = id === null ? this.activeLayer : id;
             const idx = this.getLayerIndex(id);
-            if (idx >= 0 && index >= 0 && index < this.layers[idx].comments.length) {
-                this.layers[idx].comments[index] = comment;
+            if (idx >= 0) {
+                this.layers[idx].updateComment(index, comment);
                 return true;
             }
             return false;
@@ -201,8 +200,8 @@ const vextNoteStore = {
 
             id = id === null ? this.activeLayer : id;
             const idx = this.getLayerIndex(id);
-            if (idx >= 0 && index >= 0 && index < this.layers[idx].comments.length) {
-                this.layers[idx].comments.splice(index, 1);
+            if (idx >= 0) {
+                this.layers[idx].removeComment(index);
                 return true;
             }
             return false;
@@ -214,7 +213,7 @@ const vextNoteStore = {
             id = id === null ? this.activeLayer : id;
             const idx = this.getLayerIndex(id);
             if (idx >= 0) {
-                this.layers[idx].comments = [];
+                this.layers[idx].removeComments()
                 return true;
             }
             return false;

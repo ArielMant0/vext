@@ -10,34 +10,34 @@
                 <v-tab :color="selectColor" style="min-width: 50px;padding: 0 4px 0 16px;" :prepend-icon="icons.whiteboard" :value="MODES.WHITEBOARD"></v-tab>
             </v-tabs>
 
-            <v-window v-model="mode">
+            <v-window v-model="mode" continuous>
                 <v-window-item :value="MODES.LAYER">
-                    <KeepAlive>
+                    <KeepAlive :max="1">
                         <VextLayersTool :tooltip-delay="tooltipDelay"/>
                     </KeepAlive>
                 </v-window-item>
                 <v-window-item :value="MODES.BRUSH">
-                    <KeepAlive>
+                    <KeepAlive :max="1">
                         <VextBrushTool/>
                     </KeepAlive>
                 </v-window-item>
                 <v-window-item :value="MODES.SHAPE">
-                    <KeepAlive>
+                    <KeepAlive :max="1">
                         <VextShapeTool/>
                     </KeepAlive>
                 </v-window-item>
                 <v-window-item :value="MODES.CONNECT">
-                    <KeepAlive>
+                    <KeepAlive :max="1">
                         <VextConnectTool/>
                     </KeepAlive>
                 </v-window-item>
                 <v-window-item :value="MODES.EDIT">
-                    <KeepAlive>
+                    <KeepAlive :max="1">
                         <VextEditTool/>
                     </KeepAlive>
                 </v-window-item>
                 <v-window-item :value="MODES.WHITEBOARD">
-                    <KeepAlive>
+                    <KeepAlive :max="1">
                         <VextWhiteBoardTool/>
                     </KeepAlive>
                 </v-window-item>
