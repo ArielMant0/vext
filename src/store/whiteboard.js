@@ -4,7 +4,10 @@ import html2canvas from "html2canvas";
 import WhiteBoardLayer from "@/use/whiteboard-layer";
 import { MODES } from "@/use/enums";
 import { useVextNoteSettings } from "@/store/note-settings";
+import { useVextHistory } from "@/store/history";
 import { fabric } from 'fabric';
+import { createFabricObject } from "@/use/util";
+import { toRaw } from "vue";
 
 const vextWhiteboard = {
     state: () => {
@@ -18,6 +21,8 @@ const vextWhiteboard = {
             layers: {},
             selectedLayer: "",
             groupSelected: false,
+
+            paths: [],
 
             border: {
                 color: "lightgrey",
@@ -50,20 +55,70 @@ const vextWhiteboard = {
             brush.color = settings.color0;
             brush.width = settings.brushSize;
             canvas.freeDrawingBrush = brush;
+
+            canvas.on("path:created", ({ path }) => {
+                this.addPath(path, false, true);
+            });
+        },
+
+        addPath(path, addToCanvas=true, record=true) {
+            if (!this.enabled) return;
+            if (addToCanvas) {
+                this.canvas.add(path);
+            }
+            this.paths.push(path);
+
+            if (record) {
+                const history = useVextHistory();
+                history.do("added path on whiteboard",
+                    this.addPathFromJSON.bind(this, path.toJSON(), false),
+                    this.removePath.bind(this, null, false)
+                );
+            }
+        },
+
+        addPathFromJSON(json, record=true) {
+            if (!this.enabled) return;
+
+            const path = createFabricObject("path", json);
+            this.canvas.add(path);
+            this.paths.push(path);
+
+            if (record) {
+                const history = useVextHistory();
+                history.do("added path on whiteboard",
+                    this.addPathFromJSON.bind(this, json, false),
+                    this.removePath.bind(this, null, false)
+                );
+            }
+        },
+
+        removePath(index=null, record=true) {
+            if (!this.enabled || this.paths.length === 0) return;
+
+            index = index === 0 ? this.paths.length-1 : index;
+            if (index < 0 || index >= this.paths.length) return;
+
+            const path = this.paths.pop();
+            this.canvas.remove(toRaw(path))
+
+            if (record) {
+                const history = useVextHistory();
+                history.do("removed path on whiteboard",
+                    this.removePath.bind(this, index, false),
+                    this.addPathFromJSON.bind(this, path.toJSON(), false),
+                );
+            }
         },
 
         setBrushColor(color) {
-            console.log("setBrushColor")
             if (this.canvas) {
-                console.log(color)
                 this.canvas.freeDrawingBrush.color = color;
             }
         },
 
         setBrushSize(size) {
-            console.log("setBrushSize")
             if (this.canvas) {
-                console.log(size)
                 this.canvas.freeDrawingBrush.width = size;
             }
         },
