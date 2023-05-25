@@ -25,6 +25,7 @@ const vextHistoryStore = {
          * @param {*} action
          */
         do(desc, doAction, undoAction) {
+            console.debug("history DO:", desc)
             this.undoStack.push({
                 description: desc,
                 time: new Date(Date.now()),
@@ -36,6 +37,7 @@ const vextHistoryStore = {
         undo(remember=true) {
             if (this.hasUndo) {
                 const action = this.undoStack.pop();
+                console.debug("history UNDO:", action.description)
                 action.undo()
                 if (remember) {
                     this.redoStack.push({
@@ -51,6 +53,7 @@ const vextHistoryStore = {
         redo(remember=true) {
             if (this.hasRedo) {
                 const action = this.redoStack.pop();
+                console.debug("history REDO:", action.description)
                 action.undo()
                 const desc = action.description.startsWith("undo ") ?
                     action.description.slice(5) : action.description;

@@ -2,10 +2,10 @@
     <div v-show="wb.enabled" id="wrapper" :style="{ 'z-index': props.zIndex }">
         <div class="ma-6 pa-2">
             <div class="d-flex" style="position: relative; height: 50px; align-items: center;">
-                <div class="mr-2">
-                    <v-btn icon="mdi-cursor-move" @click="wb.setMode(MODES.EDIT)" rounded="0" size="small" class="mr-1"/>
-                    <v-btn icon="mdi-brush" @click="wb.setMode(MODES.BRUSH)" rounded="0" size="small"/>
-                </div>
+                <v-btn-toggle v-model="tmpMode" @update:model-value="m => wb.setMode(m)" class="mr-2" divided>
+                    <v-btn icon="mdi-cursor-move" @click="wb.setMode(MODES.EDIT)" :value="MODES.EDIT"/>
+                    <v-btn icon="mdi-brush" @click="wb.setMode(MODES.BRUSH)" :value="MODES.BRUSH"/>
+                </v-btn-toggle>
                 <div v-if="layerNames.length > 0" class="d-flex ml-1 mt-1 mr-2">
                     <v-select v-model="selectLayer" :items="layerNames"
                         density="compact" hide-details
@@ -33,6 +33,7 @@
     import { useVextWhiteboard } from '@/store/whiteboard';
     import { MODES } from '@/use/enums';
     import { useElementSize } from '@vueuse/core';
+    import { storeToRefs } from 'pinia';
 
     const props = defineProps({
         /**
@@ -63,8 +64,11 @@
     const wb = useVextWhiteboard();
     const note = useVextNote();
 
+    const { mode } = storeToRefs(wb);
+
     const size = reactive(useElementSize(parent))
 
+    const tmpMode = ref(mode.value)
     const selectLayer = ref("")
     const layerNames = computed(() => note.userLayers.map(d => d.id))
 
@@ -99,6 +103,8 @@
     watch(() => props.zIndex, () => wb.setCanvasZIndex(props.zIndex))
     watch(size, () => wb.resizeCanvas(size.width-20, size.height-10), { deep: true })
     watch(layerNames, () => selectLayer.value = layerNames.value[0])
+
+    watch(mode, m => tmpMode.value = m)
 
 </script>
 

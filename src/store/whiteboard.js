@@ -33,10 +33,19 @@ const vextWhiteboard = {
 
     actions: {
 
-        setMode(mode) {
+        setMode(mode, record=true) {
             if (mode !== this.mode) {
-                this.mode = mode;
 
+                if (record) {
+                    const history = useVextHistory();
+                    const prev = this.mode;
+                    history.do("set whiteboard mode to " + mode,
+                        this.setMode.bind(this, mode, false),
+                        this.setMode.bind(this, prev, false),
+                    );
+                }
+
+                this.mode = mode;
                 if (this.mode === MODES.BRUSH) {
                     // TODO: enable free drawing
                     this.canvas.isDrawingMode = true;
