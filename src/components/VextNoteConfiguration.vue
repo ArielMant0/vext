@@ -8,6 +8,7 @@
                 <v-tab :color="selectColor" style="min-width: 50px;padding: 0 4px 0 16px;" :prepend-icon="icons.connect" :value="MODES.CONNECT"></v-tab>
                 <v-tab :color="selectColor" style="min-width: 50px;padding: 0 4px 0 16px;" :prepend-icon="icons.edit" :value="MODES.EDIT"></v-tab>
                 <v-tab :color="selectColor" style="min-width: 50px;padding: 0 4px 0 16px;" :prepend-icon="icons.whiteboard" :value="MODES.WHITEBOARD"></v-tab>
+                <v-tab :color="selectColor" style="min-width: 50px;padding: 0 4px 0 16px;" :prepend-icon="icons.settings" :value="MODES.WHITEBOARD"></v-tab>
             </v-tabs>
 
             <v-window v-model="mode" continuous>
@@ -41,6 +42,11 @@
                         <VextWhiteBoardTool/>
                     </KeepAlive>
                 </v-window-item>
+                <v-window-item :value="MODES.SETTINGS">
+                    <KeepAlive :max="1">
+                        <VextSettings/>
+                    </KeepAlive>
+                </v-window-item>
             </v-window>
         </div>
     </div>
@@ -57,6 +63,7 @@
     import VextLayersTool from '@/components/tools/VextLayersTool.vue';
     import VextConnectTool from '@/components/tools/VextConnectTool.vue';
     import VextWhiteBoardTool from './tools/VextWhiteBoardTool.vue';
+    import VextSettings from '@/components/tools/VextSettings.vue';
 
     import { storeToRefs } from 'pinia'
     import { ref, onMounted, watch } from 'vue';
@@ -99,6 +106,7 @@
                     connect: "mdi-connection",
                     edit: "mdi-cursor-pointer",
                     whiteboard: "mdi-human-male-board",
+                    settings: "mdi-cog",
                 }
             }
         },

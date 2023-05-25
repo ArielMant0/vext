@@ -54,17 +54,9 @@
     const history = useVextHistory();
 
     const { mode } = storeToRefs(note);
-    const { pointerMenu } = storeToRefs(useVextNoteSettings())
+    const { pointerMenu, onAction, onGesture } = storeToRefs(useVextNoteSettings())
 
     const props = defineProps({
-        onAction: {
-            type: Boolean,
-            default: true
-        },
-        onGesture: {
-            type: Boolean,
-            default: true
-        },
         indicator: {
             type: Boolean,
             default: true
@@ -190,7 +182,7 @@
 
     function onPointerDown(event) {
 
-        if (!props.onGesture || open.value ||  pointerMenu.value ||
+        if (!onGesture.value || open.value ||  pointerMenu.value ||
             lastPointerDown !== null) return;
 
         lastPointerDown = performance.now();
@@ -234,7 +226,7 @@
         let handle = window.requestAnimationFrame(indicator);
     }
     function onPointerUp(event) {
-        if (!props.onGesture || open.value || pointerMenu.value ||
+        if (!onGesture.value || open.value || pointerMenu.value ||
             lastPointerDown === null) return;
 
         const duration = performance.now() - lastPointerDown;
@@ -255,7 +247,7 @@
     }
 
     function showFromEvent(event) {
-        if (!ignore.value && props.onAction && !open.value) {
+        if (!ignore.value && onAction.value && !open.value) {
             trigger.value = "event";
             radius.value = 0;
             lastPointerDown = null;

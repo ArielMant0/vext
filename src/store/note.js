@@ -434,6 +434,8 @@ const vextNoteStore = {
                         break;
                     case MODES.LAYER:
                     case MODES.CONNECT:
+                    case MODES.WHITEBOARD:
+                    case MODES.SETTINGS:
                         this.canvas.isDrawingMode = false;
                         this.enablePointerEvents(false);
                         break;

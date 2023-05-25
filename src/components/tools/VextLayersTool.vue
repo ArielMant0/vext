@@ -13,7 +13,7 @@
             </template>
         </v-tooltip>
         <div class="d-flex">
-            <v-select v-model="layerMode" :items="layerModeValues" density="compact" class="no-input-details mb-2 mr-2"></v-select>
+            <v-select v-model="layerMode" :items="LAYER_MODES_VALUES" density="compact" class="mb-2 mr-2" hide-details/>
             <v-tooltip text="add a new layer" location="right" :open-delay="tooltipDelay">
                 <template v-slot:activator="{ props }">
                     <v-btn v-bind="props" icon="mdi-plus" color="primary" size="small" rounded="0" @click="openAddDialog" class="me-1"></v-btn>
@@ -136,11 +136,12 @@
      * Component that displays layer and state information. Let's the user
      * switch between layers, select the layer mode, etc.
      */
-    import { ref, watch, computed } from 'vue';
+    import { ref, computed } from 'vue';
     import { useVextNote } from '@/store/note';
     import { storeToRefs } from 'pinia';
     import { useVextState } from '@/store/state';
     import VextLayerInfo from './VextLayerInfo.vue';
+    import { LAYER_MODES_VALUES } from '@/use/enums';
 
     const state = useVextState();
 
@@ -165,7 +166,7 @@
     })
 
     const note = useVextNote();
-    const { activeLayer, layerMode, layerModeValues, previewLayer } = storeToRefs(note);
+    const { activeLayer, layerMode, previewLayer } = storeToRefs(note);
 
     const layerSearch = computed(() => {
         if (!searchTerm.value || searchTerm.value.length === 0) return note.userLayers;

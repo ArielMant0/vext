@@ -13,6 +13,7 @@
             <v-list-item :active-color="selectColor" :prepend-icon="icons.connect" :value="MODES.CONNECT"/>
             <v-list-item :active-color="selectColor" :prepend-icon="icons.edit" :value="MODES.EDIT"/>
             <v-list-item :active-color="selectColor" :prepend-icon="icons.whiteboard" :value="MODES.WHITEBOARD"/>
+            <v-list-item :active-color="selectColor" :prepend-icon="icons.settings" :value="MODES.SETTINGS"/>
         </v-list>
     </v-navigation-drawer>
 
@@ -73,6 +74,7 @@
                     connect: "mdi-connection",
                     edit: "mdi-cursor-pointer",
                     whiteboard: "mdi-human-male-board",
+                    settings: "mdi-cog",
                 }
             }
         },

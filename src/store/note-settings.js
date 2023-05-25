@@ -9,6 +9,8 @@ const vextNoteSettingsStore = {
         return {
 
             pointerMenu: false,
+            onAction: true,
+            onGesture: true,
 
             activeColor: 0,
             color0: "#ffffff",

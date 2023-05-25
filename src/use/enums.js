@@ -5,6 +5,7 @@ const MODES = Object.freeze({
     LAYER: "layer",
     CONNECT: "connect",
     WHITEBOARD: "whiteboard",
+    SETTINGS: "settings",
 })
 const MODES_VALUES = Object.values(MODES);
 
