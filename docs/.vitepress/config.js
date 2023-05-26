@@ -37,7 +37,7 @@ export default {
                 text: 'Stores',
                 items: [
                     { text: 'VextNote Store', link: 'stores/note' },
-                    { text: 'VextNoteSettings Store', link: 'stores/note-settings' },
+                    { text: 'VextSettings Store', link: 'stores/settings' },
                     { text: 'VextState Store', link: 'stores/state' },
                     { text: 'VextHistory Store', link: 'stores/history' },
                     { text: 'VextApp Store', link: 'stores/app' },

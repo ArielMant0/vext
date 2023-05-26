@@ -1,7 +1,7 @@
 <template>
     <VextToolTip
         :content="ttContent" :x="ttX" :y="ttY" :placement="ttPlacement"
-        :width="width" :height="height" :offset="offset"/>
+        :width="width" :height="height" :offset="offset" :z-index="zIndex"/>
 </template>
 
 <script setup>
@@ -39,7 +39,15 @@
             validator(value) {
                 return value >= 0
             }
-        }
+        },
+        zIndex: {
+            type: [Number, String],
+            default: 300,
+            validator(value) {
+                const num = Number.parseFloat(value);
+                return !Number.isNaN(num) && num >= 0;
+            }
+        },
     })
 
     const { ttContent, ttX, ttY, ttPlacement } = storeToRefs(useVextApp())

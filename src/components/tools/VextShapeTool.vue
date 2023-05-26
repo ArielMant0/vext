@@ -43,14 +43,14 @@
     import { fabric } from 'fabric';
     import { useVextNote } from '@/store/note';
     import { useVextApp } from '@/store/app';
-    import { useVextNoteSettings } from '@/store/note-settings';
+    import { useVextSettings } from '@/store/settings';
     import { storeToRefs } from 'pinia';
     import { MODES } from '@/use/enums';
     import VextColorViewer from './VextColorViewer.vue';
 
     const note = useVextNote();
     const app = useVextApp();
-    const settings = useVextNoteSettings();
+    const settings = useVextSettings();
     const mode = ref("create");
 
     const { shape } = storeToRefs(settings);

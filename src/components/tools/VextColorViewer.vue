@@ -28,7 +28,7 @@
     import { ref, watch } from 'vue';
     import { useVextNote } from '@/store/note'
     import { storeToRefs } from 'pinia';
-    import { useVextNoteSettings } from '@/store/note-settings';
+    import { useVextSettings } from '@/store/settings';
 
     const props = defineProps({
         /**
@@ -56,7 +56,7 @@
     const emits = defineEmits(["color-change"]);
 
     const note = useVextNote();
-    const settings = useVextNoteSettings();
+    const settings = useVextSettings();
     const { activeColor, color0, color1, color } = storeToRefs(settings);
 
     settings.setColorPrimary(props.colorPrimary, false)

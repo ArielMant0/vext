@@ -3,11 +3,12 @@ import { useVextNote } from "./note";
 import html2canvas from "html2canvas";
 import WhiteBoardLayer from "@/use/whiteboard-layer";
 import { MODES } from "@/use/enums";
-import { useVextNoteSettings } from "@/store/note-settings";
+import { useVextSettings } from "@/store/settings";
 import { useVextHistory } from "@/store/history";
 import { fabric } from 'fabric';
-import { createFabricObject } from "@/use/util";
+import { createFabricObject, getObjTransform } from "@/use/util";
 import { toRaw } from "vue";
+import { v4 as uuidv4 } from 'uuid';
 
 const vextWhiteboard = {
     state: () => {
@@ -45,29 +46,38 @@ const vextWhiteboard = {
                     );
                 }
 
-                this.mode = mode;
-                if (this.mode === MODES.BRUSH) {
-                    // TODO: enable free drawing
-                    this.canvas.isDrawingMode = true;
-                } else {
-                    // TODO: disable free drawing
-                    this.canvas.isDrawingMode = false;
+                if (this.mode && MODES.EDIT && this.canvas.getActiveObject()) {
+                    this.canvas.discardActiveObject()
+                    this.canvas.requestRenderAll();
                 }
+
+                this.mode = mode;
+                this.canvas.isDrawingMode = this.mode === MODES.BRUSH;
             }
         },
 
         setCanvas(canvas) {
             this.canvas = canvas;
             const brush = new fabric.PencilBrush(canvas);
-            const settings = useVextNoteSettings();
+            const settings = useVextSettings();
             brush.decimate = settings.brushDecimation;
             brush.color = settings.color0;
             brush.width = settings.brushSize;
             canvas.freeDrawingBrush = brush;
 
-            canvas.on("path:created", ({ path }) => {
-                this.addPath(path, false, true);
-            });
+            canvas
+                .on("path:created", ({ path }) => {
+                    this.addPath(path, false, true);
+                })
+                .on("object:modified", ({ target, transform }) => {
+                    if (target.uuid && this.mode === MODES.EDIT) {
+                        const history = useVextHistory();
+                        history.do("modify whiteboard annotation",
+                            this.modifyObject.bind(this, target.uuid, getObjTransform(transform), false),
+                            this.modifyObject.bind(this, target.uuid, getObjTransform(transform.original), false)
+                        );
+                    }
+                })
         },
 
         addPath(path, addToCanvas=true, record=true) {
@@ -75,12 +85,13 @@ const vextWhiteboard = {
             if (addToCanvas) {
                 this.canvas.add(path);
             }
+            path.set("uuid", uuidv4());
             this.paths.push(path);
 
             if (record) {
                 const history = useVextHistory();
                 history.do("added path on whiteboard",
-                    this.addPathFromJSON.bind(this, path.toJSON(), false),
+                    this.addPathFromJSON.bind(this, path.toJSON(["uuid"]), false),
                     this.removePath.bind(this, null, false)
                 );
             }
@@ -115,9 +126,43 @@ const vextWhiteboard = {
                 const history = useVextHistory();
                 history.do("removed path on whiteboard",
                     this.removePath.bind(this, index, false),
-                    this.addPathFromJSON.bind(this, path.toJSON(), false),
+                    this.addPathFromJSON.bind(this, path.toJSON(["uuid"]), false),
                 );
             }
+        },
+
+        modifyObject(uuid, transform, record=true) {
+
+            const obj = this.itemFromUUID(uuid);
+            if (obj) {
+                if (record) {
+                    const history = useVextHistory();
+                    const original = getObjTransform(obj);
+                    history.do("modify annotation",
+                        this.modifyObject.bind(this, uuid, transform, id, false),
+                        this.modifyObject.bind(this, uuid, original, id, false),
+                    );
+                }
+
+                obj.set(transform);
+                obj.set("dirty", true);
+
+                this.canvas.requestRenderAll();
+            }
+        },
+
+        itemFromUUID(uuid) {
+            const path = this.paths.find(d => d.uuid === uuid);
+            if (path) return path;
+
+            for (const l in this.layers) {
+                const item = this.layers[l].item(uuid)
+                if (item) {
+                    return item;
+                }
+            }
+
+            return null;
         },
 
         setBrushColor(color) {

@@ -6,7 +6,8 @@ const vextHistoryStore = {
         return {
             menu: false,
             undoStack: [],
-            redoStack: []
+            redoStack: [],
+            limit: 50
         };
     },
 
@@ -26,6 +27,10 @@ const vextHistoryStore = {
          */
         do(desc, doAction, undoAction) {
             console.debug("history DO:", desc)
+            if (this.undoStack.length >= this.limit) {
+                console.debug("history: removing oldest UNDO entry due to size limit")
+                this.undoStack.splice(0, this.undoStack.length-this.limit+1);
+            }
             this.undoStack.push({
                 description: desc,
                 time: new Date(Date.now()),
@@ -40,6 +45,10 @@ const vextHistoryStore = {
                 console.debug("history UNDO:", action.description)
                 action.undo()
                 if (remember) {
+                    if (this.redoStack.length >= this.limit) {
+                        console.debug("history: removing oldest REDO entry due to size limit")
+                        this.redoStack.splice(0, this.redoStack.length-this.limit+1);
+                    }
                     this.redoStack.push({
                         description: "undo " + action.description,
                         do: action.undo,
@@ -58,6 +67,10 @@ const vextHistoryStore = {
                 const desc = action.description.startsWith("undo ") ?
                     action.description.slice(5) : action.description;
                 if (remember) {
+                    if (this.undoStack.length >= this.limit) {
+                        console.debug("history: removing oldest UNDO entry due to size limit")
+                        this.undoStack.splice(0, this.undoStack.length-this.limit+1);
+                    }
                     this.undoStack.push({
                         description: desc,
                         do: action.undo,

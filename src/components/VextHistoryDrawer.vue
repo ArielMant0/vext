@@ -1,5 +1,5 @@
 <template>
-    <v-navigation-drawer v-model="menu" temporary location="right" width="400">
+    <v-navigation-drawer v-model="open" temporary :location="location" width="400">
         <v-list-item prepend-icon="mdi-history" title="History">
             <template v-slot:append>
                 <v-hover v-slot="{ isHovering, props }">
@@ -8,12 +8,20 @@
             </template>
         </v-list-item>
         <v-divider/>
-        <v-card title="undo stack" :prepend-icon="undoIcon" variant="flat">
+        <v-card variant="flat">
+            <v-card-title class="text-subtitle-2">
+                <v-btn :icon="undoIcon" variant="plain" @click="history.undo()" :disabled="!hasUndo" rounded="0" size="small"/>
+                <span>undo stack</span>
+            </v-card-title>
             <v-list density="compact" nav>
                 <v-list-item v-for="(item, index) in undoStack" :key="index" :title="item.description" :subtitle="item.time.toLocaleTimeString()"></v-list-item>
             </v-list>
         </v-card>
-        <v-card title="redo stack" :prepend-icon="redoIcon" variant="flat">
+        <v-card variant="flat">
+            <v-card-title class="text-subtitle-2">
+                <v-btn :icon="redoIcon" variant="plain" @click="history.redo()" :disabled="!hasRedo" rounded="0" size="small"/>
+                <span>redo stack</span>
+            </v-card-title>
             <v-list density="compact" nav>
                 <v-list-item v-for="(item, index) in redoStack" :key="index" :title="item.description" :subtitle="item.time.toLocaleTimeString()"></v-list-item>
             </v-list>
@@ -28,13 +36,18 @@
      */
     import { storeToRefs } from 'pinia';
     import { useVextHistory } from '@/store/history';
+    import { computed } from 'vue';
 
     const history = useVextHistory();
-    const { menu, undoStack, redoStack } = storeToRefs(history);
+    const { undoStack, redoStack, hasUndo, hasRedo } = storeToRefs(history);
 
     function clearHistory() { history.clear(); }
 
     const props = defineProps({
+        modelValue: {
+            type: Boolean,
+            required: true,
+        },
         undoIcon: {
             type: String,
             default: "mdi-undo"
@@ -43,6 +56,21 @@
             type: String,
             default: "mdi-redo"
         },
+        location: {
+            type: String,
+            default: "left"
+        }
     });
+
+    const emit = defineEmits(["update:modelValue"])
+
+    const open = computed({
+        get() {
+            return props.modelValue
+        },
+        set(value) {
+            emit("update:modelValue", value);
+        }
+    })
 
 </script>

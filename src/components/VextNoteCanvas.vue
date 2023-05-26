@@ -11,7 +11,7 @@
     import { fabric } from 'fabric';
     import { onMounted, ref, watch } from 'vue';
     import { useVextNote } from '@/store/note';
-    import { useVextNoteSettings } from '@/store/note-settings';
+    import { useVextSettings } from '@/store/settings';
     import { MODES } from '@/use/enums';
 
     const props = defineProps({
@@ -113,7 +113,7 @@
     const wrapper = ref(null);
     const canvasNode = ref(null);
     const note = useVextNote();
-    const settings = useVextNoteSettings();
+    const settings = useVextSettings();
 
     function init() {
         const canvas = new fabric.Canvas(canvasNode.value, {

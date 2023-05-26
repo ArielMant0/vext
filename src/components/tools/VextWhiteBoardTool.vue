@@ -3,43 +3,53 @@
 </template>
 
 <script setup>
-    import { onMounted, watch } from 'vue';
+    import { ref, onMounted, watch } from 'vue';
     import { useVextNote } from '@/store/note';
     import { useVextWhiteboard } from '@/store/whiteboard';
     import { MODES } from '@/use/enums';
     import { storeToRefs } from 'pinia';
     import { useVextInput } from '@/store/input';
-    import { useVextNoteSettings } from '@/store/note-settings';
+    import { useVextSettings } from '@/store/settings';
 
     const input = useVextInput();
     const note = useVextNote();
-    const settings = useVextNoteSettings();
-    const { brushSize, color } = storeToRefs(settings);
     const { mode } = storeToRefs(note);
+
+    const settings = useVextSettings();
+    const { brushSize, color } = storeToRefs(settings);
+
     const wb = useVextWhiteboard();
+    const { enabled } = storeToRefs(wb);
 
     wb.setBrushSize(brushSize.value)
     wb.setBrushColor(color.value)
 
+    input.on("keydown", function(event) {
+        if (enabled.value && (event.key === "Delete" || event.key === "Backspace")) {
+            wb.deleteActiveObject();
+        }
+    })
+
     onMounted(function() {
-        input.on("keydown", function(event) {
-            if (wb.enabled && (event.key === "Delete" || event.key === "Backspace")) {
-                wb.deleteActiveObject();
-            }
-        })
         if (mode.value === MODES.WHITEBOARD) {
             wb.enable();
         }
     });
 
-    watch(brushSize, () => wb.setBrushSize(brushSize.value))
-    watch(color, () => wb.setBrushColor(color.value))
+    watch(brushSize, wb.setBrushSize)
+    watch(color, wb.setBrushColor)
 
-    watch(mode, async (now, prev) => {
+    watch(mode, (now, prev) => {
         if (prev !== MODES.WHITEBOARD && now === MODES.WHITEBOARD) {
             wb.enable();
-        } else if (prev === MODES.WHITEBOARD && now !== MODES.WHITEBOARD) {
-            wb.disable()
+        } else if (enabled.value && prev === MODES.WHITEBOARD) {
+            wb.disable();
         }
     });
+
+    watch(enabled, function() {
+        if (!enabled.value && mode.value === MODES.WHITEBOARD) {
+            note.setPreviousMode()
+        }
+    })
 </script>

@@ -89,7 +89,7 @@
     }
 
     function close() {
-        note.setMode(MODES.LAYER, false)
+        wb.disable();
     }
 
     function selectLayerItems() {

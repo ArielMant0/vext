@@ -3,7 +3,7 @@ import { useVextHistory } from "./history";
 
 let _CANVAS;
 
-const vextNoteSettingsStore = {
+const vextSettingsStore = {
 
     state: () => {
         return {
@@ -12,6 +12,8 @@ const vextNoteSettingsStore = {
             onAction: true,
             onGesture: true,
             closeOnClick: true,
+
+            historyLimit: 50,
 
             activeColor: 0,
             color0: "#ffffff",
@@ -51,6 +53,11 @@ const vextNoteSettingsStore = {
 
         defaultColorAt(index) {
             return this.defaultColors[index % this.defaultColors.length]
+        },
+
+        setHistoryLimit(limit) {
+            const history = useVextHistory();
+            history.limit = Math.max(1, Math.floor(limit));
         },
 
         setBrushSize(size, record=true) {
@@ -143,6 +150,6 @@ const vextNoteSettingsStore = {
     },
 }
 
-const useVextNoteSettings = defineStore("vext-note-settings", vextNoteSettingsStore);
+const useVextSettings = defineStore("vext-settings", vextSettingsStore);
 
-export { useVextNoteSettings, vextNoteSettingsStore }
+export { useVextSettings, vextSettingsStore }

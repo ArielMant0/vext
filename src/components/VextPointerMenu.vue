@@ -2,9 +2,9 @@
     <div>
         <VextCircleMenu v-model="open"
             :items="visibleOptions" :x="x" :y="y"
-            :close-on-click="closeOnClick"
+            :close-on-click="closeOnClick" :z-index="zIndex"
             @click="o => performAction(o.action, o.value)"
-            @close="pointerMenu = false">
+            @close="onClose(false)">
 
             <template #button="{ item, degree }">
                 <v-btn v-if="item.icon"
@@ -21,11 +21,12 @@
         </VextCircleMenu>
 
         <VextCircleSettingsMenu v-model="openSettings"
-            :x="x" :y="y"
+            :x="x" :y="y" :z-index="zIndex"
             :close-on-click="closeOnClick"
-            @close="closeOnClick ? pointerMenu = false : open = true"/>
+            @click="onClose(true)"
+            @close="onClose(true)"/>
 
-        <div v-if="indicator && radius > 0" class="menu-indicator" :style="{ 'left': indicatorX+'px', 'top': indicatorY+'px', }">
+        <div v-if="indicator && radius > 0" class="menu-indicator" :style="{ 'left': indicatorX+'px', 'top': indicatorY+'px', 'z-index': zIndex}">
 
             <slot name="indicator" :t="indicatorT" :fill="fill ? fillColor : null" :stroke="stroke ? strokeColor : null">
                 <svg :width="maxRadius*2+10" :height="maxRadius*2+10">
@@ -53,7 +54,7 @@
     import { storeToRefs } from 'pinia';
     import { ref, watch, computed, onMounted } from 'vue';
     import { pointerMenuOptions } from '@/use/util';
-    import { useVextNoteSettings } from '@/store/note-settings';
+    import { useVextSettings } from '@/store/settings';
     import { ACTIONS, MODES } from '@/use/enums';
 
     const input = useVextInput();
@@ -61,7 +62,7 @@
     const history = useVextHistory();
 
     const { mode } = storeToRefs(note);
-    const { pointerMenu, onAction, onGesture, closeOnClick } = storeToRefs(useVextNoteSettings())
+    const { pointerMenu, onAction, onGesture, closeOnClick } = storeToRefs(useVextSettings())
 
     const props = defineProps({
         indicator: {
@@ -91,6 +92,14 @@
         timeThresholdMax: {
             type: Number,
             default: 1000
+        },
+        zIndex: {
+            type: [Number, String],
+            default: 300,
+            validator(value) {
+                const num = Number.parseFloat(value);
+                return !Number.isNaN(num) && num >= 0;
+            }
         }
     });
 
@@ -118,6 +127,16 @@
     function close() {
         open.value = false;
         pointerMenu.value = false;
+    }
+
+    function onClose(isSettingsMenu=false) {
+        if (isSettingsMenu && !closeOnClick.value) {
+            open.value = true;
+            pointerMenu.value = true;
+        } else {
+            open.value = false;
+            pointerMenu.value = false;
+        }
     }
 
     const visibleOptions = computed(() => {

@@ -1,26 +1,26 @@
 <template>
     <VextCircleMenu v-if="mode === MODES.BRUSH" v-model="open"
             :items="brushOptions" :x="x" :y="y"
-            :close-on-click="closeOnClick"
-            @click="o => performAction(o)"
+            :close-on-click="closeOnClick" :z-index="zIndex"
+            @click="performAction"
             @close="close"/>
     <VextCircleMenu v-else-if="mode === MODES.SHAPE" v-model="open"
             :items="shapeOptions" :x="x" :y="y"
-            :close-on-click="closeOnClick"
-            @click="o => performAction(o)"
+            :close-on-click="closeOnClick" :z-index="zIndex"
+            @click="performAction"
             @close="close"/>
 </template>
 
 <script setup>
-    import { computed } from 'vue';
     import VextCircleMenu from './VextCircleMenu.vue';
+    import { computed } from 'vue';
     import { useVextNote } from '@/store/note';
-    import { useVextNoteSettings } from '@/store/note-settings';
+    import { useVextSettings } from '@/store/settings';
     import { storeToRefs } from 'pinia';
     import { MODES } from '@/use/enums';
 
     const note = useVextNote();
-    const settings = useVextNoteSettings();
+    const settings = useVextSettings();
     const { mode } = storeToRefs(note)
 
     const props = defineProps({
@@ -40,6 +40,14 @@
             type: Boolean,
             default: true
         },
+        zIndex: {
+            type: [Number, String],
+            default: 300,
+            validator(value) {
+                const num = Number.parseFloat(value);
+                return !Number.isNaN(num) && num >= 0;
+            }
+        }
     })
     const emit = defineEmits(["update:modelValue", "close", "click"])
 
@@ -70,21 +78,25 @@
                 border: settings.activeColor === 1,
             },{
                 id: "size-1",
+                icon: "mdi-numeric-1-box-outline",
                 action: "brush-size",
                 color: "default",
                 value: 1,
             },{
                 id: "size-3",
+                icon: "mdi-numeric-3-box-outline",
                 action: "brush-size",
                 color: "default",
                 value: 3,
             },{
                 id: "size-5",
+                icon: "mdi-numeric-5-box-outline",
                 action: "brush-size",
                 color: "default",
                 value: 5,
             },{
                 id: "size-10",
+                icon: "mdi-numeric-10-box-outline",
                 action: "brush-size",
                 color: "default",
                 value: 10,

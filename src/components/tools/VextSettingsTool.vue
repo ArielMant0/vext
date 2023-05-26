@@ -50,20 +50,40 @@
         </v-tooltip>
         <v-switch v-model="closeOnClick" :label="closeOnClick ? 'on' : 'off'"
             density="compact" color="primary" hide-details/>
+
+        <v-tooltip :open-delay="tooltipDelay">
+            how many entries should be stored in the interaction history
+            <template v-slot:activator="{ props }">
+                <div class="text-caption mb-1">
+                    interaction history limit
+                    <v-icon size="small" icon="mdi-information" v-bind="props"/>
+                </div>
+            </template>
+        </v-tooltip>
+        <v-text-field v-model="historyLimit" type="number" hide-details density="compact"
+            :rules="[v => v && v > 0 || 'must be larger than 0']"
+            @update:model-value="setHistoryLimit"/>
     </div>
 </template>
 
 <script setup>
 
-    import { useVextNoteSettings } from '@/store/note-settings';
+    import { useVextSettings } from '@/store/settings';
     import { useVextNote } from '@/store/note';
     import { LAYER_MODES_VALUES } from '@/use/enums';
+    import { ref } from 'vue';
     import { storeToRefs } from 'pinia'
 
     const note = useVextNote();
-    const settings = useVextNoteSettings();
+    const settings = useVextSettings();
     const { layerMode } = storeToRefs(note);
     const { onAction, onGesture, closeOnClick } = storeToRefs(settings);
+
+    const historyLimit = ref(settings.historyLimit);
+
+    function setHistoryLimit() {
+        settings.setHistoryLimit(historyLimit.value);
+    }
 
     const props = defineProps({
         tooltipDelay: {

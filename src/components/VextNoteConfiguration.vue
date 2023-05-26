@@ -1,6 +1,6 @@
 <template>
-    <div>
-        <div :style="{ 'min-width': width+'px' }">
+    <v-navigation-drawer v-model="open" :temporary="floating" :width="width" class="pl-2 pr-2">
+        <div :style="{ 'min-width': (width-30)+'px' }">
             <v-tabs v-model="tmpMode" density="compact" mandatory @update:modelValue="setMode">
                 <v-tab :color="selectColor" style="min-width: 50px;padding: 0 4px 0 16px;" :prepend-icon="icons.layer" :value="MODES.LAYER"></v-tab>
                 <v-tab :color="selectColor" style="min-width: 50px;padding: 0 4px 0 16px;" :prepend-icon="icons.brush" :value="MODES.BRUSH"></v-tab>
@@ -8,7 +8,7 @@
                 <v-tab :color="selectColor" style="min-width: 50px;padding: 0 4px 0 16px;" :prepend-icon="icons.connect" :value="MODES.CONNECT"></v-tab>
                 <v-tab :color="selectColor" style="min-width: 50px;padding: 0 4px 0 16px;" :prepend-icon="icons.edit" :value="MODES.EDIT"></v-tab>
                 <v-tab :color="selectColor" style="min-width: 50px;padding: 0 4px 0 16px;" :prepend-icon="icons.whiteboard" :value="MODES.WHITEBOARD"></v-tab>
-                <v-tab :color="selectColor" style="min-width: 50px;padding: 0 4px 0 16px;" :prepend-icon="icons.settings" :value="MODES.WHITEBOARD"></v-tab>
+                <v-tab :color="selectColor" style="min-width: 50px;padding: 0 4px 0 16px;" :prepend-icon="icons.settings" :value="MODES.SETTINGS"></v-tab>
             </v-tabs>
 
             <v-window v-model="mode" continuous>
@@ -49,7 +49,7 @@
                 </v-window-item>
             </v-window>
         </div>
-    </div>
+    </v-navigation-drawer>
 </template>
 
 <script setup>
@@ -66,19 +66,31 @@
     import VextSettingsTool from '@/components/tools/VextSettingsTool.vue';
 
     import { storeToRefs } from 'pinia'
-    import { ref, onMounted, watch } from 'vue';
+    import { computed, ref, onMounted, watch } from 'vue';
     import { useVextNote } from '@/store/note'
     import { useVextState } from '@/store/state';
     import { useVextInput } from '@/store/input';
+    import { useVextHistory } from '@/store/history'
     import { LAYER_MODES, MODES } from '@/use/enums';
 
     const props = defineProps({
+        modelValue: {
+            type: Boolean,
+            default: false,
+        },
         /**
          * The width of this component.
          */
          width: {
             type: Number,
             default: 280
+        },
+        /**
+         * Whether this component should take up space or float.
+         */
+        floating: {
+            type: Boolean,
+            default: true,
         },
         /**
          * Object of icons to use for tools/modes etc.
@@ -91,20 +103,20 @@
          *     brush: "mdi-draw",
          *     shape: "mdi-shape",
          *     connect: "mdi-connection",
-         *     edit: "mdi-cursor-pointer",
+         *     edit: "mdi-cursor-move",
          * }
          */
         icons: {
             type: Object,
             default() {
                 return {
-                    open: "mdi-backburger",
-                    closed: "mdi-forwardburger",
+                    open: "mdi-chevron-double-left",
+                    closed: "mdi-chevron-double-right",
                     layer: "mdi-layers",
                     brush: "mdi-draw",
                     shape: "mdi-shape",
                     connect: "mdi-connection",
-                    edit: "mdi-cursor-pointer",
+                    edit: "mdi-cursor-move",
                     whiteboard: "mdi-human-male-board",
                     settings: "mdi-cog",
                 }
@@ -168,10 +180,21 @@
     const input = useVextInput();
     const state = useVextState();
     const note = useVextNote();
+    const history = useVextHistory();
     const { mode, enabled } = storeToRefs(note);
 
+    let once = false;
     const tmpMode = ref(mode.value);
-    const lastMode = ref(mode.value);
+
+    const emit = defineEmits(["update:modelValue"])
+    const open = computed({
+        get() {
+            return props.modelValue;
+        },
+        set(value) {
+            emit("update:modelValue", value)
+        }
+    })
 
     function setMode() {
         note.setMode(tmpMode.value);
@@ -182,21 +205,13 @@
         }
     }
 
-    function init() {
-        input.init();
-        input.on("pointerdown", onPointerDown)
-        input.on("keydown", onKeyDown)
-        state.on("change", saveState);
-    }
-
     function onPointerDown() {
         const type = input.pointerDownType;
         if (props.autoModeSwitch) {
             if (type === 'pen' && mode.value !== MODES.BRUSH) {
-                lastMode.value = mode.value;
                 note.setMode(MODES.BRUSH, false);
             } else if (type !== 'pen' && mode.value === MODES.BRUSH) {
-                note.setMode(lastMode.value, false);
+                note.setPreviousMode(false);
             }
         }
     }
@@ -214,24 +229,41 @@
 
         if (event.key === "Delete" || event.key === "Backspace") {
             note.deleteActiveObject();
+        } else if (event.key === "z" && event.ctrl) {
+            history.undo();
+        } else if (event.key === "y" && event.ctrl) {
+            history.redo();
         } else {
             const which = props.hotkeyMap[event.key];
             if (which) {
                 switch (typeof which) {
                     case 'string':
-                        note.setMode(which, false);
+                        if (note.mode === which) {
+                            open.value = !open.value;
+                        } else {
+                            note.setMode(which);
+                        }
                         break;
                     case 'object':
                         if ((which.shift && event.shift) ||
                             (which.alt && event.alt) ||
                             (which.ctrl && event.ctrl) ||
-                            (which.meta && event.meta)) {
-                            note.setMode(which.mode, false);
+                            (which.meta && event.meta)
+                        ) {
+                            if (note.mode === which.mode) {
+                                open.value = !open.value;
+                            } else {
+                                note.setMode(which.mode);
+                            }
                         }
                         break;
                     case 'function':
                         if (which.validator(event)) {
-                            note.setMode(which.mode, false);
+                            if (note.mode === which.mode) {
+                                open.value = !open.value;
+                            } else {
+                                note.setMode(which.mode);
+                            }
                         }
                         break;
                 }
@@ -270,7 +302,15 @@
         }
     }
 
-    onMounted(init);
+    onMounted(function init() {
+        if (!once) {
+            input.init();
+            input.on("pointerdown", onPointerDown)
+            input.on("keydown", onKeyDown)
+            state.on("change", saveState);
+            once = true;
+        }
+    });
 
     watch(mode, loadMode);
     watch(() => note.activeLayer, loadState)

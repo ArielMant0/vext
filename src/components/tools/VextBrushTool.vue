@@ -51,7 +51,7 @@
     import { ref, watch, onMounted } from 'vue';
     import { useVextNote } from '@/store/note'
     import { useVextInput } from '@/store/input';
-    import { useVextNoteSettings } from '@/store/note-settings';
+    import { useVextSettings } from '@/store/settings';
     import { fabric } from 'fabric';
     import { MODES } from '@/use/enums';
 
@@ -59,7 +59,7 @@
 
     const note = useVextNote();
     const input = useVextInput();
-    const settings = useVextNoteSettings();
+    const settings = useVextSettings();
 
     const size = ref(settings.brushSize);
     const decimation = ref(settings.brushDecimation);

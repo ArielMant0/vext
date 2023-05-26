@@ -1,11 +1,11 @@
 import { defineStore } from "pinia"
 import { useVextHistory } from "@/store/history";
-import { isFabric } from '@/use/util';
+import { isFabric, getObjTransform } from '@/use/util';
 import { toRaw } from 'vue';
 import { useExportPDF } from "@/use/export-pdf";
 import { useExportZIP } from "@/use/export-zip";
 import EventHandler from "@/use/event-handler";
-import { useVextNoteSettings } from "./note-settings";
+import { useVextSettings } from "./settings";
 import { MODES, LAYER_MODES } from "@/use/enums";
 import AnnotationLayer from "@/use/annotation-layer";
 
@@ -28,17 +28,6 @@ function parseObject(obj, layer) {
     }
 }
 
-function getObjTransform(obj) {
-    return {
-        scaleX: obj.scaleX,
-        scaleY: obj.scaleY,
-        originX: obj.originX,
-        originY: obj.originY,
-        top: obj.top,
-        left: obj.left,
-    }
-}
-
 function getCanvasCoords(canvas, x, y) {
     const rect = canvas.wrapperEl.getBoundingClientRect();
     const left = x < rect.x ? 0 : (x > rect.x+rect.width ? rect.width : x - rect.x)
@@ -56,6 +45,7 @@ const vextNoteStore = {
             canvas: null,
 
             mode: MODES.LAYER,
+            previousMode: MODES.LAYER,
 
             currentState: null,
 
@@ -88,13 +78,13 @@ const vextNoteStore = {
         },
 
         color: () => {
-            const settings = useVextNoteSettings();
+            const settings = useVextSettings();
             return settings.color;
         },
         layerColors: state => state.layers.map(t => t.color),
 
         nextColor: state => {
-            const settings = useVextNoteSettings();
+            const settings = useVextSettings();
             return settings.defaultColorAt(state.layers.length);
         },
         nextID: state => "layer " + state.LAYER_ID_IDX,
@@ -445,43 +435,48 @@ const vextNoteStore = {
                         break;
                 }
 
+                this.previousMode = this.mode;
                 this.mode = mode;
             }
         },
 
+        setPreviousMode(record=true) {
+            this.setMode(this.previousMode, record);
+        },
+
         setBrushSize(size, record=true) {
             if (!this.enabled) return;
-            const settings = useVextNoteSettings();
+            const settings = useVextSettings();
             settings.setBrushSize(size, record);
         },
 
         setBrushDecimation(value, record=true) {
             if (!this.enabled) return;
-            const settings = useVextNoteSettings();
+            const settings = useVextSettings();
             settings.setBrushDecimation(value, record);
         },
 
         selectColor(id, record=true) {
             if (!this.enabled) return;
-            const settings = useVextNoteSettings();
+            const settings = useVextSettings();
             settings.selectColor(id, record);
         },
 
         setColorPrimary(color, record=true) {
             if (!this.enabled) return;
-            const settings = useVextNoteSettings();
+            const settings = useVextSettings();
             settings.setColorPrimary(color, record);
         },
 
         setColorSecondary(color, record=true) {
             if (!this.enabled) return;
-            const settings = useVextNoteSettings();
+            const settings = useVextSettings();
             settings.setColorSecondary(color, record);
         },
 
         setShape(shape, record=true) {
             if (!this.enabled) return;
-            const settings = useVextNoteSettings();
+            const settings = useVextSettings();
             settings.setShape(shape, record);
         },
 
@@ -733,13 +728,13 @@ const vextNoteStore = {
         setCanvas(canvas) {
             this.canvas = canvas;
             this.enablePointerEvents(false);
-            const settings = useVextNoteSettings();
+            const settings = useVextSettings();
             settings.setCanvas(canvas);
 
             canvas
                 .on("path:created", (obj) => {
                     if (this.enabled && this.mode === MODES.BRUSH) {
-                        const settings = useVextNoteSettings();
+                        const settings = useVextSettings();
                         if (!settings.pointerMenu) {
                             // obj already part of the canvas
                             this.addObject(obj.path, null, false)

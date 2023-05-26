@@ -2,6 +2,7 @@
     <v-navigation-drawer permanent rail>
         <v-list nav density="compact" :disabled="!enabled">
             <v-list-item :prepend-icon="open ? icons.open : icons.closed" @click="open = !open"/>
+            <v-list-item :prepend-icon="openHistory ? icons.historyOpen : icons.historyClosed" @click="openHistory = !openHistory"/>
         </v-list>
 
         <v-divider></v-divider>
@@ -17,19 +18,20 @@
         </v-list>
     </v-navigation-drawer>
 
-    <v-navigation-drawer v-model="open" :temporary="floating" :width="width" class="pl-2 pr-2">
-        <VextNoteConfiguration
-            :icons="icons"
-            :hotkeys="hotkeys"
-            :hotkeyMap="hotkeyMap"
-            :tooltip-delay="tooltipDelay"
-            :auto-mode-switch="autoModeSwitch"
-            :width="width-30"/>
-    </v-navigation-drawer>
+    <VextNoteConfiguration v-model="open"
+        :floating="floating"
+        :icons="icons"
+        :hotkeys="hotkeys"
+        :hotkeyMap="hotkeyMap"
+        :tooltip-delay="tooltipDelay"
+        :auto-mode-switch="autoModeSwitch"
+        :width="width"/>
 
-    <VextPointerMenu/>
-    <VextGlobalToolTip/>
-    <VextWhiteBoard :z-index="9999"/>
+    <VextHistoryDrawer v-model="openHistory"/>
+    <VextPointerMenu :z-index="7999"/>
+    <VextGlobalToolTip :z-index="6999"/>
+    <VextWhiteBoard :z-index="5999"/>
+
 </template>
 
 <script setup>
@@ -42,6 +44,7 @@
     import VextWhiteBoard from '@/components/whiteboard/VextWhiteBoard.vue';
     import VextPointerMenu from '@/components/VextPointerMenu.vue';
     import { MODES } from '@/use/enums';
+    import VextHistoryDrawer from './VextHistoryDrawer.vue';
 
     const props = defineProps({
         modelValue: {
@@ -59,22 +62,24 @@
          *     brush: "mdi-draw",
          *     shape: "mdi-shape",
          *     connect: "mdi-connection",
-         *     edit: "mdi-cursor-pointer",
+         *     edit: "mdi-cursor-move",
          * }
          */
         icons: {
             type: Object,
             default() {
                 return {
-                    open: "mdi-backburger",
-                    closed: "mdi-forwardburger",
+                    open: "mdi-chevron-double-left",
+                    closed: "mdi-chevron-double-right",
                     layer: "mdi-layers",
                     brush: "mdi-draw",
                     shape: "mdi-shape",
                     connect: "mdi-connection",
-                    edit: "mdi-cursor-pointer",
+                    edit: "mdi-cursor-move",
                     whiteboard: "mdi-human-male-board",
                     settings: "mdi-cog",
+                    historyOpen: "mdi-backburger",
+                    historyClosed: "mdi-history",
                 }
             }
         },
@@ -164,11 +169,15 @@
             emit("update:modelValue", value && enabled.value)
         }
     });
+    const openHistory = ref(false);
 
     function setMode(modeValue) {
         tmpMode.value[0] = modeValue[0];
         if (tmpMode.value[0] !== mode.value) {
             note.setMode(tmpMode.value[0]);
+            if (tmpMode.value[0] === MODES.SETTINGS) {
+                open.value = true;
+            }
         } else {
             open.value = !open.value;
         }
@@ -176,6 +185,9 @@
     function loadMode() {
         if (mode.value !== tmpMode.value[0]) {
             tmpMode.value = [mode.value];
+            if (mode.value === MODES.SETTINGS) {
+                open.value = true;
+            }
         }
     }
 

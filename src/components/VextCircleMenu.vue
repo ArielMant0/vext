@@ -1,5 +1,5 @@
 <template>
-    <div v-if="open" class="wrapper" @click="close">
+    <div v-if="open" class="wrapper" @click="close" :style="{ 'z-index': zIndex }">
         <div class="menu" :style="{ 'left': (x-30)+'px', 'top': (y-25)+'px' }">
             <v-btn icon="mdi-close-thick" rounded color="primary" variant="text" @click.stop="close"/>
             <ul style="border-radius: 50%" class="bg-primary">
@@ -54,6 +54,14 @@
             type: Number,
             default: 10
         },
+        zIndex: {
+            type: [Number, String],
+            default: 300,
+            validator(value) {
+                const num = Number.parseFloat(value);
+                return !Number.isNaN(num) && num >= 0;
+            }
+        }
     })
 
     const open = computed({
@@ -113,7 +121,9 @@
         }
 
         open.value = false;
-        if (emitEvent) emit("close")
+        if (emitEvent) {
+            emit("close")
+        }
     }
 
 </script>

@@ -82,7 +82,7 @@ function pointerMenuOptions () {
             value: "shape",
         },{
             id: "edit",
-            icon: "mdi-cursor-pointer",
+            icon: "mdi-cursor-move",
             action: "mode",
             value: "edit",
         },{
@@ -96,6 +96,11 @@ function pointerMenuOptions () {
             action: "mode",
             value: "connect",
         },{
+            id: "whiteboard",
+            icon: "mdi-human-male-board",
+            action: "mode",
+            value: "whiteboard",
+        },{
             id: "settings",
             icon: "mdi-cogs",
             action: "settings",
@@ -105,4 +110,15 @@ function pointerMenuOptions () {
     ];
 }
 
-export { isFabric, parseAccessor, createFabricObject, pointerMenuOptions };
+function getObjTransform(obj) {
+    return {
+        scaleX: obj.scaleX,
+        scaleY: obj.scaleY,
+        originX: obj.originX,
+        originY: obj.originY,
+        top: obj.top,
+        left: obj.left,
+    }
+}
+
+export { isFabric, parseAccessor, createFabricObject, pointerMenuOptions, getObjTransform };

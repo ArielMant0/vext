@@ -1,4 +1,5 @@
 import { fabric } from 'fabric';
+import { v4 as uuidv4 } from 'uuid';
 import { toRaw } from 'vue';
 
 export default class WhiteBoardLayer {
@@ -13,7 +14,22 @@ export default class WhiteBoardLayer {
             }, commentsOptions))
         });
 
+        this.addUUIDs()
+
         this.group = null;
+    }
+
+    addUUIDs() {
+        if (this.image && !this.image.uuid) this.image.set("uuid", uuidv4());
+        this.comments.forEach(c => {
+            if (!c.uuid) c.set("uuid", uuidv4());
+        });
+
+    }
+
+    item(uuid) {
+        if (this.image && this.image.uuid === uuid) return this.image;
+        return this.comments.find(d => d.uuid === uuid);
     }
 
     addToCanvas(canvas) {
@@ -100,6 +116,8 @@ export default class WhiteBoardLayer {
             });
             this.addCommentsToCanvas(canvas);
         }
+
+        this.addUUIDs();
     }
 
     select(canvas) {

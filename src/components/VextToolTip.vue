@@ -1,5 +1,5 @@
 <template>
-    <div ref="wrapper" class="vext-tooltip" v-if="content" :style="{ 'left': tX+'px', 'top': tY+'px' }">
+    <div ref="wrapper" class="vext-tooltip" v-if="content" :style="{ 'left': tX+'px', 'top': tY+'px', 'z-index': zIndex  }">
         <v-card style="height: 100%; opacity: 0.9;" color="grey-darken-3">
             <v-list v-if="Array.isArray(content)" class="vext-tt-content">
                 <v-list v-for="(item, idx) in content" :key="idx">
@@ -101,6 +101,14 @@
             default: 0,
             validator(value) {
                 return value >= 0
+            }
+        },
+        zIndex: {
+            type: [Number, String],
+            default: 300,
+            validator(value) {
+                const num = Number.parseFloat(value);
+                return !Number.isNaN(num) && num >= 0;
             }
         },
     })
