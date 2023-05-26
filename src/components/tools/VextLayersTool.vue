@@ -1,25 +1,12 @@
 <template>
     <div>
-        <v-tooltip :open-delay="tooltipDelay">
-            when layers should be added<br/>
-            ... when the state changed and you annotate<br/>
-            ... when the state changed (without annotations)<br/>
-            ... manually
+        <v-tooltip text="add a new layer" location="right" :open-delay="tooltipDelay">
             <template v-slot:activator="{ props }">
-                <div class="text-caption mb-1">
-                    layer mode
-                    <v-icon size="small" icon="mdi-information" v-bind="props"/>
-                </div>
+                <v-btn v-bind="props" class="mt-4 mb-2" color="primary" size="small" block @click="openAddDialog">
+                    add new layer
+                </v-btn>
             </template>
         </v-tooltip>
-        <div class="d-flex">
-            <v-select v-model="layerMode" :items="LAYER_MODES_VALUES" density="compact" class="mb-2 mr-2" hide-details/>
-            <v-tooltip text="add a new layer" location="right" :open-delay="tooltipDelay">
-                <template v-slot:activator="{ props }">
-                    <v-btn v-bind="props" icon="mdi-plus" color="primary" size="small" rounded="0" @click="openAddDialog" class="me-1"></v-btn>
-                </template>
-            </v-tooltip>
-        </div>
 
         <div class="text-caption">layer actions</div>
         <div class="d-flex mb-2">
@@ -39,15 +26,6 @@
                         icon="mdi-silverware-clean"
                         v-bind="props"
                         @click="removeEmptyLayers"/>
-                </template>
-            </v-tooltip>
-
-            <v-tooltip text="export the current layer, visualizations and application state to a .zip archive" :open-delay="tooltipDelay">
-                <template v-slot:activator="{ props }">
-                    <v-icon
-                        icon="mdi-download"
-                        @click="note.exportZIP()"
-                        v-bind="props"/>
                 </template>
             </v-tooltip>
 
@@ -121,7 +99,7 @@
                         density="compact"
                         hide-details
                         class="mb-1"
-                        @update:model-value="files => note.importLayer(files[0])"></v-file-input>
+                        @update:model-value="files => importLayer(files[0])"></v-file-input>
                 </v-card-text>
                 <v-card-actions>
                     <v-btn color="warning" @click="importDialog = false">cancel</v-btn>
@@ -141,7 +119,6 @@
     import { storeToRefs } from 'pinia';
     import { useVextState } from '@/store/state';
     import VextLayerInfo from './VextLayerInfo.vue';
-    import { LAYER_MODES_VALUES } from '@/use/enums';
 
     const state = useVextState();
 
@@ -197,6 +174,11 @@
         treeDepth.value = collaped ?
             Math.min(node.level, treeDepth.value) :
             Math.max(node.level+1, treeDepth.value)
+    }
+
+    function importLayer(file) {
+        note.importLayer(file)
+            .then(importDialog.value = false);
     }
 
 

@@ -125,6 +125,8 @@
                     "3": "shape",
                     "4": "connect",
                     "5": "edit",
+                    "6": "whiteboard",
+                    "7": "settings",
                 }
             }
         },

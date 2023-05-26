@@ -57,24 +57,11 @@
 
     import VextColorViewer from '@/components/tools/VextColorViewer';
 
-    const props = defineProps({
-        /**
-         * The initial size of the brush
-         */
-        initialSize: {
-            type: Number,
-            default: 1,
-            validator(value) {
-                return value >= 0
-            }
-        }
-    });
-
     const note = useVextNote();
     const input = useVextInput();
     const settings = useVextNoteSettings();
 
-    const size = ref(props.initialSize);
+    const size = ref(settings.brushSize);
     const decimation = ref(settings.brushDecimation);
 
     const preview = new fabric.Circle({
@@ -83,8 +70,8 @@
         stroke: "black",
         strokeWidth: 1,
         fill: note.color,
-        radius: props.initialSize * 0.5
-    })
+        radius: size.value * 0.5
+    });
 
     function readBrushSize() {
         if (settings.brushSize !== size.value) {

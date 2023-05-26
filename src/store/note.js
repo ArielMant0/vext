@@ -987,8 +987,7 @@ const vextNoteStore = {
                 );
             }, false)
 
-            reader.readAsText(file);
-
+            return reader.readAsText(file);
         },
 
         exportLayer() {

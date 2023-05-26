@@ -55,9 +55,9 @@
 
     onMounted(function() {
         input.on("keydown", function() {
-            if (input.key.key === "z" && input.key.ctrl) {
+            if (input.keyDown.key === "z" && input.keyDown.ctrl) {
                 history.undo();
-            } else if (input.key.key === "y" && input.key.ctrl) {
+            } else if (input.keyDown.key === "y" && input.keyDown.ctrl) {
                 history.redo();
             }
         })

@@ -147,7 +147,7 @@ const vextWhiteboard = {
             }
         },
 
-        async show() {
+        async enable() {
             const note = useVextNote();
             const proms = [];
             note.userLayers.forEach(l => {
@@ -163,7 +163,7 @@ const vextWhiteboard = {
             })
         },
 
-        hide() {
+        disable() {
             this.enabled = false;
         },
 

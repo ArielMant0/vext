@@ -56,12 +56,11 @@
     const emits = defineEmits(["color-change"]);
 
     const note = useVextNote();
-    note.setColorPrimary(props.colorPrimary, false)
-    note.setColorSecondary(props.colorSecondary, false)
-
     const settings = useVextNoteSettings();
-
     const { activeColor, color0, color1, color } = storeToRefs(settings);
+
+    settings.setColorPrimary(props.colorPrimary, false)
+    settings.setColorSecondary(props.colorSecondary, false)
 
     const tmpColor = ref(props.colorPrimary)
     const tmpActive = ref(0);

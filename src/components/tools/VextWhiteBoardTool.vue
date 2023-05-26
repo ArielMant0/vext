@@ -18,28 +18,28 @@
     const { mode } = storeToRefs(note);
     const wb = useVextWhiteboard();
 
+    wb.setBrushSize(brushSize.value)
+    wb.setBrushColor(color.value)
+
     onMounted(function() {
         input.on("keydown", function(event) {
             if (wb.enabled && (event.key === "Delete" || event.key === "Backspace")) {
                 wb.deleteActiveObject();
             }
         })
-        wb.setBrushSize(brushSize.value)
-        wb.setBrushColor(color.value)
-
         if (mode.value === MODES.WHITEBOARD) {
-            wb.show();
+            wb.enable();
         }
     });
 
     watch(brushSize, () => wb.setBrushSize(brushSize.value))
     watch(color, () => wb.setBrushColor(color.value))
 
-    watch(mode, (now, prev) => {
+    watch(mode, async (now, prev) => {
         if (prev !== MODES.WHITEBOARD && now === MODES.WHITEBOARD) {
-            wb.show();
+            wb.enable();
         } else if (prev === MODES.WHITEBOARD && now !== MODES.WHITEBOARD) {
-            wb.hide()
+            wb.disable()
         }
     });
 </script>

@@ -83,22 +83,35 @@
                         <template v-slot:activator="{ props }">
                             <v-btn v-if="!active && merge && data.id !== note.previewLayerID && note.previewLayerID !== note.activeLayer"
                                 v-bind="props"
-                                size="small"
+                                size="x-small"
                                 icon="mdi-merge"
-                                rounded="0"
-                                variant="text"
+                                variant="tonal"
+                                rounded="sm"
+                                class="mr-1"
                                 @click="mergeLayers()"/>
                         </template>
                     </v-tooltip>
                     <v-tooltip text="delete this layer" location="right" :open-delay="tooltipDelay">
                         <template v-slot:activator="{ props }">
                             <v-btn v-bind="props"
-                                size="small"
+                                size="x-small"
                                 icon="mdi-delete"
                                 color="error"
-                                variant="text"
-                                rounded="0"
+                                rounded="sm"
+                                variant="tonal"
+                                class="mr-1"
                                 @click="delDialog = true"/>
+                        </template>
+                    </v-tooltip>
+                    <v-tooltip text="export and download this layer" location="right" :open-delay="tooltipDelay">
+                        <template v-slot:activator="{ props }">
+                            <v-btn v-bind="props"
+                                size="x-small"
+                                icon="mdi-download"
+                                rounded="sm"
+                                class="mr-1"
+                                variant="tonal"
+                                @click="note.exportZIP()"/>
                         </template>
                     </v-tooltip>
                 </div>

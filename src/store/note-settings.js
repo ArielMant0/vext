@@ -11,6 +11,7 @@ const vextNoteSettingsStore = {
             pointerMenu: false,
             onAction: true,
             onGesture: true,
+            closeOnClick: true,
 
             activeColor: 0,
             color0: "#ffffff",

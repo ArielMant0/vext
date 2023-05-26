@@ -39,56 +39,68 @@ function pointerMenuOptions () {
             icon: "mdi-undo",
             action: "undo",
             color: "default",
+            value: "undo",
         },{
             id: "redo",
             icon: "mdi-redo",
             action: "redo",
             color: "default",
+            value: "redo",
         },{
             id: "accept",
             icon: "mdi-check",
             action: "accept",
             color: "success",
+            value: "accept",
         },{
             id: "accept_ignore",
             icon: "mdi-check-all",
             action: "accept_ignore",
             color: "success",
+            value: "accept_ignore",
         },{
             id: "cancel",
             icon: "mdi-close-circle-outline",
             action: "cancel",
             color: "error",
+            value: "cancel",
         },{
             id: "cancel_ignore",
             icon: "mdi-close-circle-multiple-outline",
             action: "cancel_ignore",
             color: "error",
+            value: "cancel_ignore",
         },{
             id: "brush",
             icon: "mdi-draw",
-            action: "mode"
+            action: "mode",
+            value: "brush",
         },{
             id: "shape",
             icon: "mdi-shape",
-            action: "mode"
+            action: "mode",
+            value: "shape",
         },{
             id: "edit",
             icon: "mdi-cursor-pointer",
-            action: "mode"
+            action: "mode",
+            value: "edit",
         },{
             id: "layer",
             icon: "mdi-layers",
-            action: "mode"
+            action: "mode",
+            value: "layer",
         },{
             id: "connect",
             icon: "mdi-connection",
-            action: "mode"
+            action: "mode",
+            value: "connect",
         },{
             id: "settings",
-            icon: "mdi-cog",
+            icon: "mdi-cogs",
             action: "settings",
             color: "default",
+            value: "",
         },
     ];
 }

@@ -44,14 +44,36 @@ const vextInputStore = {
             ux: 0,
             uy: 0,
 
-            key: {
+            keyDown: {
                 key: "",
                 ctrl: false,
                 shift: false,
                 alt: false,
                 meta: false,
+                time: null,
             },
-            keyTime: null,
+            keyUp: {
+                key: "",
+                ctrl: false,
+                shift: false,
+                alt: false,
+                meta: false,
+                time: null,
+            },
+            keyPress: {
+                key: "",
+                ctrl: false,
+                shift: false,
+                alt: false,
+                meta: false,
+                time: null,
+            },
+
+            touches: [],
+            touchMove: null,
+            touchStart: null,
+            touchEnd: null,
+            touchCancel: null,
         };
     },
 
@@ -69,32 +91,46 @@ const vextInputStore = {
                 this.mx = event.pageX;
                 this.my = event.pageY;
                 this.pointerMoveType = event.pointerType;
-                this.pointerMove = Date.now();
+                this.pointerMove = performance.now();
                 this.emit("pointermove", event);
             });
             window.addEventListener("pointerdown", event => {
                 this.dx = event.pageX;
                 this.dy = event.pageY;
                 this.pointerDownType = event.pointerType;
-                this.pointerDown = Date.now();
+                this.pointerDown = performance.now();
                 this.emit("pointerdown", event);
             });
             window.addEventListener("pointerup", event => {
                 this.ux = event.pageX;
                 this.uy = event.pageY;
                 this.pointerUpType = event.pointerType;
-                this.pointerUp = Date.now();
+                this.pointerUp = performance.now();
                 this.emit("pointerup", event);
             });
             window.addEventListener("keydown", event => {
-                this.key.key = event.key;
-                this.key.ctrl = event.ctrlKey;
-                this.key.shift = event.shiftKey;
-                this.key.alt = event.altKey;
-                this.key.meta = event.metaKey;
-                this.keyTime = Date.now();
+                this.keyDown.key = event.key;
+                this.keyDown.ctrl = event.ctrlKey;
+                this.keyDown.shift = event.shiftKey;
+                this.keyDown.alt = event.altKey;
+                this.keyDown.meta = event.metaKey;
+                this.keyDown.time = performance.now();
                 this.emit("keydown", event);
             });
+            window.addEventListener("keyup", event => {
+                this.keyUp.key = event.key;
+                this.keyUp.ctrl = event.ctrlKey;
+                this.keyUp.shift = event.shiftKey;
+                this.keyUp.alt = event.altKey;
+                this.keyUp.meta = event.metaKey;
+                this.keyUp.time = performance.now();
+                this.emit("keyup", event);
+            });
+            if (window.ontouchstart && navigator.maxTouchPoints > 0) {
+                console.debug("touch events available")
+                // TODO:
+                // window.addEventListener("touchstart", event => {});
+            }
         },
 
         emit(name, data) {
@@ -153,8 +189,16 @@ const vextInputStore = {
             return getCoordinates(this.ux, this.uy, element)
         },
 
-        getKey(withMods=false) {
-            return withMods ? this.key : this.key.key;
+        getKey(event="down", withMods=false) {
+            switch (event) {
+                case "up":
+                    return withMods ? this.keyUp : this.keyUp.key;
+                case "press":
+                    return withMods ? this.keyPress : this.keyPress.key;
+                case "down":
+                default:
+                    return withMods ? this.keyDown : this.keyDown.key;
+            }
         }
 
     },

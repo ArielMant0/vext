@@ -2,21 +2,28 @@
     <div>
         <VextCircleMenu v-model="open"
             :items="visibleOptions" :x="x" :y="y"
-            :close-on-click="false"
-            @click="o => performAction(o.action, o.id)"
+            :close-on-click="closeOnClick"
+            @click="o => performAction(o.action, o.value)"
             @close="pointerMenu = false">
 
             <template #button="{ item, degree }">
-                <v-btn :style="{ 'transform': `rotate(${degree}deg)` }"
+                <v-btn v-if="item.icon"
+                    :style="{ 'transform': `rotate(${degree}deg)` }"
                     :icon="item.icon" rounded :color="item.color"
                     :disabled="isDisabled(item.action)"
                     size="small"/>
+                <v-btn v-else :style="{ 'transform': `rotate(${degree}deg)` }"
+                    rounded :color="item.color"
+                    :disabled="isDisabled(item.action)">
+                    {{ item.value }}
+                </v-btn>
             </template>
         </VextCircleMenu>
 
         <VextCircleSettingsMenu v-model="openSettings"
             :x="x" :y="y"
-            @close="pointerMenu = false"/>
+            :close-on-click="closeOnClick"
+            @close="closeOnClick ? pointerMenu = false : open = true"/>
 
         <div v-if="indicator && radius > 0" class="menu-indicator" :style="{ 'left': indicatorX+'px', 'top': indicatorY+'px', }">
 
@@ -54,7 +61,7 @@
     const history = useVextHistory();
 
     const { mode } = storeToRefs(note);
-    const { pointerMenu, onAction, onGesture } = storeToRefs(useVextNoteSettings())
+    const { pointerMenu, onAction, onGesture, closeOnClick } = storeToRefs(useVextNoteSettings())
 
     const props = defineProps({
         indicator: {
@@ -108,6 +115,11 @@
 
     const options = pointerMenuOptions();
 
+    function close() {
+        open.value = false;
+        pointerMenu.value = false;
+    }
+
     const visibleOptions = computed(() => {
         return options.filter(d => {
             switch(d.action) {
@@ -129,20 +141,18 @@
         })
     });
 
-    function performAction(action, id) {
+    function performAction(action, value) {
         switch(action) {
             case ACTIONS.ACCEPT_IGNORE:
                 ignore.value = true;
             case ACTIONS.ACCEPT:
-                pointerMenu.value = false;
-                open.value = false;
+                if (closeOnClick.value) close();
                 break;
             case ACTIONS.CANCEL_IGNORE:
                 ignore.value = true;
             case ACTIONS.CANCEL:
                 history.undo(false);
-                pointerMenu.value = false;
-                open.value = false;
+                if (closeOnClick.value) close();
                 break;
             case ACTIONS.UNDO:
                 history.undo();
@@ -151,9 +161,8 @@
                 history.redo();
                 break;
             case ACTIONS.MODE:
-                note.setMode(id);
-                pointerMenu.value = false;
-                open.value = false;
+                note.setMode(value);
+                if (closeOnClick.value) close();
                 break;
             case ACTIONS.SETTINGS:
                 openSettings.value = true;
@@ -241,9 +250,11 @@
     }
 
     function onModeChange() {
-        open.value = false;
-        ignore.value = false;
-        pointerMenu.value = false;
+        if (closeOnClick.value) {
+            open.value = false;
+            ignore.value = false;
+            pointerMenu.value = false;
+        }
     }
 
     function showFromEvent(event) {
@@ -262,6 +273,13 @@
         note.on("pointer-menu", showFromEvent);
         input.on("pointerdown", onPointerDown)
         input.on("pointerup", onPointerUp)
+
+        window.oncontextmenu = function() {
+            if (onGesture.value && (open.value || lastPointerDown !== null)) {
+                return false;
+            }
+            return true;
+        }
     });
 
     watch(mode, onModeChange);

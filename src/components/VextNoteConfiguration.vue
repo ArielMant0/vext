@@ -44,7 +44,7 @@
                 </v-window-item>
                 <v-window-item :value="MODES.SETTINGS">
                     <KeepAlive :max="1">
-                        <VextSettings/>
+                        <VextSettingsTool/>
                     </KeepAlive>
                 </v-window-item>
             </v-window>
@@ -63,7 +63,7 @@
     import VextLayersTool from '@/components/tools/VextLayersTool.vue';
     import VextConnectTool from '@/components/tools/VextConnectTool.vue';
     import VextWhiteBoardTool from './tools/VextWhiteBoardTool.vue';
-    import VextSettings from '@/components/tools/VextSettings.vue';
+    import VextSettingsTool from '@/components/tools/VextSettingsTool.vue';
 
     import { storeToRefs } from 'pinia'
     import { ref, onMounted, watch } from 'vue';
@@ -140,6 +140,8 @@
                     "3": "shape",
                     "4": "connect",
                     "5": "edit",
+                    "6": "whiteboard",
+                    "7": "settings",
                 }
             }
         },
@@ -208,7 +210,7 @@
 
         if (focus !== null) focus.blur()
 
-        const event = input.getKey(true);
+        const event = input.getKey("down", true);
 
         if (event.key === "Delete" || event.key === "Backspace") {
             note.deleteActiveObject();

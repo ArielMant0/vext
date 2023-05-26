@@ -38,6 +38,18 @@
         </v-tooltip>
         <v-switch v-model="onGesture" :label="onGesture ? 'on' : 'off'"
             density="compact" color="primary" hide-details/>
+
+        <v-tooltip :open-delay="tooltipDelay">
+            close the pointer menu after clicking one of its options
+            <template v-slot:activator="{ props }">
+                <div class="text-caption mb-1">
+                    close pointer menu on click
+                    <v-icon size="small" icon="mdi-information" v-bind="props"/>
+                </div>
+            </template>
+        </v-tooltip>
+        <v-switch v-model="closeOnClick" :label="closeOnClick ? 'on' : 'off'"
+            density="compact" color="primary" hide-details/>
     </div>
 </template>
 
@@ -51,7 +63,7 @@
     const note = useVextNote();
     const settings = useVextNoteSettings();
     const { layerMode } = storeToRefs(note);
-    const { onAction, onGesture } = storeToRefs(settings);
+    const { onAction, onGesture, closeOnClick } = storeToRefs(settings);
 
     const props = defineProps({
         tooltipDelay: {

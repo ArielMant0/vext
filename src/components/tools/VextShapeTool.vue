@@ -60,13 +60,15 @@
     const stroke = ref("primary color")
     const fill = ref("none")
 
+    const eventsAdded = ref(false);
+
     const brushShape = reactive({
         x: 10,
         y: 10,
         size0: 30,
         size1: 30,
         obj: null
-    })
+    });
 
     function readColor(value) {
         return value === "none" ? null :
@@ -191,38 +193,42 @@
     onMounted(function() {
         initBrushShape();
 
-        note.canvas
-            .on("mouse:up", function() {
-                if (note.mode === MODES.SHAPE && !settings.pointerMenu) {
-                    if (mode.value === "create") {
-                        addShape();
-                        brushShape.obj.set("visible", false)
-                        brushShape.obj.set("dirty", true)
-                        note.canvas.requestRenderAll();
-                        mode.value = "modify";
-                    } else if (mode.value === "wait") {
-                        mode.value = "create";
-                        note.emit("pointer-menu", "shape")
+        if (!eventsAdded.value) {
+            eventsAdded.value = true;
+            console.debug("adding canvas event listeners for shape mode")
+            note.canvas
+                .on("mouse:up", function() {
+                    if (note.mode === MODES.SHAPE && !settings.pointerMenu) {
+                        if (mode.value === "create") {
+                            addShape();
+                            brushShape.obj.set("visible", false)
+                            brushShape.obj.set("dirty", true)
+                            note.canvas.requestRenderAll();
+                            mode.value = "modify";
+                        } else if (mode.value === "wait") {
+                            mode.value = "create";
+                            note.emit("pointer-menu", "shape")
+                        }
                     }
-                }
-            })
-            .on("mouse:move", function(event) {
-                brushShape.x = event.pointer.x;
-                brushShape.y = event.pointer.y;
-                if (note.mode === MODES.SHAPE && mode.value !== "modify" && !settings.pointerMenu) {
-                    updateShape();
-                }
-            })
-            .on("selection:cleared", function(event) {
-                if (note.mode === MODES.SHAPE && mode.value === "modify" && !settings.pointerMenu) {
-                    brushShape.obj.set("visible", true)
-                    updateShape();
-                    mode.value = event.e ? "wait" : "create";
-                    if (mode.value === "create") {
-                        note.emit("pointer-menu", "shape")
+                })
+                .on("mouse:move", function(event) {
+                    brushShape.x = event.pointer.x;
+                    brushShape.y = event.pointer.y;
+                    if (note.mode === MODES.SHAPE && mode.value !== "modify" && !settings.pointerMenu) {
+                        updateShape();
                     }
-                }
-            })
+                })
+                .on("selection:cleared", function(event) {
+                    if (note.mode === MODES.SHAPE && mode.value === "modify" && !settings.pointerMenu) {
+                        brushShape.obj.set("visible", true)
+                        updateShape();
+                        mode.value = event.e ? "wait" : "create";
+                        if (mode.value === "create") {
+                            note.emit("pointer-menu", "shape")
+                        }
+                    }
+                })
+        }
 
     })
 
