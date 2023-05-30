@@ -5,7 +5,8 @@ import { useVextSettings } from './store/settings'
 import { useVextState } from './store/state.js'
 import { useVextHistory } from './store/history.js'
 import { useVextApp } from './store/app.js'
-import { useVextInput } from './store/input'
+import { useVextInput } from './store/input.js'
+import { useVextWhiteboard } from './store/whiteboard.js'
 
 function createVextPlugin() {
     const plugin = {
@@ -27,4 +28,5 @@ export {
     useVextHistory,
     useVextApp,
     useVextInput,
+    useVextWhiteboard,
 }

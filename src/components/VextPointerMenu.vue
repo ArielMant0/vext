@@ -65,34 +65,70 @@
     const { pointerMenu, onAction, onGesture, closeOnClick } = storeToRefs(useVextSettings())
 
     const props = defineProps({
+        /**
+         * Whether to show an indicator when the gesture is initiated.
+         */
         indicator: {
             type: Boolean,
             default: true
         },
+        /**
+         * Whether to stroke the indicator.
+         */
         stroke: {
             type: Boolean,
             default: true
         },
+        /**
+         * Whether to fill the indicator.
+         */
         fill: {
             type: Boolean,
             default: false
         },
+        /**
+         * The stroke color to use for the indicator.
+         */
         strokeColor: {
             type: String,
-            default: "gray"
+            default: "gray",
+            validator(value) {
+                return CSS.supports("color", value)
+            }
         },
+        /**
+         * The fill color to use for the indicator
+         */
         fillColor: {
             type: String,
-            default: "gray"
+            default: "gray",
+            validator(value) {
+                return CSS.supports("color", value)
+            }
         },
+        /**
+         * The minimum threshold (in ms) before the indicator is shown after initiating * the gesture.
+         */
         timeThresholdMin: {
             type: Number,
-            default: 125
+            default: 125,
+            validator(value) {
+                return value >= 0;
+            }
         },
+        /**
+         * The maximum threshold (in ms) that has to be reached with the gesture to open the menu.
+         */
         timeThresholdMax: {
             type: Number,
-            default: 1000
+            default: 1000,
+            validator(value) {
+                return value > 0;
+            }
         },
+        /**
+         * CSS z-index value for the menu element.
+         */
         zIndex: {
             type: [Number, String],
             default: 300,

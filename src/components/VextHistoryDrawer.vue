@@ -44,25 +44,48 @@
     function clearHistory() { history.clear(); }
 
     const props = defineProps({
+        /**
+         * Whether to show the history drawer - use with v-model.
+         */
         modelValue: {
             type: Boolean,
             required: true,
         },
+        /**
+         * Icon to use for the undo button.
+         */
         undoIcon: {
             type: String,
             default: "mdi-undo"
         },
+         /**
+         * Icon to use for the redo button.
+         */
         redoIcon: {
             type: String,
             default: "mdi-redo"
         },
+         /**
+         * At which location to show the drawer.
+         */
         location: {
             type: String,
-            default: "left"
+            default: "left",
+            validator(value) {
+                return [
+                    'top', 'end', 'bottom',
+                    'start', 'left', 'right'
+                ].includes(value)
+            }
         }
     });
 
-    const emit = defineEmits(["update:modelValue"])
+    const emit = defineEmits({
+        /**
+         * Called when the model value is updated.
+         */
+        "update:modelValue": null
+    })
 
     const open = computed({
         get() {

@@ -9,8 +9,8 @@
 
 ## Events
 
-| Event name   | Properties | Description |
-| ------------ | ---------- | ----------- |
-| color-change |            |
+| Event name   | Properties | Description                                                           |
+| ------------ | ---------- | --------------------------------------------------------------------- |
+| color-change |            | Emitted when the active color is changed or a color value is changed. |
 
 ---

@@ -53,7 +53,12 @@
         },
     });
 
-    const emits = defineEmits(["color-change"]);
+    const emits = defineEmits({
+        /**
+         * Emitted when the active color is changed or a color value is changed.
+         */
+        "color-change": null
+    });
 
     const note = useVextNote();
     const settings = useVextSettings();

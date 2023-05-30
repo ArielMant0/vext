@@ -11,5 +11,6 @@
 | placement | How to place the tooltip.                           | string                | `auto`, `right`, `left`, `bottom`, `top`, `right-bottom`, `right-top`, `left-bottom`, `left-top` | "auto"  |
 | x         | Horizontal position of the tooltip.                 | number                | -                                                                                                | 0       |
 | y         | Vertical position of the tooltip.                   | number                | -                                                                                                | 0       |
+| zIndex    |                                                     | number\|string        | -                                                                                                | 300     |
 
 ---

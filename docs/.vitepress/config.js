@@ -12,8 +12,8 @@ export default {
                     { text: 'VextNoteCanvas', link: 'src/components/VextNoteCanvas' },
                     { text: 'VextNoteConfiguration', link: 'src/components/VextNoteConfiguration' },
                     { text: 'VextNoteDrawer', link: 'src/components/VextNoteDrawer' },
-                    { text: 'VextHistoryControls', link: 'src/components/VextHistoryControls' },
                     { text: 'VextHistoryDrawer', link: 'src/components/VextHistoryDrawer' },
+                    { text: 'VextWhiteBoard', link: 'src/components/VextWhiteBoard' },
                     { text: 'VextAlertBox', link: 'src/components/VextAlertBox' },
                     { text: 'VextAppBarControls', link: 'src/components/VextAppBarControls' },
                     { text: 'VextPointerMenu', link: 'src/components/VextPointerMenu' },
@@ -30,6 +30,8 @@ export default {
                     { text: 'VextShapeTool', link: 'src/components/tools/VextShapeTool' },
                     { text: 'VextEditTool', link: 'src/components/tools/VextEditTool' },
                     { text: 'VextConnectTool', link: 'src/components/tools/VextConnectTool' },
+                    { text: 'VextSettingsTool', link: 'src/components/tools/VextSettingsTool' },
+                    { text: 'VextWhiteBoardTool', link: 'src/components/tools/VextWhiteBoardTool' },
                     { text: 'VextColorViewer', link: 'src/components/tools/VextColorViewer' },
                     { text: 'VextLayerInfo', link: 'src/components/tools/VextLayerInfo' },
                 ]
@@ -42,6 +44,7 @@ export default {
                     { text: 'VextHistory Store', link: 'stores/history' },
                     { text: 'VextApp Store', link: 'stores/app' },
                     { text: 'VextInput Store', link: 'stores/input' },
+                    { text: 'VextWhiteBoard Store', link: 'stores/whiteboard' },
                 ]
               }
         ]

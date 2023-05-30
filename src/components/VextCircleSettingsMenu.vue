@@ -1,12 +1,18 @@
 <template>
     <VextCircleMenu v-if="mode === MODES.BRUSH" v-model="open"
             :items="brushOptions" :x="x" :y="y"
-            :close-on-click="closeOnClick" :z-index="zIndex"
+            :items-per-level="itemsPerLevel"
+            :background="background"
+            :z-index="zIndex"
+            :close-on-click="closeOnClick"
             @click="performAction"
             @close="close"/>
     <VextCircleMenu v-else-if="mode === MODES.SHAPE" v-model="open"
             :items="shapeOptions" :x="x" :y="y"
-            :close-on-click="closeOnClick" :z-index="zIndex"
+            :items-per-level="itemsPerLevel"
+            :background="background"
+            :z-index="zIndex"
+            :close-on-click="closeOnClick"
             @click="performAction"
             @close="close"/>
 </template>
@@ -24,22 +30,55 @@
     const { mode } = storeToRefs(note)
 
     const props = defineProps({
+        /**
+         * Whether to show the menu - use with v-model.
+         */
         modelValue: {
             type: Boolean,
             required: true
         },
+        /**
+         * Menu center position on the x axis
+         */
         x: {
             type: Number,
-            default: 10
+            default: 10,
         },
+         /**
+         * Menu center position on the y axis
+         */
         y: {
             type: Number,
-            default: 10
+            default: 10,
         },
+        /**
+         * Whether to close the menu after an item was clicked.
+         */
         closeOnClick: {
             type: Boolean,
             default: true
         },
+        /**
+         * Whether to display a background for the menu.
+         */
+        background: {
+            type: Boolean,
+            default: true
+        },
+        /**
+         * How many items per level to allow (default 8), must be greater than 0.
+         * Could be useful when doing custom rendering.
+         */
+        itemsPerLevel: {
+            type: Number,
+            default: 8,
+            validator(value) {
+                return value > 0;
+            }
+        },
+        /**
+         * CSS z-index to use for the menu
+         */
         zIndex: {
             type: [Number, String],
             default: 300,
@@ -49,7 +88,22 @@
             }
         }
     })
-    const emit = defineEmits(["update:modelValue", "close", "click"])
+    const emit = defineEmits({
+        /**
+         * Called when the modelValue is updated
+         * @param {Boolean} value new model value
+         */
+        "update:modelValue": null,
+        /**
+         * Called when the menu is closed via the close button or an outside click.
+         */
+        "close": null,
+        /**
+         * Called when an item is clicked - with the item as parameter.
+         * @param {Object} item the item that was clicked
+         */
+        "click": value => value !== null && typeof value === "object"
+    })
 
     const open = computed({
         get() {

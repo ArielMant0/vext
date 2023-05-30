@@ -53,17 +53,6 @@
         },
         /**
          * Object of icons to use for tools/modes etc.
-         *
-         * Default is:
-         * {
-         *     open: "mdi-backburger",
-         *     closed: "mdi-forwardburger",
-         *     layer: "mdi-layers",
-         *     brush: "mdi-draw",
-         *     shape: "mdi-shape",
-         *     connect: "mdi-connection",
-         *     edit: "mdi-cursor-move",
-         * }
          */
         icons: {
             type: Object,
@@ -81,6 +70,19 @@
                     historyOpen: "mdi-backburger",
                     historyClosed: "mdi-history",
                 }
+            },
+            validator(object) {
+                return object.open !== undefined &&
+                    object.closed !== undefined &&
+                    object.layer !== undefined &&
+                    object.brush !== undefined &&
+                    object.shape !== undefined &&
+                    object.connect !== undefined &&
+                    object.edit !== undefined &&
+                    object.whiteboard !== undefined &&
+                    object.settings !== undefined &&
+                    object.historyOpen !== undefined &&
+                    object.historyClosed !== undefined;
             }
         },
         /**
@@ -90,7 +92,8 @@
             type: [Number, String],
             default: 320,
             validator(value) {
-                return +value >= 0;
+                const num = Number.parseFloat(value);
+                return !Number.isNaN(num) && num >= 0;
             }
         },
         /**
@@ -142,7 +145,8 @@
             type: [Number, String],
             default: 500,
             validator(value) {
-                return +value >= 0;
+                const num = Number.parseFloat(value);
+                return !Number.isNaN(num) && num >= 0;
             }
         },
         /**
@@ -155,7 +159,12 @@
         }
     });
 
-    const emit = defineEmits(["update:modelValue"])
+    const emit = defineEmits({
+        /**
+         * Called when the model value is updated.
+         */
+        "update:modelValue": null
+    });
 
     const note = useVextNote();
     const { mode, enabled } = storeToRefs(note);

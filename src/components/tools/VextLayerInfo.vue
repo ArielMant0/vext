@@ -156,50 +156,86 @@
     import { ref, computed } from 'vue';
 
     const props = defineProps({
+        /**
+         * Layer data
+         */
         data: {
             type: Object,
             required: true
         },
+        /**
+         * Whether this layer is active.
+         */
         active: {
             type: Boolean,
             required: true
         },
+        /**
+         * Whether to allow modidying the layer name.
+         */
         modifyName: {
             type: Boolean,
             default: true
         },
+        /**
+         * Whether to show the annotations indicator.
+         */
         annotations: {
             type: Boolean,
             default: true
         },
+        /**
+         * Whether to show the connections indicator.
+         */
         connections: {
             type: Boolean,
             default: true
         },
+        /**
+         * Whether to allow comments.
+         */
         comments: {
             type: Boolean,
             default: true
         },
+        /**
+         * Whether to allow changing the layer's opactiy.
+         */
         opacity: {
             type: Boolean,
             default: true
         },
+        /**
+         * Whether to show the layer actions (merge, delete, export).
+         */
         actions: {
             type: Boolean,
             default: true
         },
+        /**
+         * Whether to show the layer's application state.
+         */
         state: {
             type: Boolean,
             default: true
         },
+        /**
+         * Whether to allow merging this layer.
+         */
         merge: {
             type: Boolean,
             default: true
         },
+        /**
+         * The tree depth to use for the application state display.
+         */
         treeDepth: {
             type: Number,
             default: 1
         },
+        /**
+         * The delay to use when showing tooltips.
+         */
         tooltipDelay: {
             type: [Number, String],
             default: 500,
@@ -209,7 +245,12 @@
         }
     });
     const note = useVextNote();
-    const emit = defineEmits(["node-click"])
+    const emit = defineEmits({
+        /**
+         * Emitted when the user clicks on a tree node in the application state.
+         */
+        "node-click": null
+    })
 
     const open = ref(false);
     const name = ref(props.data.id)

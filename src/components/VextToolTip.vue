@@ -76,11 +76,11 @@
             type: String,
             default: "auto",
             validator(value) {
-                return ["auto", "right",
-                    "left", "bottom", "top",
-                    "right-bottom", "right-top",
-                    "left-bottom", "left-top",
-                    ].includes(value)
+                return [
+                    "auto", "right", "left",
+                    "bottom", "top", "right-bottom",
+                    "right-top", "left-bottom", "left-top",
+                ].includes(value)
             }
         },
         /**

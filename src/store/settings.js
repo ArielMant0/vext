@@ -36,7 +36,7 @@ const vextSettingsStore = {
                 "#af7aa1",
                 "#ff9da7",
                 "#9c755f",
-                "#bab0ab",
+                "#bab0ab"
             ],
         };
     },

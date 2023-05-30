@@ -94,17 +94,6 @@
         },
         /**
          * Object of icons to use for tools/modes etc.
-         *
-         * Default is:
-         * {
-         *     open: "mdi-backburger",
-         *     closed: "mdi-forwardburger",
-         *     layer: "mdi-layers",
-         *     brush: "mdi-draw",
-         *     shape: "mdi-shape",
-         *     connect: "mdi-connection",
-         *     edit: "mdi-cursor-move",
-         * }
          */
         icons: {
             type: Object,
@@ -120,6 +109,17 @@
                     whiteboard: "mdi-human-male-board",
                     settings: "mdi-cog",
                 }
+            },
+            validator(object) {
+                return object.open !== undefined &&
+                    object.closed !== undefined &&
+                    object.layer !== undefined &&
+                    object.brush !== undefined &&
+                    object.shape !== undefined &&
+                    object.connect !== undefined &&
+                    object.edit !== undefined &&
+                    object.whiteboard !== undefined &&
+                    object.settings !== undefined
             }
         },
         /**
@@ -130,17 +130,16 @@
             default: "black"
         },
         /**
-         * Whether to use keyboard shortcuts (hotkeys) for tool switching.
+         * Whether to use keyboard shortcuts (hotkeys) for mode switching.
          */
         hotkeys: {
             type: Boolean,
             default: false,
         },
         /**
-         * Hotkey map to use when using hotkeys for tool switching.
-         * By default, these are the 1, 2, 3, 4 keys are used for the layer,
-         * brush, shape and edit tool respectively. The object should have the key
-         * code as returned by the keydown event "key" property as key and the tool id
+         * Hotkey map to use when using hotkeys for mode switching.
+         * By default, these are the number keys from 1 to 7.
+         * The object should have the key string as returned by the keydown event "key" property as key and the mode id
          * as value.
          */
         hotkeyMap: {
@@ -164,7 +163,8 @@
             type: [Number, String],
             default: 500,
             validator(value) {
-                return +value >= 0;
+                const num = Number.parseInt(value);
+                return !Number.isNaN(num) && num >= 0;
             }
         },
         /**
@@ -173,7 +173,7 @@
          */
         autoModeSwitch: {
             type: Boolean,
-            default: true,
+            default: false,
         }
     });
 
@@ -186,7 +186,12 @@
     let once = false;
     const tmpMode = ref(mode.value);
 
-    const emit = defineEmits(["update:modelValue"])
+    const emit = defineEmits({
+        /**
+         * Called when the model value is updated.
+         */
+        "update:modelValue": null
+    })
     const open = computed({
         get() {
             return props.modelValue;

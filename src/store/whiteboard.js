@@ -21,7 +21,6 @@ const vextWhiteboard = {
             modified: {},
             layers: {},
             selectedLayer: "",
-            groupSelected: false,
 
             paths: [],
 

@@ -3,26 +3,26 @@
 ## Description
 
 VEXT is a Vue component library to add externalization capabilities to any Vue application,
-primarily to visual analytics systems implemented with Vue.
+primarily for visual analytics systems implemented with Vue.
 
 The [VextNoteCanvas](/src/components/VextNoteCanvas) component holds a fabric.js canvas that can be used to create annotations, i. e. drawings, shapes or text.
 
-The [VextNoteConfiguration](/src/components/VextNoteConfiguration) component is basically a sidebar that lets you use and control the NoteCanvas and all related externalization capabilites.
+The [VextNoteDrawer](/src/components/VextNoteDrawer) component is a sidebar that lets you use and control the NoteCanvas and all related externalization capabilities.
 It lets you select the mode you want to use and handles state changes.
-
-The [VextHistoryControls](/src/components/VextHistoryControls) component can be added to a navigation bar, they let the user undo or redo operations tracked with the history store.
-
-The [VextHistoryDrawer](/src/components/VextHistoryDrawer) component holds a drawer that lets the user see the actions in the history store.
 
 ### Stores
 
-The [`note` store](/stores/note) implements much of the externalization capabilities.
+The [`note` store](/stores/note) implements much of the externalization functionalities.
+
+The [`settings` store](/stores/settings) handles settings.
 
 The [`state` store](/stores/state) takes care of tracking state changes. You need to pass your application state, e.g. data you visualize, to it so that the state can be tracked and revisited later.
 
 The [`history` store](/stores/history) implements the action history mechanism used by the `note` store.
 
 The [`app` store](/stores/app) implements the action history mechanism used by the `note` store.
+
+The [`whiteboard` store](/stores/whiteboard) implements whiteboard functionalities.
 
 ## Installation
 
@@ -105,22 +105,3 @@ vextState.setData(mystateobject);
 
 </script>
 ```
-
-### Vuetify Components and Directives
-
-Components:
-- VBtn
-- VSlider
-- VTextField
-- VIcon
-- VDialog (+ related components)
-- VCard (+ related components)
-- VItemGroup (+ related components)
-- VList (+ related components)
-- VHover
-- VContainer
-- VRow
-- VCol
-
-Directives:
-- Ripple
