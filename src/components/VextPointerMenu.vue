@@ -52,7 +52,7 @@
     import { useVextNote } from '@/store/note';
     import { useVextHistory } from '@/store/history';
     import { storeToRefs } from 'pinia';
-    import { ref, watch, computed, onMounted } from 'vue';
+    import { ref, watch, computed } from 'vue';
     import { pointerMenuOptions } from '@/use/util';
     import { useVextSettings } from '@/store/settings';
     import { ACTIONS, MODES } from '@/use/enums';
@@ -102,6 +102,9 @@
             }
         }
     });
+
+    // whether a digital pen is captured
+    let digitialPen = false;
 
     const open = ref(false)
     const openSettings = ref(false)
@@ -288,17 +291,21 @@
         }
     }
 
-    onMounted(function() {
-        note.on("pointer-menu", showFromEvent);
-        input.on("pointerdown", onPointerDown)
-        input.on("pointerup", onPointerUp)
+    note.on("pointer-menu", showFromEvent);
+    input.on("pointerdown", onPointerDown)
+    input.on("pointerup", onPointerUp)
 
-        window.oncontextmenu = function() {
-            if (onGesture.value && (open.value || lastPointerDown !== null)) {
-                return false;
-            }
-            return true;
+    window.oncontextmenu = function() {
+        if (digitialPen && onGesture.value && (open.value || lastPointerDown !== null)) {
+            return false;
         }
+        return true;
+    }
+    window.addEventListener("gotpointercapture", function(event) {
+        digitialPen = event.pointerType === "pen" || event.pointerType === "touch";
+    });
+    window.addEventListener("lostpointercapture", function() {
+        digitialPen = false;
     });
 
     watch(mode, onModeChange);

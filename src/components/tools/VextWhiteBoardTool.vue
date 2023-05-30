@@ -3,7 +3,7 @@
 </template>
 
 <script setup>
-    import { ref, onMounted, watch } from 'vue';
+    import { onMounted, watch } from 'vue';
     import { useVextNote } from '@/store/note';
     import { useVextWhiteboard } from '@/store/whiteboard';
     import { MODES } from '@/use/enums';

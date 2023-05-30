@@ -41,7 +41,7 @@
 
     import VextNoteConfiguration from './VextNoteConfiguration.vue';
     import VextGlobalToolTip from '@/components/VextGlobalToolTip.vue';
-    import VextWhiteBoard from '@/components/whiteboard/VextWhiteBoard.vue';
+    import VextWhiteBoard from '@/components/VextWhiteBoard.vue';
     import VextPointerMenu from '@/components/VextPointerMenu.vue';
     import { MODES } from '@/use/enums';
     import VextHistoryDrawer from './VextHistoryDrawer.vue';

@@ -1,5 +1,9 @@
 <template>
     <div class="ml-1">
+
+        <div class="mt-2 text-subtitle-1">Layers</div>
+        <v-divider class="mb-2"/>
+
         <v-tooltip :open-delay="tooltipDelay">
             when layers should be added<br/>
             ... when the state changed and you annotate<br/>
@@ -14,6 +18,25 @@
         </v-tooltip>
         <v-select v-model="layerMode" :items="LAYER_MODES_VALUES"
             density="compact" class="mb-4" hide-details/>
+
+        <div class="mt-4 text-subtitle-1">Interaction History</div>
+        <v-divider class="mb-2"/>
+
+        <v-tooltip :open-delay="tooltipDelay">
+            how many entries should be stored in the interaction history
+            <template v-slot:activator="{ props }">
+                <div class="text-caption mb-1">
+                    interaction history limit
+                    <v-icon size="small" icon="mdi-information" v-bind="props"/>
+                </div>
+            </template>
+        </v-tooltip>
+        <v-text-field v-model="historyLimit" type="number" hide-details density="compact"
+            :rules="[v => v && v > 0 || 'must be larger than 0']"
+            @update:model-value="setHistoryLimit"/>
+
+        <div class="mt-4 text-subtitle-1">Pointer Menu</div>
+        <v-divider class="mb-2"/>
 
         <v-tooltip :open-delay="tooltipDelay">
             open the pointer menu after an annotation action
@@ -50,19 +73,6 @@
         </v-tooltip>
         <v-switch v-model="closeOnClick" :label="closeOnClick ? 'on' : 'off'"
             density="compact" color="primary" hide-details/>
-
-        <v-tooltip :open-delay="tooltipDelay">
-            how many entries should be stored in the interaction history
-            <template v-slot:activator="{ props }">
-                <div class="text-caption mb-1">
-                    interaction history limit
-                    <v-icon size="small" icon="mdi-information" v-bind="props"/>
-                </div>
-            </template>
-        </v-tooltip>
-        <v-text-field v-model="historyLimit" type="number" hide-details density="compact"
-            :rules="[v => v && v > 0 || 'must be larger than 0']"
-            @update:model-value="setHistoryLimit"/>
     </div>
 </template>
 

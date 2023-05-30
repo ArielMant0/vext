@@ -1,12 +1,20 @@
 <template>
     <div v-if="open" class="wrapper" @click="close" :style="{ 'z-index': zIndex }">
         <div class="menu" :style="{ 'left': (x-30)+'px', 'top': (y-25)+'px' }">
+            <div v-for="level in levels" :key="level"
+                :style="{
+                    'width': `${levelDistance(level)*2+60}px`,
+                    'height': `${levelDistance(level)*2+60}px`,
+                    'top': `-${levelDistance(level)+5}px`,
+                    'left': `-${levelDistance(level)+5}px`
+                    }"
+                class="menu-bg"/>
             <v-btn icon="mdi-close-thick" rounded color="primary" variant="text" @click.stop="close"/>
-            <ul style="border-radius: 50%" class="bg-primary">
-                <li v-for="(item, i) in items" :key="item.id" class="menu-item" :style="{ 'transform': `rotate(${i*degree}deg) translate(60px)` }" @click.stop="action(item)">
-                    <slot name="button" :item="item" :degree="-i*degree">
+            <ul style="border-radius: 50%">
+                <li v-for="(item, i) in items" :key="item.id" class="menu-item" :style="{ 'transform': `rotate(${degree(i)}deg) translate(${distance(i)}px)` }" @click.stop="action(item)">
+                    <slot name="button" :item="item" :degree="-degree(i)">
                         <v-btn v-if="item.icon"
-                            :style="{ 'transform': `rotate(${-i*degree}deg)` }"
+                            :style="{ 'transform': `rotate(${-degree(i)}deg)` }"
                             :icon="item.icon"
                             rounded
                             :color="item.color"
@@ -14,7 +22,7 @@
                             :class="[textColorClass(item.color)]"
                             size="small"/>
                         <v-btn v-else
-                            :style="{ 'transform': `rotate(${-i*degree}deg)` }"
+                            :style="{ 'transform': `rotate(${-degree(i)}deg)` }"
                             rounded
                             :color="item.color"
                             :border="item.border"
@@ -37,6 +45,13 @@
         items: {
             type: Array,
             required: true
+        },
+        itemsPerLevel: {
+            type: Number,
+            default: 8,
+            validator(value) {
+                return value > 0;
+            }
         },
         closeOnClick: {
             type: Boolean,
@@ -72,10 +87,38 @@
             emit("update:modelValue", value)
         }
     })
-    const degree = computed(() => 360 / props.items.length)
+    const levels = computed(() => {
+        const values = [];
+        for (let i = itemLevel(props.items.length-1); i > 0; --i) {
+            values.push(i)
+        }
+        return values;
+    })
+    const perLevel = computed(() => {
+        return Math.min(props.items.length, props.itemsPerLevel)
+    })
 
     const textLight = 'text-white';
     const textDark = 'text-black';
+
+    function itemLevel(index) {
+        return 1 + Math.floor(index / props.itemsPerLevel)
+    }
+    function degree(index) {
+        const l = itemLevel(index)
+        return (index % perLevel.value) * 360 / (perLevel.value * l);
+    }
+    function levelDistance(level) {
+        switch (level) {
+            case 1:
+                return 60
+            default:
+                return 40 + level * 40
+        }
+    }
+    function distance(index) {
+        return levelDistance(itemLevel(index))
+    }
 
     function textColorClass(color) {
         switch (color) {
@@ -110,7 +153,7 @@
 
     function action(item) {
         emit("click", item)
-        if (props.closeOnClick) {
+        if (props.closeOnClick && !item.stayOpen) {
             close(false);
         }
     }
@@ -138,6 +181,12 @@
     bottom: 0;
     left: 0;
     right: 0;
+}
+.menu-bg {
+    position: absolute;
+    background-color: rgb(240, 240, 240);
+    border: 3px solid white;
+    border-radius: 50%;
 }
 .menu {
     position: fixed;
