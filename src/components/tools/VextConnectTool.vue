@@ -7,7 +7,7 @@
 
 <script setup>
 
-    import { watch, reactive, ref, onMounted } from 'vue';
+    import { watch, reactive, ref } from 'vue';
     import { useVextNote } from '@/store/note';
     import { fabric } from 'fabric';
     import { useVextInput } from '@/store/input';
@@ -29,7 +29,7 @@
         line.x0 = x;
         line.y0 = y;
         lineObj = new fabric.Line([x, y, x, y], {
-            stroke: note.color,
+            stroke: settings.color,
             strokeWidth: 1,
             strokeUniform: true,
             opacity: 1,
@@ -49,26 +49,22 @@
         lineObj = null;
     }
 
-    function init() {
-        note.on("connect:start", function(data) {
-            if (note.mode === MODES.CONNECT) {
-                datapoint.value = data.source;
-                start(data.x, data.y);
-            }
-        })
-        note.on("connect:move", function(data) {
-            if (note.mode === MODES.CONNECT && drawing) {
-                update(data.x, data.y);
-            }
-        })
-        note.on("connect:end connect:cancel", function() {
-            if (note.mode === MODES.CONNECT && drawing) {
-                end();
-            }
-        })
-    }
-
-    onMounted(init);
+    note.on("connect:start", function(data) {
+        if (note.mode === MODES.CONNECT) {
+            datapoint.value = data.source;
+            start(data.x, data.y);
+        }
+    })
+    note.on("connect:move", function(data) {
+        if (note.mode === MODES.CONNECT && drawing) {
+            update(data.x, data.y);
+        }
+    })
+    note.on("connect:end connect:cancel", function() {
+        if (note.mode === MODES.CONNECT && drawing) {
+            end();
+        }
+    })
 
     watch(() => input.pointerDown, function() {
         if (note.mode === MODES.CONNECT && drawing) {

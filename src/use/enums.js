@@ -28,6 +28,7 @@ const ACTIONS = Object.freeze({
     COLOR_CHANGE: "color-change",
     COLOR_VALUE: "color",
     BRUSH_SIZE: "brush-size",
+    BRUSH_DECIMATE: "brush-decimate",
     SHAPE: "shape-change",
 });
 const ACTIONS_VALUES = Object.values(ACTIONS);

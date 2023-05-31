@@ -51,6 +51,7 @@
     import { useVextInput } from '@/store/input';
     import { useVextNote } from '@/store/note';
     import { useVextHistory } from '@/store/history';
+    import { useVextWhiteboard } from '@/store/whiteboard'
     import { storeToRefs } from 'pinia';
     import { ref, watch, computed } from 'vue';
     import { pointerMenuOptions } from '@/use/util';
@@ -60,6 +61,7 @@
     const input = useVextInput();
     const note = useVextNote();
     const history = useVextHistory();
+    const wb = useVextWhiteboard();
 
     const { mode } = storeToRefs(note);
     const { pointerMenu, onAction, onGesture, closeOnClick } = storeToRefs(useVextSettings())
@@ -193,7 +195,8 @@
                     return d.id !== mode.value && (d.id !== MODES.SETTINGS || trigger.value === "click");
                 case ACTIONS.SETTINGS:
                     return trigger.value === "click" &&
-                        (mode.value === MODES.BRUSH || mode.value === MODES.SHAPE);
+                        (mode.value === MODES.BRUSH || mode.value === MODES.SHAPE ||
+                        (mode.value === MODES.WHITEBOARD && wb.mode === MODES.BRUSH));
                 default:
                     return true;
             }

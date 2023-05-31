@@ -2,7 +2,7 @@ import { defineStore } from "pinia"
 import { useVextNote } from "./note";
 import html2canvas from "html2canvas";
 import WhiteBoardLayer from "@/use/whiteboard-layer";
-import { MODES } from "@/use/enums";
+import { ACTIONS, MODES } from "@/use/enums";
 import { useVextSettings } from "@/store/settings";
 import { useVextHistory } from "@/store/history";
 import { fabric } from 'fabric';
@@ -60,13 +60,36 @@ const vextWhiteboard = {
             const brush = new fabric.PencilBrush(canvas);
             const settings = useVextSettings();
             brush.decimate = settings.brushDecimation;
-            brush.color = settings.color0;
+            brush.color = settings.color;
             brush.width = settings.brushSize;
             canvas.freeDrawingBrush = brush;
+
+            settings.on(ACTIONS.BRUSH_SIZE, () => {
+                this.canvas.freeDrawingBrush.width = settings.brushSize;
+            });
+            settings.on(ACTIONS.BRUSH_DECIMATE, () => {
+                this.canvas.freeDrawingBrush.decimate = settings.brushDecimation;
+            });
+            settings.on(ACTIONS.COLOR_CHANGE, () => {
+                this.canvas.freeDrawingBrush.color = settings.color;
+            });
+            settings.on(ACTIONS.COLOR_VALUE, () => {
+                this.canvas.freeDrawingBrush.color = settings.color;
+            });
 
             canvas
                 .on("path:created", ({ path }) => {
                     this.addPath(path, false, true);
+                    if (this.mode === MODES.BRUSH) {
+                        if (!settings.pointerMenu) {
+                            // obj already part of the canvas
+                            this.addPath(path, false, true)
+                        } else {
+                            this.canvas.remove(path)
+                        }
+                    } else {
+                        this.canvas.remove(path)
+                    }
                 })
                 .on("object:modified", ({ target, transform }) => {
                     if (target.uuid && this.mode === MODES.EDIT) {

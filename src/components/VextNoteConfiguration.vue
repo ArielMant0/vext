@@ -181,7 +181,7 @@
     const state = useVextState();
     const note = useVextNote();
     const history = useVextHistory();
-    const { mode, enabled } = storeToRefs(note);
+    const { mode, enabled, activeLayer } = storeToRefs(note);
 
     const tmpMode = ref(mode.value);
 
@@ -309,9 +309,14 @@
     input.init();
     input.on("pointerdown", onPointerDown)
     input.on("keydown", onKeyDown)
-    state.on("change", saveState);
+
+    const handle = note.on("canvas:created", function() {
+        note.off("canvas:created", handle);
+        state.on("change", saveState);
+        saveState();
+    })
 
     watch(mode, loadMode);
-    watch(() => note.activeLayer, loadState)
+    watch(activeLayer, loadState)
 
 </script>

@@ -1,5 +1,5 @@
 <template>
-    <VextCircleMenu v-if="mode === MODES.BRUSH" v-model="open"
+    <VextCircleMenu v-if="mode === MODES.BRUSH || isWbBrush" v-model="open"
             :items="brushOptions" :x="x" :y="y"
             :items-per-level="itemsPerLevel"
             :background="background"
@@ -45,9 +45,12 @@
     import { useVextSettings } from '@/store/settings';
     import { storeToRefs } from 'pinia';
     import { ACTIONS, MODES } from '@/use/enums';
+    import { useVextWhiteboard } from '..';
 
     const note = useVextNote();
     const settings = useVextSettings();
+    const wb = useVextWhiteboard();
+
     const { mode } = storeToRefs(note)
 
     const props = defineProps({
@@ -133,6 +136,10 @@
         set(value) {
             emit("update:modelValue", value);
         }
+    })
+
+    const isWbBrush = computed(() => {
+        return mode.value === MODES.WHITEBOARD && wb.mode === MODES.BRUSH;
     })
     const showColorPicker = ref(false);
     const tmpColor = ref(settings.color);

@@ -60,7 +60,6 @@
         "color-change": null
     });
 
-    const note = useVextNote();
     const settings = useVextSettings();
     const { activeColor, color0, color1, color } = storeToRefs(settings);
 
@@ -72,18 +71,18 @@
 
     function changeColor() {
         if (activeColor.value === 0) {
-            note.setColorPrimary(tmpColor.value)
+            settings.setColorPrimary(tmpColor.value)
         } else {
-            note.setColorSecondary(tmpColor.value)
+            settings.setColorSecondary(tmpColor.value)
         }
         emits("color-change", tmpColor.value);
     }
     function chooseColor() {
-        note.selectColor(tmpActive.value);
-        emits("color-change", note.color);
+        settings.selectColor(tmpActive.value);
+        emits("color-change", settings.color);
     }
     function readColor() {
-        tmpColor.value = note.color;
+        tmpColor.value = settings.color;
         tmpActive.value = activeColor.value;
     }
 

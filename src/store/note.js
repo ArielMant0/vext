@@ -6,7 +6,7 @@ import { useExportPDF } from "@/use/export-pdf";
 import { useExportZIP } from "@/use/export-zip";
 import EventHandler from "@/use/event-handler";
 import { useVextSettings } from "./settings";
-import { MODES, LAYER_MODES } from "@/use/enums";
+import { MODES, LAYER_MODES, ACTIONS } from "@/use/enums";
 import AnnotationLayer from "@/use/annotation-layer";
 
 // https://stackoverflow.com/questions/69881048/cannot-resize-edit-objects-until-i-group-ungroup-them-alpinejs-fabricjs/70564680#70564680
@@ -501,42 +501,6 @@ const vextNoteStore = {
             this.setMode(this.previousMode, record);
         },
 
-        setBrushSize(size, record=true) {
-            if (!this.enabled) return;
-            const settings = useVextSettings();
-            settings.setBrushSize(size, record);
-        },
-
-        setBrushDecimation(value, record=true) {
-            if (!this.enabled) return;
-            const settings = useVextSettings();
-            settings.setBrushDecimation(value, record);
-        },
-
-        selectColor(id, record=true) {
-            if (!this.enabled) return;
-            const settings = useVextSettings();
-            settings.selectColor(id, record);
-        },
-
-        setColorPrimary(color, record=true) {
-            if (!this.enabled) return;
-            const settings = useVextSettings();
-            settings.setColorPrimary(color, record);
-        },
-
-        setColorSecondary(color, record=true) {
-            if (!this.enabled) return;
-            const settings = useVextSettings();
-            settings.setColorSecondary(color, record);
-        },
-
-        setShape(shape, record=true) {
-            if (!this.enabled) return;
-            const settings = useVextSettings();
-            settings.setShape(shape, record);
-        },
-
         addObject(obj, layer=null, addToCanvas=true, record=true) {
             if (!this.enabled) return null;
             if (!this.canvas) {
@@ -844,22 +808,32 @@ const vextNoteStore = {
             this.canvas = canvas;
             this.enablePointerEvents(false);
             const settings = useVextSettings();
-            settings.setCanvas(canvas);
+            settings.on(ACTIONS.BRUSH_SIZE, () => {
+                this.canvas.freeDrawingBrush.width = settings.brushSize;
+            });
+            settings.on(ACTIONS.BRUSH_DECIMATE, () => {
+                this.canvas.freeDrawingBrush.decimate = settings.brushDecimation;
+            });
+            settings.on(ACTIONS.COLOR_CHANGE, () => {
+                this.canvas.freeDrawingBrush.color = settings.color;
+            });
+            settings.on(ACTIONS.COLOR_VALUE, () => {
+                this.canvas.freeDrawingBrush.color = settings.color;
+            });
 
             canvas
-                .on("path:created", (obj) => {
+                .on("path:created", ({ path }) => {
                     if (this.enabled && this.mode === MODES.BRUSH) {
-                        const settings = useVextSettings();
                         if (!settings.pointerMenu) {
                             // obj already part of the canvas
-                            this.addObject(obj.path, null, false)
+                            this.addObject(path, null, false)
                             this.emit("pointer-menu", "drawing")
-                            this.emit("path:created", obj);
+                            this.emit("path:created", path);
                         } else {
-                            this.canvas.remove(obj.path)
+                            this.canvas.remove(path)
                         }
                     } else {
-                        this.canvas.remove(obj.path)
+                        this.canvas.remove(path)
                     }
                 })
                 .on("selection:created", () => {
@@ -936,11 +910,12 @@ const vextNoteStore = {
         },
 
         setState(state) {
-            this.currentState = state;
+            if (!this.enabled) return;
             if (!this.canvas) {
                 console.debug("canvas not initialized");
                 return;
             }
+            this.currentState = state;
             if (this.previewLayerID === null) {
                 this.addLayer(state, false);
                 this.previewLayerID = this.activeLayer;
@@ -959,6 +934,7 @@ const vextNoteStore = {
                 console.debug("canvas not initialized");
                 return;
             }
+
             if (this.previewLayerID === null) {
                 if (this.currentState !== null) {
                     this.addLayer(this.currentState, false);

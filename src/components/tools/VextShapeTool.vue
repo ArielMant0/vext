@@ -39,7 +39,7 @@
     /**
      * Component to add simple shapes or text to the NoteCanvas.
      */
-    import { ref, onMounted, toRaw, watch, reactive } from 'vue';
+    import { ref, toRaw, watch, reactive } from 'vue';
     import { fabric } from 'fabric';
     import { useVextNote } from '@/store/note';
     import { useVextApp } from '@/store/app';
@@ -59,8 +59,6 @@
 
     const stroke = ref("primary color")
     const fill = ref("none")
-
-    const eventsAdded = ref(false);
 
     const brushShape = reactive({
         x: 10,
@@ -185,17 +183,19 @@
                     top: brushShape.y,
                     left: brushShape.x,
                     fontSize: brushShape.size0,
-                    fill: note.color,
+                    fill: settings.color,
                 };
         }
     }
 
-    onMounted(function() {
+    let eventsAdded = false;
+
+    const handler = note.on("canvas:created", function() {
         initBrushShape();
 
-        if (!eventsAdded.value) {
-            eventsAdded.value = true;
-            console.debug("adding canvas event listeners for shape mode")
+        if (!eventsAdded) {
+            eventsAdded = true;
+            note.off("canvas:created", handler);
             note.canvas
                 .on("mouse:up", function() {
                     if (note.mode === MODES.SHAPE && !settings.pointerMenu) {

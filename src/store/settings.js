@@ -1,7 +1,9 @@
 import { defineStore } from "pinia"
 import { useVextHistory } from "./history";
+import EventHandler from "@/use/event-handler";
+import { ACTIONS } from "@/use/enums";
 
-let _CANVAS;
+const EVENTS = new EventHandler();
 
 const vextSettingsStore = {
 
@@ -47,8 +49,16 @@ const vextSettingsStore = {
 
     actions: {
 
-        setCanvas(canvas) {
-            _CANVAS = canvas;
+        emit(name, data) {
+            EVENTS.emit(name, data);
+        },
+
+        on(name, handler) {
+            return EVENTS.on(name, handler);
+        },
+
+        off(name, handler) {
+            return EVENTS.off(name, handler);
         },
 
         defaultColorAt(index) {
@@ -69,8 +79,8 @@ const vextSettingsStore = {
                     this.setBrushSize.bind(this, this.brushSize, false)
                 );
             }
-            _CANVAS.freeDrawingBrush.width = newVal;
             this.brushSize = newVal;
+            this.emit(ACTIONS.BRUSH_SIZE, newVal);
         },
 
         setBrushDecimation(value, record=true) {
@@ -82,8 +92,8 @@ const vextSettingsStore = {
                     this.setBrushDecimation.bind(this, this.brushDecimation, false)
                 );
             }
-            _CANVAS.freeDrawingBrush.decimate = newVal;
             this.brushDecimation = newVal;
+            this.emit(ACTIONS.BRUSH_DECIMATE, newVal);
         },
 
         selectColor(id=null, record=true) {
@@ -96,7 +106,7 @@ const vextSettingsStore = {
                 );
             }
             this.activeColor = newColor
-            _CANVAS.freeDrawingBrush.color = this.color;
+            EVENTS.emit(ACTIONS.COLOR_CHANGE, newColor);
         },
 
         setColor(color, record=true) {
@@ -117,7 +127,7 @@ const vextSettingsStore = {
             }
             this.color0 = color;
             if (this.activeColor === 0) {
-                _CANVAS.freeDrawingBrush.color = color
+                EVENTS.emit(ACTIONS.COLOR_VALUE, color);
             }
         },
 
@@ -131,7 +141,7 @@ const vextSettingsStore = {
             }
             this.color1 = color;
             if (this.activeColor === 1) {
-                _CANVAS.freeDrawingBrush.color = color
+                EVENTS.emit(ACTIONS.COLOR_VALUE, color);
             }
         },
 

@@ -70,7 +70,7 @@
         top: 10,
         left: 10,
         strokeWidth: 0,
-        fill: note.color,
+        fill: settings.color,
         radius: size.value * 0.5
     });
 
@@ -91,14 +91,14 @@
     }
 
     function transferBrushSize(value) {
-        note.setBrushSize(value);
+        settings.setBrushSize(value);
         preview.set({
             radius: value*0.5,
             dirty: true
         });
         note.canvas.requestRenderAll();
     }
-    function transferDecimation(value) { note.setBrushDecimation(value); }
+    function transferDecimation(value) { settings.setBrushDecimation(value); }
 
     function setBrushSize(brushSize) {
         if (brushSize !== size.value) {
@@ -138,6 +138,16 @@
             note.canvas.add(preview);
             addedPreview = true;
         }
+    });
+
+    const handle = note.on("canvas:created", function() {
+        readBrushSize();
+        readBrushDecimation()
+        if (!addedPreview) {
+            note.canvas.add(preview);
+            addedPreview = true;
+        }
+        note.off("canvas:created", handle);
     });
 
     note.on("path:created", function() {

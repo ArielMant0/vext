@@ -204,43 +204,6 @@
 > Go to the previous mode.
 > <br>`@param {Boolean}` record - whether to record this action in history (default `true`)
 
-### setBrushSize
-
-> Set the brush size for drawing.
-> <br>`@param {Number}` size - brush size in pixels
-> <br>`@param {Boolean}` record - whether to record this action in history (default `true`)
-
-### setBrushDecimation
-
-> Set the decimation value for drawing.
-> <br>`@param {Number}` value - decimation value
-> <br>`@param {Boolean}` record - whether to record this action in history (default `true`)
-
-### selectColor
-
-> Select either the primary or secondary color.
-> <br>`@param {Number}` id - 0 if primary color, else 1
-> <br>`@param {Boolean}` record - whether to record this action in history (default `true`)
-
-### setColorPrimary
-
-> Set the primary color.
-> <br>`@param {String}` color
-> <br>`@param {Boolean}` record - whether to record this action in history (default `true`)
-
-
-### setColorSecondary
-
-> Set the secondary color.
-> <br>`@param {String}` color
-> <br>`@param {Boolean}` record - whether to record this action in history (default `true`)
-
-### setShape
-
-> Set the shape type for the shape mode.
-> <br>`@param {String}` shape
-> <br>`@param {Boolean}` record - whether to record this action in history (default `true`)
-
 ### addObject
 
 > Add an object to the active layer.

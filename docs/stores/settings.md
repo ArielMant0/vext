@@ -29,10 +29,25 @@
 
 ## Methods
 
-### setCanvas
+### emit
 
-> Set the fabric.js canvas instance to use for the annotations.
-> <br>`@param {Object}` canvas - the fabric.js canvas
+> Emit an event from the note event handler.
+> <br>`@param {String}` name - event name
+> <br>`@param {*}` data - event payload
+
+### on
+
+> Register an event handler.
+> <br>`@param {String}` name - event name
+> <br>`@param {Function}` hadler - event callback handler
+> <br>`@returns` handle id
+
+### off
+
+> Remove an event handler for the given event.
+> <br>`@param {String}` name - event name
+> <br>`@param {Number}` handler - event handle
+> <br>`@returns` true if the event was removed
 
 ### defaultColorAt
 
@@ -45,7 +60,6 @@
 
 > Sets the history interaction limit (minimum value of 1 is enforced)
 > <br>`@param {Number}` limit
-
 
 ### setBrushSize
 
@@ -64,6 +78,12 @@
 > Select a color by id (either primary = 0 or secondary = 1).
 > If the passed id is not 0 or 1, the selected color is toggled.
 > <br>`@param {Number}` id - color id
+> <br>`@param {Boolean}` record - whether to record this action (default `true`)
+
+### setColor
+
+> Sets the color to use for the currently active color.
+> <br>`@param {String}` color - color value
 > <br>`@param {Boolean}` record - whether to record this action (default `true`)
 
 ### setColorPrimary

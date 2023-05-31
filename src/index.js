@@ -8,6 +8,8 @@ import { useVextApp } from './store/app.js'
 import { useVextInput } from './store/input.js'
 import { useVextWhiteboard } from './store/whiteboard.js'
 
+import * as VEXT_ENUMS from './use/enums.js';
+
 function createVextPlugin() {
     const plugin = {
         install: function(app) {
@@ -29,4 +31,5 @@ export {
     useVextApp,
     useVextInput,
     useVextWhiteboard,
+    VEXT_ENUMS
 }

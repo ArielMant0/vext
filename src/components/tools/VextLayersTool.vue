@@ -143,7 +143,7 @@
     })
 
     const note = useVextNote();
-    const { activeLayer, layerMode, previewLayer } = storeToRefs(note);
+    const { activeLayer, previewLayer } = storeToRefs(note);
 
     const layerSearch = computed(() => {
         if (!searchTerm.value || searchTerm.value.length === 0) return note.userLayers;
