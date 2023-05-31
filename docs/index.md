@@ -2,15 +2,18 @@
 
 ## Description
 
-VEXT is a Vue component library to add externalization capabilities to any Vue application,
-primarily for visual analytics systems implemented with Vue.
+VEXT is a Vue component library to add externalization/annotation capabilities to any Vue application,
+primarily for visual analytics systems implemented with Vue. The two essential components are the following:
 
-The [VextNoteCanvas](/src/components/VextNoteCanvas) component holds a fabric.js canvas that can be used to create annotations, i. e. drawings, shapes or text.
+The [VextNoteCanvas](/src/components/VextNoteCanvas) component holds a fabric.js canvas that can be used to create annotations, i. e. drawings, shapes or text. It should be included where you want to annotate.
 
-The [VextNoteDrawer](/src/components/VextNoteDrawer) component is a sidebar that lets you use and control the NoteCanvas and all related externalization capabilities.
-It lets you select the mode you want to use and handles state changes.
+The [VextNoteDrawer](/src/components/VextNoteDrawer) component is a sidebar that lets you use and control the NoteCanvas and all related externalization capabilities. It lets you select the mode you want to use and handles state changes.
+
+You can find the source code on [GitHub](https://github.com/ArielMant0/vext).
 
 ### Stores
+
+A lot of settings and functionalities is separated into different PINIA stores that you can also use.
 
 The [`note` store](/stores/note) implements much of the externalization functionalities.
 
@@ -41,8 +44,8 @@ npm install @nullbuild/vext
 ## Usage
 
 To use the components provided by VEXT, you need to register the plugin and make
-sure that all Vuetify components used by the plugin ([see here](#vuetify-components-and-directives))
-are actually provided. For more information see [treeshaking](https://vuetifyjs.com/en/features/treeshaking/).
+sure that all Vuetify components used by the plugin are actually provided.
+For more information see [treeshaking](https://vuetifyjs.com/en/features/treeshaking/).
 
 Here is a simple example, starting off from an essentials vuetify application:
 
@@ -88,20 +91,55 @@ export default createVuetify({
 
 ```
 
+Here is a minimal example on how to include the required VEXT component in a view. This example is also included in the GitHub repository in the src folder.
+
+```Vue
+<!-- src/views/MyView.vue -->
+<template>
+  <div>
+    <VextNoteDrawer v-model="open"/>
+    <section style="width: 100%; height: 100%;">
+      <VextNoteCanvas :width="visAreaWidth" :height="visAreaHeight" show-border/>
+      <div>
+        <VisA :data="dataA"/>
+        <VisB :data="dataB"/>
+      </div>
+    </section>
+  </div>
+</template>
+
+<script setup>
+  // ... imports
+
+  const open = ref(false);
+  const visAreaWidth = ref(800);
+  const visAreaHeight = ref(600);
+</script>
+```
+
 Here is an example on how to use the stores in a Vue component.
 This code uses the state store and manually sets the state (once).
 
-```javascript
-// src/components/MyComponent.vue
+```Vue
+<!-- src/components/MyComponent.vue -->
 <script setup>
-import { useVextState } from 'vuetify'
-
-const mystateobject = {
-  key0: ...,
-}
+import { useVextState } from '@nullbild/vext'
 
 const vextState = useVextState();
-vextState.setData(mystateobject);
+const myStateObj = {
+  key0: "...",
+}
 
+function loadState(state) {
+  // ...
+}
+
+function modifyState() {
+  // tell state store that the state changed
+  vextState.setData(myStateObj);
+}
+
+// register callback that is invoked when a state is loaded
+vextState.on("load", loadState);
 </script>
 ```

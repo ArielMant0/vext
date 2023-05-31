@@ -183,7 +183,6 @@
     const history = useVextHistory();
     const { mode, enabled } = storeToRefs(note);
 
-    let once = false;
     const tmpMode = ref(mode.value);
 
     const emit = defineEmits({
@@ -307,15 +306,10 @@
         }
     }
 
-    onMounted(function init() {
-        if (!once) {
-            input.init();
-            input.on("pointerdown", onPointerDown)
-            input.on("keydown", onKeyDown)
-            state.on("change", saveState);
-            once = true;
-        }
-    });
+    input.init();
+    input.on("pointerdown", onPointerDown)
+    input.on("keydown", onKeyDown)
+    state.on("change", saveState);
 
     watch(mode, loadMode);
     watch(() => note.activeLayer, loadState)

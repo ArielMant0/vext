@@ -3,7 +3,7 @@ import hash from 'object-hash'
 import { defineStore } from "pinia"
 import { toRaw } from 'vue';
 
-let EID = 0;
+const EVENTS = new EventHandler()
 
 const vextStateStore = {
 
@@ -14,7 +14,6 @@ const vextStateStore = {
             historySize: 25,
             dataChange: false,
             dataChangeTime: null,
-            events: new EventHandler()
         };
     },
 
@@ -45,17 +44,17 @@ const vextStateStore = {
         },
 
         on(event, func) {
-            return this.events.on(event, func);
+            return EVENTS.on(event, func);
         },
 
         off(event, id) {
-            return this.events.off(event, id);
+            return EVENTS.off(event, id);
         },
 
         setData(data, check=true) {
             this.data = data;
             if (check && this.checkChanges()) {
-                this.events.emit("change", toRaw(data))
+                EVENTS.emit("change", toRaw(data))
             }
 
         },
@@ -63,7 +62,7 @@ const vextStateStore = {
         loadState(state) {
             const stateObj = JSON.parse(state)
             this.setData(stateObj, false);
-            this.events.emit("load", toRaw(this.data))
+            EVENTS.emit("load", toRaw(this.data))
         },
 
         resetDataChange() {

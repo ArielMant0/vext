@@ -13,18 +13,8 @@ function getCoordinates(x, y, element) {
     return [left, top]
 }
 
-const ACTIONS = Object.freeze({
-    ACCEPT: "accept",
-    ACCEPT_IGNORE: "accept_ignore",
-    CANCEL: "cancel",
-    CANCEL_IGNORE: "cancel_ignore",
-    MODE: "mode",
-    UNDO: "undo",
-    REDO: "redo",
-    SETTINGS: "settings"
-});
-
 const EVENTS = new EventHandler();
+let INITIALIZED = false;
 
 const vextInputStore = {
 
@@ -68,17 +58,7 @@ const vextInputStore = {
                 meta: false,
                 time: null,
             },
-
-            touches: [],
-            touchMove: null,
-            touchStart: null,
-            touchEnd: null,
-            touchCancel: null,
         };
-    },
-
-    getters: {
-        ACTIONS: () => ACTIONS,
     },
 
     actions: {
@@ -87,6 +67,11 @@ const vextInputStore = {
          * Add event listener to track mouse and keyboard
          */
         init() {
+            if (INITIALIZED) {
+                console.debug("input store already initialized")
+                return;
+            }
+
             window.addEventListener("pointermove", event => {
                 this.mx = event.pageX;
                 this.my = event.pageY;
@@ -131,6 +116,7 @@ const vextInputStore = {
                 // TODO:
                 // window.addEventListener("touchstart", event => {});
             }
+            INITIALIZED = true;
         },
 
         emit(name, data) {
@@ -150,15 +136,15 @@ const vextInputStore = {
          * the passed HTML element.
          * @param {HTMLElement} element
          */
-        getPointer(which="move", element=null) {
-            switch (which) {
+        getPointer(event="move", element=null) {
+            switch (event) {
                 case "down":
-                    return getCoordinates(this.dx, this.dy, element)
+                    return this.getPointerDown(element)
                 case "up":
-                    return getCoordinates(this.ux, this.uy, element)
+                    return this.getPointerUp(element)
                 case "move":
                 default:
-                    return getCoordinates(this.mx, this.my, element)
+                    return this.getPointerMove(element)
             }
         },
 
@@ -192,15 +178,26 @@ const vextInputStore = {
         getKey(event="down", withMods=false) {
             switch (event) {
                 case "up":
-                    return withMods ? this.keyUp : this.keyUp.key;
+                    return this.getKeyUp(withMods);
                 case "press":
-                    return withMods ? this.keyPress : this.keyPress.key;
+                    return this.getKeyPress(withMods);
                 case "down":
                 default:
-                    return withMods ? this.keyDown : this.keyDown.key;
+                    return this.getKeyDown(withMods);
             }
-        }
+        },
 
+        getKeyDown(withMods=false) {
+            return withMods ? this.keyDown : this.keyDown.key;
+        },
+
+        getKeyUp(withMods=false) {
+            return withMods ? this.keyUp : this.keyUp.key;
+        },
+
+        getKeyPress(withMods=false) {
+            return withMods ? this.keyPress : this.keyPress.key;
+        },
     },
 }
 

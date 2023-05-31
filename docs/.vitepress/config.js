@@ -1,10 +1,17 @@
 export default {
     base: '/vext/',
-    title: 'VEXT Docs',
-    description: 'Documentation for the VEXT library for visualization externalization',
+    title: 'VEXT API',
+    description: 'API documentation for the VEXT library for visualization externalization',
     appearance: 'dark',
     lastUpdated: true,
     themeConfig: {
+        repo: "https://github.com/ArielMant0/vext",
+        nav: [
+            { text: 'Home', link: '/#vext' },
+            { text: 'Guide', link: '/#usage' },
+            { text: "GitHub", link: "https://github.com/ArielMant0/vext" },
+            { text: "npm", link: "https://www.npmjs.com/package/@nullbuild/vext" },
+        ],
         sidebar: [
             {
                 text: 'Components',
