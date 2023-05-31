@@ -15,15 +15,36 @@
             :close-on-click="closeOnClick"
             @click="performAction"
             @close="close"/>
+
+    <v-card v-if="showColorPicker" density="compact" rounded="sm"
+        :style="{ 'position': 'absolute', 'left': cpX+'px', 'top': cpY+'px', 'z-index': zIndex+2 }">
+        <v-card-text>
+            <v-color-picker v-model="tmpColor" hide-inputs/>
+        </v-card-text>
+        <v-card-actions class="d-flex justify-end">
+            <v-btn icon="mdi-close"
+                color="error"
+                size="x-small"
+                rounded="sm"
+                variant="tonal"
+                @click="cancelColor"/>
+            <v-btn icon="mdi-check"
+                color="success"
+                size="x-small"
+                rounded="sm"
+                variant="tonal"
+                @click="chooseColor"/>
+        </v-card-actions>
+    </v-card>
 </template>
 
 <script setup>
     import VextCircleMenu from './VextCircleMenu.vue';
-    import { computed } from 'vue';
+    import { ref, computed } from 'vue';
     import { useVextNote } from '@/store/note';
     import { useVextSettings } from '@/store/settings';
     import { storeToRefs } from 'pinia';
-    import { MODES } from '@/use/enums';
+    import { ACTIONS, MODES } from '@/use/enums';
 
     const note = useVextNote();
     const settings = useVextSettings();
@@ -113,45 +134,60 @@
             emit("update:modelValue", value);
         }
     })
+    const showColorPicker = ref(false);
+    const tmpColor = ref(settings.color);
+
+    const cpX = computed(() => {
+        return props.x + 350 < window.innerWidth ? props.x : props.x - 350;
+    });
+    const cpY = computed(() => {
+        return props.y + 350 < window.innerHeight ? props.y : props.y - 350;
+    });
 
     const brushOptions = computed(() => {
         return [
             {
                 id: "color-primary",
                 icon: "mdi-palette",
-                action: "color",
+                action: ACTIONS.COLOR_CHANGE,
                 color: settings.color0,
                 value: 0,
                 border: settings.activeColor === 0,
             },{
                 id: "color-secondary",
                 icon: "mdi-palette",
-                action: "color",
+                action: ACTIONS.COLOR_CHANGE,
                 color: settings.color1,
                 value: 1,
                 border: settings.activeColor === 1,
             },{
+                id: "choose-color",
+                icon: "mdi-select-color",
+                action: ACTIONS.COLOR_VALUE,
+                color: settings.color,
+                value: 1,
+            },{
                 id: "size-1",
                 icon: "mdi-numeric-1-box-outline",
-                action: "brush-size",
+                action: ACTIONS.BRUSH_SIZE,
                 color: "default",
                 value: 1,
             },{
                 id: "size-3",
                 icon: "mdi-numeric-3-box-outline",
-                action: "brush-size",
+                action: ACTIONS.BRUSH_SIZE,
                 color: "default",
                 value: 3,
             },{
                 id: "size-5",
                 icon: "mdi-numeric-5-box-outline",
-                action: "brush-size",
+                action: ACTIONS.BRUSH_SIZE,
                 color: "default",
                 value: 5,
             },{
                 id: "size-10",
                 icon: "mdi-numeric-10-box-outline",
-                action: "brush-size",
+                action: ACTIONS.BRUSH_SIZE,
                 color: "default",
                 value: 10,
             }
@@ -162,38 +198,38 @@
             {
                 id: "shape-text",
                 icon: "mdi-format-text",
-                action: "shape",
+                action: ACTIONS.SHAPE,
                 color: "default",
                 value: "text",
             },{
                 id: "shape-circle",
                 icon: "mdi-circle",
-                action: "shape",
+                action: ACTIONS.SHAPE,
                 color: "default",
                 value: "circle",
             },{
                 id: "shape-rectangle",
                 icon: "mdi-rectangle",
-                action: "shape",
+                action: ACTIONS.SHAPE,
                 color: "default",
                 value: "rectangle",
             },{
                 id: "shape-triangle",
                 icon: "mdi-triangle",
-                action: "shape",
+                action: ACTIONS.SHAPE,
                 color: "default",
                 value: "triangle",
             },{
                 id: "color-primary",
                 icon: "mdi-palette",
-                action: "color",
+                action: ACTIONS.COLOR_CHANGE,
                 color: settings.color0,
                 value: 0,
                 border: settings.activeColor === 0,
             },{
                 id: "color-secondary",
                 icon: "mdi-palette",
-                action: "color",
+                action: ACTIONS.COLOR_CHANGE,
                 color: settings.color1,
                 value: 1,
                 border: settings.activeColor === 1,
@@ -203,17 +239,35 @@
 
     function performAction(item) {
         switch (item.action) {
-            case "color":
+            case ACTIONS.COLOR_CHANGE:
                 settings.selectColor(item.value);
                 break;
-            case "shape":
+            case ACTIONS.COLOR_VALUE:
+                tmpColor.value = settings.color;
+                showColorPicker.value = true;
+                break;
+            case ACTIONS.SHAPE:
                 settings.setShape(item.value);
                 break;
-            case "brush-size":
+            case ACTIONS.BRUSH_SIZE:
                 settings.setBrushSize(item.value);
                 break;
         }
         emit("click", item)
+    }
+
+    function chooseColor() {
+        showColorPicker.value = false;
+        settings.setColor(tmpColor.value);
+        if (props.closeOnClick) {
+            open.value = false;
+        }
+    }
+    function cancelColor() {
+        showColorPicker.value = false;
+        if (props.closeOnClick) {
+            open.value = false;
+        }
     }
 
     function close() {

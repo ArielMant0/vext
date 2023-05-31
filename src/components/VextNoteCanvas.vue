@@ -120,7 +120,8 @@
             isDrawingMode: note.mode === MODES.BRUSH,
             backgroundColor: props.backgroundColor,
             renderOnAddRemove: true,
-            enablePointerEvents: true
+            enablePointerEvents: true,
+            freeDrawingCursor: "none"
         });
         note.setCanvas(canvas);
 

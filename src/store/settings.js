@@ -99,6 +99,14 @@ const vextSettingsStore = {
             _CANVAS.freeDrawingBrush.color = this.color;
         },
 
+        setColor(color, record=true) {
+            if (this.activeColor === 0) {
+                this.setColorPrimary(color, record);
+            } else {
+                this.setColorSecondary(color, record);
+            }
+        },
+
         setColorPrimary(color, record=true) {
             if (record) {
                 const history = useVextHistory();

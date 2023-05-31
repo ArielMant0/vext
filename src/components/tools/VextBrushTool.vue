@@ -39,7 +39,7 @@
             </template>
         </v-slider>
 
-        <VextColorViewer @color-change="readColor"/>
+        <VextColorViewer/>
     </div>
 </template>
 
@@ -64,11 +64,12 @@
     const size = ref(settings.brushSize);
     const decimation = ref(settings.brushDecimation);
 
+    let addedPreview = false;
+
     const preview = new fabric.Circle({
         top: 10,
         left: 10,
-        stroke: "black",
-        strokeWidth: 1,
+        strokeWidth: 0,
         fill: note.color,
         radius: size.value * 0.5
     });
@@ -133,12 +134,22 @@
     onMounted(function() {
         readBrushSize();
         readBrushDecimation()
-        note.canvas.add(preview);
+        if (!addedPreview) {
+            note.canvas.add(preview);
+            addedPreview = true;
+        }
     });
+
+    note.on("path:created", function() {
+        if (addedPreview) {
+            note.canvas.bringToFront(preview)
+        }
+    })
 
     watch(() => note.mode, onSwitch);
     watch(() => input.pointerMove, movePreview)
 
+    watch(() => settings.color, readColor)
     watch(() => settings.brushSize, readBrushSize)
     watch(() => settings.brushDecimation, readBrushDecimation)
 

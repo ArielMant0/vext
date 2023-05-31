@@ -190,9 +190,10 @@
                 case ACTIONS.REDO:
                     return trigger.value === "click"
                 case ACTIONS.MODE:
-                    return d.id !== mode.value;
+                    return d.id !== mode.value && (d.id !== MODES.SETTINGS || trigger.value === "click");
                 case ACTIONS.SETTINGS:
-                    return mode.value === MODES.BRUSH || mode.value === MODES.SHAPE;
+                    return trigger.value === "click" &&
+                        (mode.value === MODES.BRUSH || mode.value === MODES.SHAPE);
                 default:
                     return true;
             }

@@ -24,7 +24,11 @@ const ACTIONS = Object.freeze({
     MODE: "mode",
     UNDO: "undo",
     REDO: "redo",
-    SETTINGS: "settings"
+    SETTINGS: "settings",
+    COLOR_CHANGE: "color-change",
+    COLOR_VALUE: "color",
+    BRUSH_SIZE: "brush-size",
+    SHAPE: "shape-change",
 });
 const ACTIONS_VALUES = Object.values(ACTIONS);
 

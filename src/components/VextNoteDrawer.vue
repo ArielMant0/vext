@@ -24,7 +24,7 @@
         :hotkeys="hotkeys"
         :hotkeyMap="hotkeyMap"
         :tooltip-delay="tooltipDelay"
-        :auto-mode-switch="autoModeSwitch"
+        :auto-tool-switch="autoToolSwitch"
         :width="width"/>
 
     <VextHistoryDrawer v-model="openHistory"/>
@@ -153,9 +153,9 @@
          * Whether to switch between brush and other modes automatically, depending
          * on whether the pen is used to interact (or the mouse/touch).
          */
-        autoModeSwitch: {
+        autoToolSwitch: {
             type: Boolean,
-            default: true,
+            default: false,
         }
     });
 

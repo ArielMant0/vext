@@ -1,16 +1,12 @@
 import EventHandler from "@/use/event-handler";
+import { getElementCoords } from "@/use/util";
 import { defineStore } from "pinia"
 
 function getCoordinates(x, y, element) {
     if (!element) {
         return [x, y]
     }
-    const rect = element.getBoundingClientRect();
-    const left = x < rect.x ? 0 :
-        (x > rect.x+rect.width ? rect.width : x - rect.x)
-    const top = y < rect.y ? 0 :
-        (y > rect.y+rect.height ? rect.height : y - rect.y)
-    return [left, top]
+    return getElementCoords(element, x, y);
 }
 
 const EVENTS = new EventHandler();

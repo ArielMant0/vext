@@ -21,14 +21,14 @@
                             rounded
                             :color="item.color ? item.color : 'default'"
                             :border="item.border"
-                            :class="[textColorClass(item.color ? item.color : 'default')]"
+                            :class="[colorContrastTextClass(item.color ? item.color : 'default')]"
                             size="small"/>
                         <v-btn v-else
                             :style="{ 'transform': `rotate(${-degree(i)}deg)` }"
                             rounded
                             :color="item.color  ? item.color : 'default'"
                             :border="item.border"
-                            :class="[textColorClass(item.color ? item.color : 'default')]"
+                            :class="[colorContrastTextClass(item.color ? item.color : 'default')]"
                             size="small">
                             {{  item.value }}
                         </v-btn>
@@ -41,6 +41,7 @@
 
 <script setup>
     import { computed } from 'vue';
+    import { colorContrastTextClass } from '@/use/util';
 
     const emit = defineEmits({
         /**
@@ -66,7 +67,8 @@
          *   "color": "error",      // color (vuetify- compatible)
          *   "icon": "mdi-account"  // icon for the button - will use value as fallback
          *   "value": 0,            // value - fallback for display if no icon is set
-         *   "stayOpen": true       // if true, menu will not close when this item is clicked
+         *   "forceOpen": true      // if true, menu will not close when this item is clicked
+         *   "forceClose": true     // if true, menu will always close when this item is clicked
          * }
          */
         items: {
@@ -154,9 +156,6 @@
         return Math.min(props.items.length, props.itemsPerLevel)
     })
 
-    const textLight = 'text-white';
-    const textDark = 'text-black';
-
     function itemLevel(index) {
         return 1 + Math.floor(index / props.itemsPerLevel)
     }
@@ -176,41 +175,13 @@
         return levelDistance(itemLevel(index))
     }
 
-    function textColorClass(color) {
-        switch (color) {
-            case "success":
-            case "error":
-            case "info":
-            case "default":
-                return textDark;
-            default:
-                let hex = (color[0] === '#') ? color.substring(1, 7) : color;
-
-                // Convert 3-digit hex to 6-digits.
-                if (hex.length === 3) {
-                    hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
-                }
-
-                // By this point, it should be 6 characters
-                if (hex.length !== 6) {
-                    return textDark;
-                }
-
-                const r = parseInt(hex.slice(0, 2), 16) / 255;
-                const g = parseInt(hex.slice(2, 4), 16) / 255;
-                const b = parseInt(hex.slice(4, 6), 16) / 255;
-
-                const contrast = r * 0.299 + g * 0.587 + b * 0.114;
-                // Return light or dark class based on contrast calculation
-                return contrast > 0.186 ? textDark : textLight;
-        }
-
-    }
-
     function action(item) {
         emit("click", item)
-        if (props.closeOnClick && !item.stayOpen) {
+        // if we should close after a click and the item does not force to stay open
+        if (props.closeOnClick && !item.forceOpen) {
             close(false);
+        } else if (item.forceClose) {
+            close()
         }
     }
     function close(emitEvent=true) {

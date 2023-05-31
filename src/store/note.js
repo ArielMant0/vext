@@ -1,6 +1,6 @@
 import { defineStore } from "pinia"
 import { useVextHistory } from "@/store/history";
-import { isFabric, getObjTransform } from '@/use/util';
+import { isFabric, getObjTransform, getElementCoords } from '@/use/util';
 import { toRaw } from 'vue';
 import { useExportPDF } from "@/use/export-pdf";
 import { useExportZIP } from "@/use/export-zip";
@@ -29,10 +29,7 @@ function parseObject(obj, layer) {
 }
 
 function getCanvasCoords(canvas, x, y) {
-    const rect = canvas.wrapperEl.getBoundingClientRect();
-    const left = x < rect.x ? 0 : (x > rect.x+rect.width ? rect.width : x - rect.x)
-    const top = y < rect.y ? 0 : (y > rect.y+rect.height ? rect.height : y - rect.y)
-    return [left, top]
+    return getElementCoords(canvas.wrapperEl, x, y);
 }
 
 const EVENTS = new EventHandler();
@@ -101,6 +98,10 @@ const vextNoteStore = {
         },
 
         enablePointerEvents(value)  {
+            if (!this.canvas) {
+                console.debug("canvas not initialized");
+                return;
+            }
             this.canvas.wrapperEl.style.pointerEvents = value ? null : "none";
             this.canvas.upperCanvasEl.style.pointerEvents = value ? null : "none";
             this.canvas.lowerCanvasEl.style.pointerEvents = value ? null : "none";
@@ -133,6 +134,10 @@ const vextNoteStore = {
 
         overwriteState(state) {
             const layer = this.currentLayer;
+            if (!this.canvas) {
+                console.debug("canvas not initialized");
+                return;
+            }
             if (layer) {
                 layer.state = state;
                 layer.width = this.canvas.getWidth();
@@ -144,6 +149,10 @@ const vextNoteStore = {
 
         renameLayer(oldId, newId) {
             if (!this.enabled) return false;
+            if (!this.canvas) {
+                console.debug("canvas not initialized");
+                return;
+            }
 
             const l = this.getLayer(oldId);
             if (l !== null) {
@@ -163,6 +172,10 @@ const vextNoteStore = {
 
         addLayerComment(comment, id=null) {
             if (!this.enabled) return false;
+            if (!this.canvas) {
+                console.debug("canvas not initialized");
+                return;
+            }
 
             id = id === null ? this.activeLayer : id;
             const idx = this.getLayerIndex(id);
@@ -175,6 +188,10 @@ const vextNoteStore = {
 
         updateLayerComment(comment, id=null, index=0) {
             if (!this.enabled) return false;
+            if (!this.canvas) {
+                console.debug("canvas not initialized");
+                return;
+            }
 
             id = id === null ? this.activeLayer : id;
             const idx = this.getLayerIndex(id);
@@ -187,6 +204,10 @@ const vextNoteStore = {
 
         removeLayerComment(id=null, index=0) {
             if (!this.enabled) return false;
+            if (!this.canvas) {
+                console.debug("canvas not initialized");
+                return;
+            }
 
             id = id === null ? this.activeLayer : id;
             const idx = this.getLayerIndex(id);
@@ -199,6 +220,10 @@ const vextNoteStore = {
 
         removeLayerComments(id=null) {
             if (!this.enabled) return false;
+            if (!this.canvas) {
+                console.debug("canvas not initialized");
+                return;
+            }
 
             id = id === null ? this.activeLayer : id;
             const idx = this.getLayerIndex(id);
@@ -211,6 +236,10 @@ const vextNoteStore = {
 
         mergeLayers(idFrom, idInto=null) {
             if (!this.enabled) return;
+            if (!this.canvas) {
+                console.debug("canvas not initialized");
+                return;
+            }
 
             idInto = idInto === null ? this.activeLayer : idInto;
             const i0 = this.getLayerIndex(idFrom);
@@ -235,6 +264,10 @@ const vextNoteStore = {
 
         addLayer(state, record=true, id=null, color=null, width=null, height=null, items=[], comments=[], connections={}) {
             if (!this.enabled) return;
+            if (!this.canvas) {
+                console.debug("canvas not initialized");
+                return;
+            }
 
             id = id === null ? this.nextID : id;
             color = color === null ? this.nextColor : color;
@@ -269,6 +302,10 @@ const vextNoteStore = {
 
         removeLayer(id, record=true) {
             if (!this.enabled) return;
+            if (!this.canvas) {
+                console.debug("canvas not initialized");
+                return;
+            }
 
             if (id === undefined) { id = this.activeLayer }
             let idx = this.getLayerIndex(id)
@@ -300,6 +337,10 @@ const vextNoteStore = {
 
         removeEmptyLayers(record=true) {
             if (!this.enabled) return;
+            if (!this.canvas) {
+                console.debug("canvas not initialized");
+                return;
+            }
 
             if (record) {
                 const toRemove = this.layers
@@ -329,6 +370,10 @@ const vextNoteStore = {
 
         setActiveLayer(id, record=true) {
             if (!this.enabled) return;
+            if (!this.canvas) {
+                console.debug("canvas not initialized");
+                return;
+            }
 
             if (id === null) {
                 this.activeLayer = null;
@@ -359,6 +404,10 @@ const vextNoteStore = {
 
         setLayerOpacity(value, id=null, record=true, render=true) {
             if (!this.enabled) return;
+            if (!this.canvas) {
+                console.debug("canvas not initialized");
+                return;
+            }
 
             if (id === null) id = this.activeLayer
 
@@ -382,6 +431,10 @@ const vextNoteStore = {
 
         setLayerVisibility(visible, id=null, record=true, render=true) {
             if (!this.enabled) return;
+            if (!this.canvas) {
+                console.debug("canvas not initialized");
+                return;
+            }
 
             if (id === null) id = this.activeLayer
 
@@ -403,6 +456,10 @@ const vextNoteStore = {
         },
 
         setMode(mode, record=true) {
+            if (!this.canvas) {
+                console.debug("canvas not initialized");
+                return;
+            }
             if (mode !== this.mode) {
                 if (record) {
                     const history = useVextHistory();
@@ -482,6 +539,10 @@ const vextNoteStore = {
 
         addObject(obj, layer=null, addToCanvas=true, record=true) {
             if (!this.enabled) return null;
+            if (!this.canvas) {
+                console.debug("canvas not initialized");
+                return;
+            }
 
             if (this.layerMode === LAYER_MODES.ANNOTATE) {
                 // no state available
@@ -517,6 +578,10 @@ const vextNoteStore = {
 
         addObjects(objs, layer=null, addToCanvas=true, record=true) {
             if (!this.enabled) return null;
+            if (!this.canvas) {
+                console.debug("canvas not initialized");
+                return;
+            }
 
             if (this.layerMode === LAYER_MODES.ANNOTATE && this.currentState !== null) {
                 const l = this.layerFromStateHash(this.currentState.hash);
@@ -545,6 +610,10 @@ const vextNoteStore = {
         addObjectFromJSON(json, layer=null, record=true) {
 
             if (!this.enabled) return null;
+            if (!this.canvas) {
+                console.debug("canvas not initialized");
+                return;
+            }
 
             layer = layer === null ? this.activeLayer : layer;
             const index = this.getLayerIndex(layer)
@@ -566,6 +635,10 @@ const vextNoteStore = {
         addObjectsFromJSON(json, layer=null, record=true) {
 
             if (!this.enabled) return null;
+            if (!this.canvas) {
+                console.debug("canvas not initialized");
+                return;
+            }
 
             layer = layer === null ? this.activeLayer : layer;
             const index = this.getLayerIndex(layer)
@@ -587,6 +660,10 @@ const vextNoteStore = {
         removeObject(uuid, layer=null, record=true) {
 
             if (!this.enabled) return null;
+            if (!this.canvas) {
+                console.debug("canvas not initialized");
+                return;
+            }
 
             const index = this.getLayerIndex(layer === null ? this.activeLayer : layer);
             const repr = this.layers[index].removeObject(uuid, this.canvas, record);
@@ -603,6 +680,10 @@ const vextNoteStore = {
         removeObjects(uuids, layer=null, record=true) {
 
             if (!this.enabled) return null;
+            if (!this.canvas) {
+                console.debug("canvas not initialized");
+                return;
+            }
 
             const index = this.getLayerIndex(layer === null ? this.activeLayer : layer);
             const repr = this.layers[index].removeObjects(uuids, this.canvas, record);
@@ -619,6 +700,10 @@ const vextNoteStore = {
         removeLastObject(layer=null, record=true) {
 
             if (!this.enabled) return null;
+            if (!this.canvas) {
+                console.debug("canvas not initialized");
+                return;
+            }
 
             const index = this.getLayerIndex(layer === null ? this.activeLayer : layer);
             const repr = this.layers[index].removeLastObject(this.canvas, record);
@@ -633,6 +718,12 @@ const vextNoteStore = {
         },
 
         modifyObject(uuid, transform, id=null, record=true) {
+
+            if (!this.enabled) return null;
+            if (!this.canvas) {
+                console.debug("canvas not initialized");
+                return;
+            }
 
             id === null ? this.activeLayer : id
             const index = this.getLayerIndex(id === null ? this.activeLayer : id);
@@ -661,6 +752,11 @@ const vextNoteStore = {
         },
 
         setActiveObject(uuid, layer=null) {
+            if (!this.enabled) return;
+            if (!this.canvas) {
+                console.debug("canvas not initialized");
+                return;
+            }
 
             const index = this.getLayerIndex(layer === null ? this.activeLayer : layer);
             if (index >= 0) {
@@ -671,15 +767,30 @@ const vextNoteStore = {
         },
 
         getActiveObject() {
+            if (!this.enabled) return null;
+            if (!this.canvas) {
+                console.debug("canvas not initialized");
+                return null;
+            }
             return this.canvas.getActiveObject();
         },
 
         discardActiveObject() {
+            if (!this.enabled) return;
+            if (!this.canvas) {
+                console.debug("canvas not initialized");
+                return;
+            }
             this.canvas.discardActiveObject();
         },
 
         deleteActiveObject(record=true) {
             if (!this.enabled) return;
+            if (!this.canvas) {
+                console.debug("canvas not initialized");
+                return;
+            }
+
             const obj = this.canvas.getActiveObject();
             if (obj) {
                 // remove highlight
@@ -710,6 +821,8 @@ const vextNoteStore = {
             if (this.canvas) {
                 this.canvas.setWidth(width);
                 this.canvas.setHeight(height);
+            } else {
+                console.debug("canvas not initialized");
             }
         },
 
@@ -718,6 +831,8 @@ const vextNoteStore = {
                 this.canvas.wrapperEl.style.zIndex = value;
                 this.canvas.upperCanvasEl.style.zIndex = value;
                 this.canvas.lowerCanvasEl.style.zIndex = value
+            } else {
+                console.debug("canvas not initialized");
             }
         },
 
@@ -739,6 +854,7 @@ const vextNoteStore = {
                             // obj already part of the canvas
                             this.addObject(obj.path, null, false)
                             this.emit("pointer-menu", "drawing")
+                            this.emit("path:created", obj);
                         } else {
                             this.canvas.remove(obj.path)
                         }
@@ -821,6 +937,10 @@ const vextNoteStore = {
 
         setState(state) {
             this.currentState = state;
+            if (!this.canvas) {
+                console.debug("canvas not initialized");
+                return;
+            }
             if (this.previewLayerID === null) {
                 this.addLayer(state, false);
                 this.previewLayerID = this.activeLayer;
@@ -834,6 +954,11 @@ const vextNoteStore = {
         },
 
         selectPreviewLayer() {
+            if (!this.enabled) return;
+            if (!this.canvas) {
+                console.debug("canvas not initialized");
+                return;
+            }
             if (this.previewLayerID === null) {
                 if (this.currentState !== null) {
                     this.addLayer(this.currentState, false);
@@ -848,6 +973,12 @@ const vextNoteStore = {
         },
 
         addConnection(uuid, id=null, record=true) {
+
+            if (!this.enabled) return;
+            if (!this.canvas) {
+                console.debug("canvas not initialized");
+                return;
+            }
 
             id = id === null ? this.activeLayer : id;
             const layer = this.getLayer(id);
@@ -876,6 +1007,13 @@ const vextNoteStore = {
         },
 
         addConnectionFromJSON(uuid, json, id=null, record=true) {
+
+            if (!this.enabled) return;
+            if (!this.canvas) {
+                console.debug("canvas not initialized");
+                return;
+            }
+
             id = id === null ? this.activeLayer : id;
             const layer = this.getLayer(id);
             if (layer === null || !layer.hasItems()) return;
@@ -899,10 +1037,21 @@ const vextNoteStore = {
         },
 
         removeLastConnection(uuid, id=null, record=true) {
+            if (!this.enabled) return;
+            if (!this.canvas) {
+                console.debug("canvas not initialized");
+                return;
+            }
             this.removeConnectionAtIndex(uuid, null, id, record);
         },
 
         removeConnectionAtIndex(uuid, index, id=null, record=true) {
+            if (!this.enabled) return;
+            if (!this.canvas) {
+                console.debug("canvas not initialized");
+                return;
+            }
+
             id = id === null ? this.activeLayer : id;
             const layer = this.getLayer(id);
             if (layer === null || layer.items.length === 0) return;
@@ -922,6 +1071,12 @@ const vextNoteStore = {
         },
 
         startConnect(element, x, y) {
+            if (!this.enabled) return;
+            if (!this.canvas) {
+                console.debug("canvas not initialized");
+                return;
+            }
+
             if (this.currentLayer === null || this.mode !== MODES.CONNECT ||
                 this.currentLayer.items.length === 0) return;
 
@@ -936,6 +1091,12 @@ const vextNoteStore = {
         },
 
         moveConnect(x, y) {
+            if (!this.enabled) return;
+            if (!this.canvas) {
+                console.debug("canvas not initialized");
+                return;
+            }
+
             if (this.currentLayer === null || this.mode !== MODES.CONNECT ||
                 this.currentLayer.items.length === 0) return;
 
@@ -944,6 +1105,12 @@ const vextNoteStore = {
         },
 
         endConnect(x, y) {
+            if (!this.enabled) return;
+            if (!this.canvas) {
+                console.debug("canvas not initialized");
+                return;
+            }
+
             this.enablePointerEvents(false);
 
             if (this.currentLayer === null || this.mode !== MODES.CONNECT ||
@@ -965,6 +1132,10 @@ const vextNoteStore = {
 
         async importLayer(file) {
             if (!this.enabled) return;
+            if (!this.canvas) {
+                console.debug("canvas not initialized");
+                return;
+            }
             const reader = new FileReader();
             reader.addEventListener("load", () => {
                 const layer = JSON.parse(reader.result);
@@ -987,6 +1158,11 @@ const vextNoteStore = {
 
         exportLayer() {
             if (!this.enabled) return;
+            if (!this.canvas) {
+                console.debug("canvas not initialized");
+                return;
+            }
+
             const layer = this.currentLayer;
             if (layer) {
                 return layer.toJSON()
@@ -997,6 +1173,11 @@ const vextNoteStore = {
 
         async exportZIP(name=null, canvasOnly=false) {
             if (!this.enabled) return;
+            if (!this.canvas) {
+                console.debug("canvas not initialized");
+                return;
+            }
+
             if (this.layers.length > 0) {
 
                 const expPDF = useExportPDF();
