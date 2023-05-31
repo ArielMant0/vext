@@ -30,13 +30,13 @@
 
             <slot name="indicator" :t="indicatorT" :fill="fill ? fillColor : null" :stroke="stroke ? strokeColor : null">
                 <svg :width="maxRadius*2+10" :height="maxRadius*2+10">
-                    <circle :fill="fill ? fillColor : 'none'" :stroke="stroke ? strokeColor : 'none'" stroke-width="3"
+                    <circle :fill="fill ? fillColor : 'none'" :stroke="stroke ? strokeColor : 'none'" :stroke-width="strokeWidth"
                         :stroke-opacity="indicatorT" :fill-opacity="indicatorT*0.25"
                         :r="radius" :cx="maxRadius+5" :cy="maxRadius+5"></circle>
-                    <circle :fill="fill ? fillColor : 'none'" :stroke="stroke ? strokeColor : 'none'" stroke-width="3"
+                    <circle :fill="fill ? fillColor : 'none'" :stroke="stroke ? strokeColor : 'none'" :stroke-width="strokeWidth"
                         :stroke-opacity="indicatorT" :fill-opacity="indicatorT*0.25"
                         :r="Math.max(1, radius-8)" :cx="maxRadius+5" :cy="maxRadius+5"></circle>
-                    <circle :fill="fill ? fillColor : 'none'" :stroke="stroke ? strokeColor : 'none'" stroke-width="3"
+                    <circle :fill="fill ? fillColor : 'none'" :stroke="stroke ? strokeColor : 'none'" :stroke-width="strokeWidth"
                         :stroke-opacity="indicatorT" :fill-opacity="indicatorT*0.25"
                         :r="Math.max(1, radius-16)" :cx="maxRadius+5" :cy="maxRadius+5"></circle>
                 </svg>
@@ -93,9 +93,19 @@
          */
         strokeColor: {
             type: String,
-            default: "gray",
+            default: "black",
             validator(value) {
                 return CSS.supports("color", value)
+            }
+        },
+        /**
+         * The stroke color to use for the indicator.
+         */
+        strokeWidth: {
+            type: Number,
+            default: 2,
+            validator(value) {
+                return value >= 0
             }
         },
         /**
@@ -103,7 +113,7 @@
          */
         fillColor: {
             type: String,
-            default: "gray",
+            default: "black",
             validator(value) {
                 return CSS.supports("color", value)
             }

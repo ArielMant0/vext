@@ -3,6 +3,7 @@ import VextAppBarControls from './VextAppBarControls'
 import VextNoteCanvas from './VextNoteCanvas'
 import VextNoteConfiguration from './VextNoteConfiguration'
 import VextNoteDrawer from './VextNoteDrawer'
+import VextExtraContent from './VextExtraContent'
 import VextWhiteBoard from './VextWhiteBoard'
 
 import VextToolTip from './VextToolTip'
@@ -30,6 +31,7 @@ export {
     VextNoteCanvas,
     VextNoteConfiguration,
     VextNoteDrawer,
+    VextExtraContent,
     VextWhiteBoard,
 
     VextToolTip,

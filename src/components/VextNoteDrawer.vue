@@ -1,37 +1,36 @@
 <template>
-    <v-navigation-drawer permanent rail>
-        <v-list nav density="compact" :disabled="!enabled">
-            <v-list-item :prepend-icon="open ? icons.open : icons.closed" @click="open = !open"/>
-            <v-list-item :prepend-icon="openHistory ? icons.historyOpen : icons.historyClosed" @click="openHistory = !openHistory"/>
-        </v-list>
+    <div>
+        <v-navigation-drawer permanent rail>
+            <v-list nav density="compact" :disabled="!enabled">
+                <v-list-item :prepend-icon="open ? icons.open : icons.closed" @click="open = !open"/>
+                <v-list-item :prepend-icon="openHistory ? icons.historyOpen : icons.historyClosed" @click="openHistory = !openHistory"/>
+            </v-list>
 
-        <v-divider></v-divider>
+            <v-divider></v-divider>
 
-        <v-list nav density="compact" :selected="tmpMode" mandatory @update:selected="setMode" :disabled="!enabled">
-            <v-list-item :active-color="selectColor" :prepend-icon="icons.layer" :value="MODES.LAYER"/>
-            <v-list-item :active-color="selectColor" :prepend-icon="icons.brush" :value="MODES.BRUSH"/>
-            <v-list-item :active-color="selectColor" :prepend-icon="icons.shape" :value="MODES.SHAPE"/>
-            <v-list-item :active-color="selectColor" :prepend-icon="icons.connect" :value="MODES.CONNECT"/>
-            <v-list-item :active-color="selectColor" :prepend-icon="icons.edit" :value="MODES.EDIT"/>
-            <v-list-item :active-color="selectColor" :prepend-icon="icons.whiteboard" :value="MODES.WHITEBOARD"/>
-            <v-list-item :active-color="selectColor" :prepend-icon="icons.settings" :value="MODES.SETTINGS"/>
-        </v-list>
-    </v-navigation-drawer>
+            <v-list nav density="compact" :selected="tmpMode" mandatory @update:selected="setMode" :disabled="!enabled">
+                <v-list-item :active-color="selectColor" :prepend-icon="icons.layer" :value="MODES.LAYER"/>
+                <v-list-item :active-color="selectColor" :prepend-icon="icons.brush" :value="MODES.BRUSH"/>
+                <v-list-item :active-color="selectColor" :prepend-icon="icons.shape" :value="MODES.SHAPE"/>
+                <v-list-item :active-color="selectColor" :prepend-icon="icons.connect" :value="MODES.CONNECT"/>
+                <v-list-item :active-color="selectColor" :prepend-icon="icons.edit" :value="MODES.EDIT"/>
+                <v-list-item :active-color="selectColor" :prepend-icon="icons.whiteboard" :value="MODES.WHITEBOARD"/>
+                <v-list-item :active-color="selectColor" :prepend-icon="icons.settings" :value="MODES.SETTINGS"/>
+            </v-list>
+        </v-navigation-drawer>
 
-    <VextNoteConfiguration v-model="open"
-        :floating="floating"
-        :icons="icons"
-        :hotkeys="hotkeys"
-        :hotkeyMap="hotkeyMap"
-        :tooltip-delay="tooltipDelay"
-        :auto-tool-switch="autoToolSwitch"
-        :width="width"/>
+        <VextNoteConfiguration v-model="open"
+            :floating="floating"
+            :icons="icons"
+            :hotkeys="hotkeys"
+            :hotkeyMap="hotkeyMap"
+            :tooltip-delay="tooltipDelay"
+            :auto-tool-switch="autoToolSwitch"
+            :width="width"/>
 
-    <VextHistoryDrawer v-model="openHistory"/>
-    <VextPointerMenu :z-index="7999"/>
-    <VextGlobalToolTip :z-index="6999"/>
-    <VextWhiteBoard :z-index="5999"/>
+        <VextHistoryDrawer v-model="openHistory"/>
 
+    </div>
 </template>
 
 <script setup>
@@ -40,9 +39,6 @@
     import { useVextNote } from '@/store/note'
 
     import VextNoteConfiguration from './VextNoteConfiguration.vue';
-    import VextGlobalToolTip from '@/components/VextGlobalToolTip.vue';
-    import VextWhiteBoard from '@/components/VextWhiteBoard.vue';
-    import VextPointerMenu from '@/components/VextPointerMenu.vue';
     import { MODES } from '@/use/enums';
     import VextHistoryDrawer from './VextHistoryDrawer.vue';
 

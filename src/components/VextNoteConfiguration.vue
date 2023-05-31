@@ -66,7 +66,7 @@
     import VextSettingsTool from '@/components/tools/VextSettingsTool.vue';
 
     import { storeToRefs } from 'pinia'
-    import { computed, ref, onMounted, watch } from 'vue';
+    import { computed, ref, watch } from 'vue';
     import { useVextNote } from '@/store/note'
     import { useVextState } from '@/store/state';
     import { useVextInput } from '@/store/input';
