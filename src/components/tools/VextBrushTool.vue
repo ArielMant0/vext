@@ -107,7 +107,7 @@
         }
     }
 
-    function movePreview() {
+    function movePreview(event) {
         if (preview.visible) {
             const coords = input.getPointerMove(note.canvas.upperCanvasEl)
             preview.set({
@@ -156,9 +156,9 @@
         }
     })
 
-    watch(() => note.mode, onSwitch);
-    watch(() => input.pointerMove, movePreview)
+    input.on("pointermove", movePreview)
 
+    watch(() => note.mode, onSwitch);
     watch(() => settings.color, readColor)
     watch(() => settings.brushSize, readBrushSize)
     watch(() => settings.brushDecimation, readBrushDecimation)

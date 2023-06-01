@@ -26,7 +26,7 @@
             @click="onClose(true)"
             @close="onClose(true)"/>
 
-        <div v-if="indicator && radius > 0" class="menu-indicator" :style="{ 'left': indicatorX+'px', 'top': indicatorY+'px', 'z-index': zIndex}">
+        <div v-if="indicator && radius > 0" class="menu-indicator" :style="{ 'left': indicatorX+'px', 'top': indicatorY+'px', 'z-index': zIndex }">
 
             <slot name="indicator" :t="indicatorT" :fill="fill ? fillColor : null" :stroke="stroke ? strokeColor : null">
                 <svg :width="maxRadius*2+10" :height="maxRadius*2+10">
@@ -267,17 +267,25 @@
             lastPointerDown !== null) return;
 
         lastPointerDown = performance.now();
-        lastX = event.pageX;
-        lastY = event.pageY;
+        lastX = event.pageX - window.scrollX;
+        lastY = event.pageY - window.scrollY;
         indicatorX.value = lastX - maxRadius;
         indicatorY.value = lastY - maxRadius;
         radius.value = 0;
 
         trigger.value = "click";
 
+        console.log("on pointer down")
+
         const indicator = function(timestamp) {
-            if (lastPointerDown !== null && Math.abs(lastX - input.mx) <= 10 && Math.abs(lastY - input.my) <= 10) {
+            const mx = input.mx - input.pointerMoveScroll.x;
+            const my = input.my - input.pointerMoveScroll.y;
+            console.log("on pointer down", lastPointerDown, lastX, mx, lastY, my)
+
+            if (lastPointerDown !== null && Math.abs(lastX - mx) <= 10 && Math.abs(lastY - my) <= 10) {
                 const duration = timestamp - lastPointerDown;
+
+                console.log(duration)
                 // if we reached the maximum time
                 if (duration >= props.timeThresholdMax) {
                     window.cancelAnimationFrame(handle);
@@ -311,7 +319,9 @@
             lastPointerDown === null) return;
 
         const duration = performance.now() - lastPointerDown;
-        if (Math.abs(lastX - event.pageX) > 10 || Math.abs(lastY - event.pageY) > 10 ||
+        const x = event.pageX - window.scrollX;
+        const y = event.pageY - window.scrollY;
+        if (Math.abs(lastX - x) > 10 || Math.abs(lastY - y) > 10 ||
             duration < props.timeThresholdMax
         ) {
             lastPointerDown = null;
@@ -334,8 +344,8 @@
             trigger.value = "event";
             radius.value = 0;
             lastPointerDown = null;
-            x.value = input.mx + 10;
-            y.value = input.my + 5;
+            x.value = input.mx - input.pointerMoveScroll.x + 10;
+            y.value = input.my - input.pointerMoveScroll.y + 5;
             open.value = true;
             pointerMenu.value = true;
         }

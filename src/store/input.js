@@ -21,14 +21,28 @@ const vextInputStore = {
             pointerMoveType: null,
             mx: 0,
             my: 0,
+            pointerMoveScroll: {
+                x: 0,
+                y: 0,
+            },
+
             pointerDown: null,
             pointerDownType: null,
             dx: 0,
             dy: 0,
+            pointerDownScroll: {
+                x: 0,
+                y: 0,
+            },
+
             pointerUp: null,
             pointerUpType: null,
             ux: 0,
             uy: 0,
+            pointerUpScroll: {
+                x: 0,
+                y: 0,
+            },
 
             keyDown: {
                 key: "",
@@ -71,6 +85,9 @@ const vextInputStore = {
             window.addEventListener("pointermove", event => {
                 this.mx = event.pageX;
                 this.my = event.pageY;
+                this.pointerMoveScroll.x = window.scrollX;
+                this.pointerMoveScroll.y = window.scrollY;
+                console.log(this.mx-this.pointerMoveScroll.x, this.my-this.pointerMoveScroll.y)
                 this.pointerMoveType = event.pointerType;
                 this.pointerMove = performance.now();
                 this.emit("pointermove", event);
@@ -78,6 +95,8 @@ const vextInputStore = {
             window.addEventListener("pointerdown", event => {
                 this.dx = event.pageX;
                 this.dy = event.pageY;
+                this.pointerDownScroll.x = window.scrollX;
+                this.pointerDownScroll.y = window.scrollY;
                 this.pointerDownType = event.pointerType;
                 this.pointerDown = performance.now();
                 this.emit("pointerdown", event);
@@ -85,6 +104,8 @@ const vextInputStore = {
             window.addEventListener("pointerup", event => {
                 this.ux = event.pageX;
                 this.uy = event.pageY;
+                this.pointerUpScroll.x = window.scrollX;
+                this.pointerUpScroll.y = window.scrollY;
                 this.pointerUpType = event.pointerType;
                 this.pointerUp = performance.now();
                 this.emit("pointerup", event);
@@ -150,7 +171,11 @@ const vextInputStore = {
          * @param {HTMLElement} element
          */
         getPointerMove(element=null) {
-            return getCoordinates(this.mx, this.my, element)
+            return getCoordinates(
+                element ? this.mx-this.pointerMoveScroll.x : this.mx,
+                element ? this.my-this.pointerMoveScroll.y : this.my,
+                element
+            );
         },
 
         /**
@@ -159,7 +184,11 @@ const vextInputStore = {
          * @param {HTMLElement} element
          */
         getPointerDown(element=null) {
-            return getCoordinates(this.dx, this.dy, element)
+            return getCoordinates(
+                element ? this.dx-this.pointerDownScroll.x : this.dx,
+                element ? this.dy-this.pointerDownScroll.y : this.dy,
+                element
+            );
         },
 
         /**
@@ -168,7 +197,11 @@ const vextInputStore = {
          * @param {HTMLElement} element
          */
         getPointerUp(element=null) {
-            return getCoordinates(this.ux, this.uy, element)
+            return getCoordinates(
+                element ? this.ux-this.pointerUpScroll.x : this.ux,
+                element ? this.uy-this.pointerUpScroll.y : this.uy,
+                element
+            );
         },
 
         getKey(event="down", withMods=false) {

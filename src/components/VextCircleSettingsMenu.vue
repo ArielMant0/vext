@@ -17,7 +17,7 @@
             @close="close"/>
 
     <v-card v-if="showColorPicker" density="compact" rounded="sm"
-        :style="{ 'position': 'absolute', 'left': cpX+'px', 'top': cpY+'px', 'z-index': zIndex+2 }">
+        :style="{ 'position': 'fixed', 'left': cpX+'px', 'top': cpY+'px', 'z-index': zIndex+2 }">
         <v-card-text>
             <v-color-picker v-model="tmpColor" hide-inputs/>
         </v-card-text>
