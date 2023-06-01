@@ -87,7 +87,6 @@ const vextInputStore = {
                 this.my = event.pageY;
                 this.pointerMoveScroll.x = window.scrollX;
                 this.pointerMoveScroll.y = window.scrollY;
-                console.log(this.mx-this.pointerMoveScroll.x, this.my-this.pointerMoveScroll.y)
                 this.pointerMoveType = event.pointerType;
                 this.pointerMove = performance.now();
                 this.emit("pointermove", event);

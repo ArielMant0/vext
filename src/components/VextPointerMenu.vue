@@ -275,17 +275,12 @@
 
         trigger.value = "click";
 
-        console.log("on pointer down")
-
         const indicator = function(timestamp) {
             const mx = input.mx - input.pointerMoveScroll.x;
             const my = input.my - input.pointerMoveScroll.y;
-            console.log("on pointer down", lastPointerDown, lastX, mx, lastY, my)
 
             if (lastPointerDown !== null && Math.abs(lastX - mx) <= 10 && Math.abs(lastY - my) <= 10) {
                 const duration = timestamp - lastPointerDown;
-
-                console.log(duration)
                 // if we reached the maximum time
                 if (duration >= props.timeThresholdMax) {
                     window.cancelAnimationFrame(handle);
