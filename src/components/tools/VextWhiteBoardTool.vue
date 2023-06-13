@@ -32,6 +32,7 @@
     watch(mode, (now, prev) => {
         if (prev !== MODES.WHITEBOARD && now === MODES.WHITEBOARD) {
             wb.enable();
+            window.scrollTo(0, 0);
         } else if (enabled.value && prev === MODES.WHITEBOARD) {
             wb.disable();
         }

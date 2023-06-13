@@ -121,7 +121,7 @@
             backgroundColor: props.backgroundColor,
             renderOnAddRemove: true,
             enablePointerEvents: true,
-            freeDrawingCursor: "none"
+            // freeDrawingCursor: "none"
         });
         note.setCanvas(canvas);
 
